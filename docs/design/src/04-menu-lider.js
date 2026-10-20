@@ -4,7 +4,7 @@ const T = THEMES.dark;
 const r = screen('04 Menu lider (Space)', 1, 1, T);
 const lines = code(T);
 const p = popup(r, T, 0, 26.94, 120, 7.06, 'which-key');
-app(r, T, { mode: 'NORMAL', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 8,
+app(r, T, { mode: 'NORMAL', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 'trie.go',
   editor: { curLine: 12, lines }, cmd: [[' <Space> ', T.mauve, { fontWeight: 700 }], ['esperando tecla...', T.dim]] });
 line(p, [[' <Space> ', T.mauve, { fontWeight: 700 }], ['lider', T.dim]]);
 hsep(p, T);

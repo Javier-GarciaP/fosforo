@@ -4,7 +4,7 @@ const T = THEMES.dark;
 const r = screen('06 Paleta de comandos', 0, 2, T);
 const p = popup(r, T, 25, 3, 70, 7.12, 'paleta');
 dim(r, T);
-app(r, T, { mode: 'COMMAND', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 8, editor: { curLine: 12, lines: code(T) },
+app(r, T, { mode: 'COMMAND', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 'trie.go', editor: { curLine: 12, lines: code(T) },
   cmd: [[':gua', T.fg], ['▏', T.fg]] });
 line(p, [[' : ', T.peach, { fontWeight: 700 }], ['gua', T.fg], ['▏', T.fg]]);
 hsep(p, T);

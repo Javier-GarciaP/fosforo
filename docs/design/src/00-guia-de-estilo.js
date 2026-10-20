@@ -22,10 +22,11 @@ function column(T, titulo) {
   line(c, [[' ', T.fg]]);
   line(c, [['Glifos', T.fg, { fontWeight: 700 }]]);
   line(c, [['bordes   ', T.dim], ['caracteres de caja Unicode U+2500-257F', T.border]]);
-  line(c, [['arbol    ', T.dim], ['v abierto   > cerrado', T.blue]]);
+  const gr = I(c, { type: 'frame', layout: 'horizontal', gap: 0, height: CH, width: 'fill_container', alignItems: 'center', fill: [] });
+  txt(gr, 'carpetas ', T.dim); iconNode(gr, T, 'folder'); txt(gr, 'cerrada  ', T.blue); iconNode(gr, T, 'folder_open'); txt(gr, 'abierta', T.blue);
   line(c, [['estado   ', T.dim], ['[+] ', T.peach], ['✓ ', T.green], ['✗ ', T.red], ['☑ ☐ ', T.fg], ['▏ cursor  ~ vacio', T.dim]]);
   line(c, [['md       ', T.dim], ['• lista  ▎ cita  ─ regla', T.teal]]);
   return c;
 }
-column(THEMES.dark, 'TEMA OSCURO  (Catppuccin Mocha)');
-column(THEMES.light, 'TEMA CLARO  (Catppuccin Latte)');
+column(THEMES.dark, 'TEMA OSCURO  (paleta Tinta)');
+column(THEMES.light, 'TEMA CLARO  (paleta Tinta)');

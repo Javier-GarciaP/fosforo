@@ -4,7 +4,7 @@ const T = THEMES.dark;
 const r = screen('10 Dialogo cambios sin guardar', 1, 3, T);
 const p = popup(r, T, 29, 12, 62, 8.06, 'dialogo');
 dim(r, T);
-app(r, T, { mode: 'NORMAL', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 8, editor: { curLine: 12, lines: code(T) },
+app(r, T, { mode: 'NORMAL', left: 'internal/keymap/trie.go [+]', right: 'go  utf-8  LF   12:35  54%', treeSel: 'trie.go', editor: { curLine: 12, lines: code(T) },
   cmd: [['E37: cambios sin guardar (usa :q! para descartarlos)', T.red, { fontWeight: 700 }]] });
 line(p, [[' Cambios sin guardar', T.peach, { fontWeight: 700 }]], T.sel);
 line(p, [[' ', T.fg]]);

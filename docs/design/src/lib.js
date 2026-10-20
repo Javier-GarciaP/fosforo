@@ -1,14 +1,6 @@
-// Libreria compartida de las maquetas. Se concatena delante de cada pantalla:
-//   cat src/lib.js src/NN-pantalla.js | op design -
+// Libreria compartida de las maquetas. Se concatena asi (palette.js e icons.js son generados, ver tools/):
+//   cat src/palette.js src/icons.js src/lib.js src/NN-pantalla.js > /tmp/NN.js && op design @/tmp/NN.js
 // Cuadricula de terminal: 120x36 celdas, celda = 9x18 px (JetBrains Mono 15px => avance de 9px).
-const THEMES = {
-  dark: { bg: '#1e1e2e', panel: '#181825', sel: '#313244', visual: '#45475a', fg: '#cdd6f4', dim: '#6c7086',
-    blue: '#89b4fa', green: '#a6e3a1', mauve: '#cba6f7', peach: '#fab387', yellow: '#f9e2af', red: '#f38ba8',
-    teal: '#94e2d5', border: '#585b70', code: '#11111b' },
-  light: { bg: '#eff1f5', panel: '#e6e9ef', sel: '#dce0e8', visual: '#bcc0cc', fg: '#4c4f69', dim: '#8c8fa1',
-    blue: '#1e66f5', green: '#40a02b', mauve: '#8839ef', peach: '#fe640b', yellow: '#df8e1d', red: '#d20f39',
-    teal: '#179299', border: '#9ca0b0', code: '#dce0e8' },
-};
 const FONT = 'JetBrains Mono', FS = 15, CW = 9, CH = 18, COLS = 120, ROWS = 36, W = COLS * CW, H = ROWS * CH, GAP = 120;
 const solid = (c) => [{ type: 'solid', color: c }];
 const MODE_COLOR = { NORMAL: 'blue', INSERT: 'green', VISUAL: 'mauve', COMMAND: 'peach', PREVIEW: 'teal' };
@@ -66,19 +58,44 @@ function statusline(app, T, mode, leftText, rightText) {
   txt(r, rightText + ' ', T.dim);
   return st;
 }
+// ---- iconos (glifos de Nerd Fonts convertidos a trazados; ver icons.js) ----
+function iconFor(name) {
+  if (ICON_BY_NAME[name]) return ICON_BY_NAME[name];
+  const dot = name.lastIndexOf('.');
+  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
+  return ICON_BY_EXT[ext] || 'default';
+}
+// Hueco de 2 celdas con el icono dentro (en el terminal: el glifo + un espacio)
+function iconNode(p, T, key, color) {
+  const ic = ICONS[key];
+  const slot = I(p, { type: 'frame', name: 'icono ' + key, layout: 'horizontal', width: 2 * CW, height: CH, alignItems: 'center', justifyContent: 'start', padding: [0, 0, 0, 2], fill: [] });
+  I(slot, { type: 'path', name: key, d: ic.d, width: ic.w, height: ic.h, fill: solid(T[color || ICON_COLOR[key]]) });
+  return slot;
+}
+// Fila del explorador: sangria de 2 celdas por nivel, sin flechas. Carpeta abierta/cerrada = icono distinto.
+function treeRow(t, T, depth, kind, name, selected) {
+  const row = I(t, { type: 'frame', name: 'fila ' + name, layout: 'horizontal', gap: 0, width: 'fill_container', height: CH, alignItems: 'center',
+    padding: [0, 0, 0, CW], fill: selected ? solid(T.sel) : [] });
+  if (depth > 0) I(row, { type: 'frame', name: 'sangria', width: depth * 2 * CW, height: CH, fill: [] });
+  if (kind === 'root') { iconNode(row, T, 'folder_open', 'fg'); txt(row, name, T.fg, { fontWeight: 700 }); }
+  else if (kind === 'dir-open') { iconNode(row, T, 'folder_open'); txt(row, name, T.blue); }
+  else if (kind === 'dir-closed') { iconNode(row, T, 'folder'); txt(row, name, T.blue); }
+  else { iconNode(row, T, iconFor(name)); txt(row, name, T.fg, selected ? { fontWeight: 700 } : {}); }
+  return row;
+}
+const TREE_ROWS = [
+  [0, 'root', 'terminal-IDE'],
+  [1, 'dir-open', 'cmd'], [2, 'dir-open', 'ted'], [3, 'file', 'main.go'],
+  [1, 'dir-open', 'internal'], [2, 'dir-closed', 'buffer'], [2, 'dir-closed', 'editor'], [2, 'dir-open', 'keymap'],
+  [3, 'file', 'trie.go'], [3, 'file', 'trie_test.go'], [2, 'dir-closed', 'ui'],
+  [1, 'dir-open', 'docs'], [2, 'dir-closed', 'design'], [2, 'file', 'README.md'],
+  [1, 'dir-closed', 'openspec'],
+  [1, 'file', '.gitignore'], [1, 'file', 'CONTRIBUTING.md'], [1, 'file', 'go.mod'], [1, 'file', 'LICENSE'], [1, 'file', 'Makefile'],
+];
+// selected = nombre del archivo seleccionado (p. ej. 'trie.go')
 function tree(parent, T, selected, rows) {
-  const t = I(parent, { type: 'frame', name: 'explorador', layout: 'vertical', gap: 0, width: 24 * CW, height: 'fill_container', fill: solid(T.panel) });
-  line(t, [[' EXPLORADOR', T.dim, { fontWeight: 700 }]]);
-  const items = rows || [
-    [' v ', 'terminal-IDE', 'dir', 0], ['   v ', 'cmd', 'dir', 1], ['     v ', 'ted', 'dir', 2], ['         ', 'main.go', 'file', 3],
-    ['   v ', 'internal', 'dir', 4], ['     > ', 'buffer', 'dir', 5], ['     > ', 'editor', 'dir', 6], ['     v ', 'keymap', 'dir', 7],
-    ['         ', 'trie.go', 'file', 8], ['     > ', 'ui', 'dir', 9], ['   > ', 'docs', 'dir', 10],
-    ['     ', 'go.mod', 'cfg', 11], ['     ', 'README.md', 'md', 12],
-  ];
-  items.forEach((it) => {
-    const c = { dir: T.blue, file: T.fg, cfg: T.yellow, md: T.teal }[it[2]];
-    line(t, [[it[0], T.dim], [it[1], c, it[3] === 0 ? { fontWeight: 700 } : {}]], it[3] === selected ? T.sel : null);
-  });
+  const t = I(parent, { type: 'frame', name: 'explorador', layout: 'vertical', gap: 0, width: 24 * CW, height: 'fill_container', padding: [CH / 2, 0, 0, 0], fill: solid(T.panel) });
+  (rows || TREE_ROWS).forEach((r) => treeRow(t, T, r[0], r[1], r[2], r[1] === 'file' && r[2] === selected));
   return t;
 }
 // Lineas de codigo de ejemplo (trie.go)

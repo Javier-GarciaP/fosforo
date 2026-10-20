@@ -8,14 +8,19 @@ cómo **ver**, **modificar** y **regenerar** el diseño.
 
 ```
 docs/design/
-├── editor.op          ← el diseño completo (11 pantallas). Se abre con OpenPencil.
+├── editor.op          ← el diseño completo (12 pantallas). Se abre con OpenPencil.
 ├── exports/           ← una imagen PNG por pantalla, para verlas sin abrir nada
 │   ├── 00-guia-de-estilo.png
 │   ├── 01-layout-principal-normal.png
-│   └── ... (hasta 10-dialogo-cambios-sin-guardar.png)
-└── src/               ← scripts que GENERAN el diseño (fuente de verdad de las maquetas)
-    ├── lib.js         ← piezas compartidas: paleta, líneas, statusline, popups, tabla...
-    └── 00-… a 10-….js ← una pantalla por archivo
+│   └── ... (hasta 11-iconos-y-explorador.png)
+├── src/               ← scripts que GENERAN el diseño (fuente de verdad de las maquetas)
+│   ├── palette.js     ← GENERADO: paleta Tinta (oscuro y claro)
+│   ├── icons.js       ← GENERADO: iconos de archivo como trazados vectoriales
+│   ├── lib.js         ← piezas compartidas: líneas, explorador, statusline, popups, tabla...
+│   └── 00-… a 11-….js ← una pantalla por archivo
+└── tools/             ← generadores de palette.js e icons.js (Python)
+    ├── make-palette.py
+    └── make-icons.py
 ```
 
 > **Regla:** `src/` es la fuente de verdad. `editor.op` y `exports/` son resultados generados. Si cambias una
@@ -42,7 +47,7 @@ Tres formas, de la más rápida a la más completa:
    op start --file docs/design/editor.op
    ```
 
-   Se abre la ventana de OpenPencil con las 11 pantallas en el lienzo, en una cuadrícula de 3 columnas.
+   Se abre la ventana de OpenPencil con las 12 pantallas en el lienzo, en una cuadrícula de 3 columnas.
 
    También puedes abrir `OpenPencil.AppImage`; la documentación indica que los archivos `.op` se asocian a la aplicación
    (doble clic para abrir) y que el menú de archivo incluye "Open Recent" y "Save As".
@@ -91,7 +96,8 @@ El README oficial no explica los paneles de capas y propiedades, la selección m
 - **Cuadrícula de terminal:** cada pantalla mide **120 × 36 celdas** de **9 × 18 px** (1080 × 648 px). La fuente es
   *JetBrains Mono* a **15 px**, que da exactamente 9 px por carácter. Así una columna del diseño equivale a una columna
   real de terminal.
-- **Paleta:** Catppuccin Mocha (oscuro) y Latte (claro), definida en `src/lib.js` y mostrada en la pantalla `00`.
+- **Paleta «Tinta»** (nombre provisional): propia, en oscuro y claro, generada en `src/palette.js` y mostrada en la pantalla `00`.
+  Ver [Paleta e iconos](#paleta-e-iconos).
 - **Colores por modo:** NORMAL azul, INSERT verde, VISUAL malva, COMMAND melocotón, PREVIEW verde azulado.
 - **Disposición de las pantallas en el lienzo:**
 
@@ -100,7 +106,47 @@ El README oficial no explica los paneles de capas y propiedades, la selección m
   | Fila 1 | 00 Guía de estilo | 01 Layout principal | 02 Modo Insert |
   | Fila 2 | 03 Modo Visual | 04 Menú líder | 05 Picker de archivos |
   | Fila 3 | 06 Paleta de comandos | 07 Markdown vista previa | 08 Markdown dividido |
-  | Fila 4 | 09 Tema claro | 10 Diálogo cambios sin guardar | |
+  | Fila 4 | 09 Tema claro | 10 Diálogo cambios sin guardar | 11 Iconos y explorador |
+
+## Paleta e iconos
+
+### Paleta «Tinta»
+
+Inspirada en la sensación de tu referencia (fondo azul-tinta, panel más oscuro que el editor, acentos suaves), pero **propia**:
+no copia los valores de ninguna paleta existente. Se **deriva en OKLCH** con `tools/make-palette.py`:
+
+- Todos los acentos comparten **la misma luminosidad y croma** y solo cambian de tono, así que ninguno grita más que otro.
+- Las superficies (fondo, panel, selección, bordes) comparten el tono azul-violeta de la marca con croma muy bajo.
+- El script **comprueba el contraste** (WCAG): texto ≥ 7:1, acentos ≥ 4,5:1 y comentarios ≥ 3:1; si algo falla, no genera nada.
+
+Para cambiar la identidad ajusta `BRAND_HUE` y `ACCENT_HUES` en el script y ejecútalo:
+
+```bash
+python3 docs/design/tools/make-palette.py        # reescribe src/palette.js e imprime los contrastes
+```
+
+### Iconos de archivo
+
+El explorador **no usa flechas**: la estructura se lee por la sangría (2 columnas por nivel) y el estado de cada carpeta por su
+icono (cerrada / abierta). Cada archivo lleva el icono de su tipo, resuelto en este orden: **nombre exacto** (`Makefile`,
+`go.mod`, `.gitignore`…) → **extensión** → icono por defecto. La pantalla [`11`](exports/11-iconos-y-explorador.png) muestra
+los 38 iconos y qué nombres o extensiones activan cada uno.
+
+Los iconos son **glifos de Nerd Fonts** (familias Seti y Material Design): en el editor real son caracteres de texto, así que
+**necesitan una Nerd Font** en la terminal. Aquí se convierten a trazados vectoriales con `tools/make-icons.py` para dibujarlos
+sin instalar fuentes:
+
+```bash
+# Descargas (en un directorio temporal, no en el repositorio):
+#   https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.tar.xz   (extraer)
+#   https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/glyphnames.json
+pip install fonttools
+python3 docs/design/tools/make-icons.py <ruta>/SymbolsNerdFont-Regular.ttf <ruta>/glyphnames.json   # reescribe src/icons.js
+```
+
+La tabla de qué icono usa cada tipo vive en `tools/make-icons.py` (diccionario `SET`), que es la referencia para implementarla.
+Sin Nerd Font se usa el modo `icons = "none"`: las carpetas llevan `/` al final, las abiertas en azul con sus hijos sangrados y las
+cerradas atenuadas (ver pantalla `11`).
 
 ## Modificar el diseño
 
@@ -118,11 +164,11 @@ rm -f docs/design/editor.op
 op start --headless --file docs/design/editor.op &
 sleep 4
 
-# Aplicar cada pantalla: lib.js + pantalla concatenados en un archivo temporal .js
+# Aplicar cada pantalla: palette.js + icons.js + lib.js + pantalla, concatenados en un archivo temporal .js
 mkdir -p /tmp/op-build
 for f in docs/design/src/[0-9]*.js; do
   n=$(basename "$f")
-  cat docs/design/src/lib.js "$f" > "/tmp/op-build/$n"
+  cat docs/design/src/palette.js docs/design/src/icons.js docs/design/src/lib.js "$f" > "/tmp/op-build/$n"
   op design "@/tmp/op-build/$n" > /dev/null
 done
 
