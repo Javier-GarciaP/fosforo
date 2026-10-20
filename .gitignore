@@ -1,0 +1,14 @@
+# Claude Code: configuracion local de cada persona
+.claude/settings.local.json
+
+# Go (cuando exista codigo)
+/bin/
+/dist/
+*.test
+*.out
+coverage.*
+
+# Sistema / editores
+.DS_Store
+*.swp
+*~
