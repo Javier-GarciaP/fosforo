@@ -20,11 +20,15 @@ Invalid or unknown settings SHALL be reported in the command line with the setti
 - **THEN** se muestra un aviso que nombra `tabwidth` y se usa el valor por defecto 4
 
 ### Requirement: Editor settings
-The configuration SHALL support `theme` (`dark`, `light` or `auto`), `tabwidth`, `indent` (`tabs` or `spaces`), `scrolloff` and `mouse`.
+The configuration SHALL support `theme` (`dark`, `light` or `auto`), `icons` (`nerd` or `none`, default `nerd`), `tabwidth`, `indent` (`tabs` or `spaces`), `scrolloff` and `mouse`.
 
 #### Scenario: Tema automático
 - **WHEN** `theme = "auto"` y la terminal informa de fondo claro
 - **THEN** se usa el tema claro; si la terminal no informa, se usa el oscuro
+
+#### Scenario: Desactivar los iconos
+- **WHEN** se configura `icons = "none"`
+- **THEN** el explorador muestra las carpetas con `/` final y no imprime ningún icono, sin reiniciar tras `config.reload`
 
 ### Requirement: Key remapping
 The configuration SHALL allow binding and unbinding keys per context (`normal`, `insert`, `visual`, `explorer`, `preview`) to named commands, and MUST report an unknown command name without applying that binding.

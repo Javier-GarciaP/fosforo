@@ -19,7 +19,9 @@
 
 - [ ] 3.1 Implementar `internal/fs` con carga perezosa, orden e ignorados; verificar con directorios temporales (incluye enlaces simbólicos y permisos)
 - [ ] 3.2 Implementar `Create`, `Rename` y `Remove` con errores tipados; verificar con pruebas sobre un directorio temporal
-- [ ] 3.3 Implementar la vista del explorador con colores por tipo; verificar con golden contra las maquetas 01 y 07
+- [ ] 3.3 Implementar la vista del explorador minimalista (sangría de 2 columnas, fila raíz, sin flechas, colores por tipo); verificar con golden contra las maquetas 01 y 07
+- [ ] 3.4 Implementar la tabla de iconos y su resolución (nombre exacto → extensión → defecto) con los colores de la paleta; verificar con pruebas de tabla (`trie.go`, `Makefile`, `go.mod`, `notas.xyz`) y golden contra la maqueta 11
+- [ ] 3.5 Implementar los iconos de carpeta cerrada/abierta y el modo `icons = "none"` (sufijo `/`, abiertas en azul, cerradas atenuadas); verificar con golden contra la pantalla 11 y comprobando que no se imprime ningún carácter de icono
 
 ## 4. Explorador interactivo
 

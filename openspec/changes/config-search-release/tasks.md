@@ -4,7 +4,7 @@
 
 - [ ] 1.1 Implementar la carga TOML con defaults embebidos y la ruta XDG; verificar con pruebas (sin archivo, archivo válido)
 - [ ] 1.2 Implementar la validación con errores por clave y respaldo al valor por defecto; verificar con pruebas de tabla (`tabwidth = "ocho"`)
-- [ ] 1.3 Aplicar `theme`, `tabwidth`, `indent`, `scrolloff` y `mouse` en el editor; verificar con `teatest`
+- [ ] 1.3 Aplicar `theme`, `icons`, `tabwidth`, `indent`, `scrolloff` y `mouse` en el editor; verificar con `teatest` (incluye alternar `icons` con `config.reload`)
 - [ ] 1.4 Implementar el tema `auto` (OSC 11) con tiempo máximo; verificar con una prueba que simula respuesta y ausencia de respuesta
 - [ ] 1.5 Implementar el remapeo por contexto con rechazo de comandos inexistentes; verificar con pruebas de tabla y `teatest`
 - [ ] 1.6 Implementar `config.open`, `config.reload` y `Space t`; verificar recargando un archivo editado

@@ -45,7 +45,7 @@ sin salir del editor.
 
 ## Cómo se verá
 
-El diseño visual vive en [`design/`](design/README.md) y se hizo con **OpenPencil**. Son 11 pantallas sobre una
+El diseño visual vive en [`design/`](design/README.md) y se hizo con **OpenPencil**. Son 12 pantallas sobre una
 cuadrícula de terminal de 120×36 celdas.
 
 | Pantalla | Imagen |
@@ -61,6 +61,7 @@ cuadrícula de terminal de 120×36 celdas.
 | Markdown: dividido fuente \| vista previa | [`08`](design/exports/08-markdown-dividido.png) |
 | Tema claro | [`09`](design/exports/09-tema-claro-normal.png) |
 | Diálogo de cambios sin guardar | [`10`](design/exports/10-dialogo-cambios-sin-guardar.png) |
+| Iconos por tipo de archivo y modo sin Nerd Font | [`11`](design/exports/11-iconos-y-explorador.png) |
 
 ![Layout principal](design/exports/01-layout-principal-normal.png)
 
@@ -127,6 +128,18 @@ con desplazamiento sincronizado.
 **Límites honestos** (una terminal no es un navegador): no hay imágenes reales (se muestra `[imagen: texto]`), ni Mermaid,
 ni HTML embebido. La fidelidad con GitHub es aproximada: misma estructura y jerarquía visual.
 
+## Iconos y fuentes
+
+El explorador no usa flechas: la estructura se lee por la **sangría** y el estado de cada carpeta por su **icono** (cerrada o
+abierta). Cada archivo lleva el icono de su tipo (Go, Markdown, JSON, Makefile, LICENSE, `.gitignore`…; ver la pantalla
+[`11`](design/exports/11-iconos-y-explorador.png)).
+
+- **Los iconos son caracteres de una Nerd Font**, así que la terminal necesita una. Basta con instalar una Nerd Font completa o
+  solo la fuente de símbolos («Symbols Nerd Font»), que las terminales usan como respaldo sin cambiar tu fuente actual
+  (el paquete oficial incluye un archivo de `fontconfig` para ello en Linux). Descargas: <https://www.nerdfonts.com>.
+- **Sin Nerd Font**, pon `icons = "none"` en la configuración: las carpetas se muestran con `/` al final y todo sigue funcionando.
+- No se puede detectar automáticamente qué fuente usa la terminal, por eso es un ajuste y no una detección.
+
 ## Stack y arquitectura
 
 - **Lenguaje:** Go. **Interfaz:** Bubble Tea (bucle Model/Update/View), Lip Gloss (estilos), Glamour (Markdown),
@@ -150,7 +163,7 @@ internal/search/    búsqueda en el proyecto
 ## Hoja de ruta
 
 Cada hito es un **cambio de OpenSpec** en [`openspec/changes/`](../openspec/changes/) con propuesta, specs, diseño y tareas
-(123 tareas en total). Se implementan en este orden; "depende de" indica qué debe estar archivado antes.
+(125 tareas en total). Se implementan en este orden; "depende de" indica qué debe estar archivado antes.
 
 | # | Cambio | Qué entrega | Depende de |
 | --- | --- | --- | --- |
@@ -181,3 +194,4 @@ Si se quiere ver Markdown cuanto antes, el cambio 7 puede adelantarse justo desp
 | OpenPencil (`op` + app de escritorio) | Ver y modificar el diseño | Instalado |
 | `gh` | PRs desde la terminal | Instalado y autenticado |
 | `rg` (ripgrep) | Búsqueda más rápida (opcional) | Instalado (14.1.1) |
+| Nerd Font o «Symbols Nerd Font» | Ver los iconos del explorador | **Sin instalar** (la fuente del sistema, Adwaita Mono, no los incluye) |
