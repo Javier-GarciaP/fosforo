@@ -48778,6 +48778,2416 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "n2976",
+      "name": "12 Marca - candidatos",
+      "x": 0.0,
+      "y": 3072.0,
+      "width": 1360.0,
+      "height": 640.0,
+      "layout": "vertical",
+      "gap": 0.0,
+      "padding": [
+        28.0,
+        32.0,
+        28.0,
+        32.0
+      ],
+      "fill": [
+        {
+          "type": "solid",
+          "color": "#171b27"
+        }
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "n2977",
+          "name": "linea",
+          "width": "fill_container",
+          "height": 18.0,
+          "layout": "horizontal",
+          "gap": 0.0,
+          "alignItems": "center",
+          "fill": [],
+          "children": [
+            {
+              "type": "text",
+              "id": "n2978",
+              "width": "fit_content",
+              "height": "fit_content",
+              "content": "NOMBRE E ICONO",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 15.0,
+              "fontWeight": 700,
+              "lineHeight": 1.2,
+              "textGrowth": "auto",
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#cfd7eb"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "n2979",
+              "width": "fit_content",
+              "height": "fit_content",
+              "content": "   cinco direcciones. Libres en GitHub, crates.io, npm, PyPI y Homebrew (comprobado).",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 15.0,
+              "fontWeight": 400,
+              "lineHeight": 1.2,
+              "textGrowth": "auto",
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#75809c"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "n2980",
+          "name": "linea",
+          "width": "fill_container",
+          "height": 18.0,
+          "layout": "horizontal",
+          "gap": 0.0,
+          "alignItems": "center",
+          "fill": [],
+          "children": [
+            {
+              "type": "text",
+              "id": "n2981",
+              "width": "fit_content",
+              "height": "fit_content",
+              "content": " ",
+              "fontFamily": "JetBrains Mono",
+              "fontSize": 15.0,
+              "fontWeight": 400,
+              "lineHeight": 1.2,
+              "textGrowth": "auto",
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#cfd7eb"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "n2982",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "horizontal",
+          "gap": 16.0,
+          "fill": [],
+          "children": [
+            {
+              "type": "frame",
+              "id": "n2983",
+              "name": "candidato fosforo",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 8.0,
+              "padding": [
+                20.0,
+                12.0,
+                16.0,
+                12.0
+              ],
+              "alignItems": "center",
+              "cornerRadius": 12.0,
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#0f131f"
+                }
+              ],
+              "stroke": {
+                "thickness": 1.0,
+                "fill": [
+                  {
+                    "type": "solid",
+                    "color": "#7fd096"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n2984",
+                  "name": "icono fosforo",
+                  "width": 132.0,
+                  "height": 132.0,
+                  "layout": "none",
+                  "clipContent": true,
+                  "cornerRadius": 30.800000000000004,
+                  "fill": [
+                    {
+                      "type": "linear_gradient",
+                      "angle": 135.0,
+                      "stops": [
+                        {
+                          "offset": 0.0,
+                          "color": "#222a47"
+                        },
+                        {
+                          "offset": 1.0,
+                          "color": "#0d111d"
+                        }
+                      ]
+                    }
+                  ],
+                  "stroke": {
+                    "thickness": 1.0,
+                    "fill": [
+                      {
+                        "type": "solid",
+                        "color": "#3a4466"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "n2985",
+                      "x": 26.4,
+                      "y": 4.4,
+                      "width": 79.2,
+                      "height": 79.2,
+                      "fill": [
+                        {
+                          "type": "radial_gradient",
+                          "cx": 0.5,
+                          "cy": 0.5,
+                          "radius": 0.7,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#ff8a5055"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#ff8a5000"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n2986",
+                      "x": 58.3,
+                      "y": 48.400000000000006,
+                      "width": 15.400000000000002,
+                      "height": 68.2,
+                      "cornerRadius": 7.700000000000001,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#e9e4d4"
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "n2987",
+                      "x": 48.400000000000006,
+                      "y": 15.400000000000002,
+                      "width": 35.2,
+                      "height": 41.8,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 180.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#ffc47a"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#ff4d33"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n2988",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "content": "fosforo",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 30.0,
+                  "fontWeight": 700,
+                  "lineHeight": 1.2,
+                  "textGrowth": "auto",
+                  "fill": [
+                    {
+                      "type": "solid",
+                      "color": "#cfd7eb"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n2989",
+                  "layout": "horizontal",
+                  "gap": 8.0,
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n2990",
+                      "name": "icono fosforo",
+                      "width": 32.0,
+                      "height": 32.0,
+                      "layout": "none",
+                      "clipContent": true,
+                      "cornerRadius": 7.466666666666667,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 135.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#222a47"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#0d111d"
+                            }
+                          ]
+                        }
+                      ],
+                      "stroke": {
+                        "thickness": 1.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#3a4466"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "n2991",
+                          "x": 6.4,
+                          "y": 1.0666666666666669,
+                          "width": 19.2,
+                          "height": 19.2,
+                          "fill": [
+                            {
+                              "type": "radial_gradient",
+                              "cx": 0.5,
+                              "cy": 0.5,
+                              "radius": 0.7,
+                              "stops": [
+                                {
+                                  "offset": 0.0,
+                                  "color": "#ff8a5055"
+                                },
+                                {
+                                  "offset": 1.0,
+                                  "color": "#ff8a5000"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n2992",
+                          "x": 14.133333333333333,
+                          "y": 11.733333333333333,
+                          "width": 3.7333333333333334,
+                          "height": 16.53333333333333,
+                          "cornerRadius": 1.8666666666666667,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#e9e4d4"
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "n2993",
+                          "x": 11.733333333333333,
+                          "y": 3.7333333333333334,
+                          "width": 8.533333333333333,
+                          "height": 10.133333333333333,
+                          "fill": [
+                            {
+                              "type": "linear_gradient",
+                              "angle": 180.0,
+                              "stops": [
+                                {
+                                  "offset": 0.0,
+                                  "color": "#ffc47a"
+                                },
+                                {
+                                  "offset": 1.0,
+                                  "color": "#ff4d33"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n2994",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "$ fosforo README.md",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n2995",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n2996",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Cerilla + fósforo de los",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n2997",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n2998",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "monitores CRT. El cursor",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n2999",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3000",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "que enciende ideas.",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3001",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3002",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "7 letras; alias corto posible",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3003",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3004",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "✓ libre en GitHub, crates, npm,",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3005",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3006",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "PyPI y brew",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n3007",
+              "name": "candidato lumbre",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 8.0,
+              "padding": [
+                20.0,
+                12.0,
+                16.0,
+                12.0
+              ],
+              "alignItems": "center",
+              "cornerRadius": 12.0,
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#0f131f"
+                }
+              ],
+              "stroke": {
+                "thickness": 1.0,
+                "fill": [
+                  {
+                    "type": "solid",
+                    "color": "#424a5e"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n3008",
+                  "name": "icono lumbre",
+                  "width": 132.0,
+                  "height": 132.0,
+                  "layout": "none",
+                  "clipContent": true,
+                  "cornerRadius": 30.800000000000004,
+                  "fill": [
+                    {
+                      "type": "linear_gradient",
+                      "angle": 135.0,
+                      "stops": [
+                        {
+                          "offset": 0.0,
+                          "color": "#222a47"
+                        },
+                        {
+                          "offset": 1.0,
+                          "color": "#0d111d"
+                        }
+                      ]
+                    }
+                  ],
+                  "stroke": {
+                    "thickness": 1.0,
+                    "fill": [
+                      {
+                        "type": "solid",
+                        "color": "#3a4466"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "n3009",
+                      "x": 37.400000000000006,
+                      "y": 59.400000000000006,
+                      "width": 57.2,
+                      "height": 55.00000000000001,
+                      "cornerRadius": 12.1,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 180.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#ffa45a"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#d63f2c"
+                            }
+                          ]
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "type": "path",
+                      "id": "n3010",
+                      "x": 51.7,
+                      "y": 8.8,
+                      "d": "M13,46 C3,46 0,33 6,24 C10,18 13,10 13,0 C22,9 26,18 26,30 C26,39 21,46 13,46 Z",
+                      "width": 28.6,
+                      "height": 50.6,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 180.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#ffe08a"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#ff8a3c"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "n3011",
+                      "x": 88.0,
+                      "y": 33.0,
+                      "width": 8.8,
+                      "height": 8.8,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#ffcf7a"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n3012",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "content": "lumbre",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 30.0,
+                  "fontWeight": 700,
+                  "lineHeight": 1.2,
+                  "textGrowth": "auto",
+                  "fill": [
+                    {
+                      "type": "solid",
+                      "color": "#cfd7eb"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3013",
+                  "layout": "horizontal",
+                  "gap": 8.0,
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n3014",
+                      "name": "icono lumbre",
+                      "width": 32.0,
+                      "height": 32.0,
+                      "layout": "none",
+                      "clipContent": true,
+                      "cornerRadius": 7.466666666666667,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 135.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#222a47"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#0d111d"
+                            }
+                          ]
+                        }
+                      ],
+                      "stroke": {
+                        "thickness": 1.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#3a4466"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "n3015",
+                          "x": 9.066666666666666,
+                          "y": 14.4,
+                          "width": 13.866666666666667,
+                          "height": 13.333333333333334,
+                          "cornerRadius": 2.933333333333333,
+                          "fill": [
+                            {
+                              "type": "linear_gradient",
+                              "angle": 180.0,
+                              "stops": [
+                                {
+                                  "offset": 0.0,
+                                  "color": "#ffa45a"
+                                },
+                                {
+                                  "offset": 1.0,
+                                  "color": "#d63f2c"
+                                }
+                              ]
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "type": "path",
+                          "id": "n3016",
+                          "x": 12.533333333333331,
+                          "y": 2.1333333333333333,
+                          "d": "M13,46 C3,46 0,33 6,24 C10,18 13,10 13,0 C22,9 26,18 26,30 C26,39 21,46 13,46 Z",
+                          "width": 6.933333333333334,
+                          "height": 12.266666666666666,
+                          "fill": [
+                            {
+                              "type": "linear_gradient",
+                              "angle": 180.0,
+                              "stops": [
+                                {
+                                  "offset": 0.0,
+                                  "color": "#ffe08a"
+                                },
+                                {
+                                  "offset": 1.0,
+                                  "color": "#ff8a3c"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "n3017",
+                          "x": 21.333333333333332,
+                          "y": 8.0,
+                          "width": 2.1333333333333333,
+                          "height": 2.1333333333333333,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#ffcf7a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n3018",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "$ lumbre README.md",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#f5a574"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3019",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3020",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Brasa y luz. Un bloque de",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3021",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3022",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "cursor al rojo vivo.",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3023",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3024",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "6 letras, cálido, fácil de",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3025",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3026",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "pronunciar",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3027",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3028",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "✓ libre en GitHub, crates, npm,",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3029",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3030",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "PyPI y brew",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n3031",
+              "name": "candidato atajo",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 8.0,
+              "padding": [
+                20.0,
+                12.0,
+                16.0,
+                12.0
+              ],
+              "alignItems": "center",
+              "cornerRadius": 12.0,
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#0f131f"
+                }
+              ],
+              "stroke": {
+                "thickness": 1.0,
+                "fill": [
+                  {
+                    "type": "solid",
+                    "color": "#424a5e"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n3032",
+                  "name": "icono atajo",
+                  "width": 132.0,
+                  "height": 132.0,
+                  "layout": "none",
+                  "clipContent": true,
+                  "cornerRadius": 30.800000000000004,
+                  "fill": [
+                    {
+                      "type": "linear_gradient",
+                      "angle": 135.0,
+                      "stops": [
+                        {
+                          "offset": 0.0,
+                          "color": "#222a47"
+                        },
+                        {
+                          "offset": 1.0,
+                          "color": "#0d111d"
+                        }
+                      ]
+                    }
+                  ],
+                  "stroke": {
+                    "thickness": 1.0,
+                    "fill": [
+                      {
+                        "type": "solid",
+                        "color": "#3a4466"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "n3033",
+                      "x": 24.200000000000003,
+                      "y": 39.6,
+                      "d": "M2,2 L28,24 L2,46",
+                      "width": 37.400000000000006,
+                      "height": 52.8,
+                      "fill": [],
+                      "stroke": {
+                        "thickness": 11.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#7fc1fe"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "id": "n3034",
+                      "x": 55.00000000000001,
+                      "y": 39.6,
+                      "d": "M2,2 L28,24 L2,46",
+                      "width": 37.400000000000006,
+                      "height": 52.8,
+                      "fill": [],
+                      "stroke": {
+                        "thickness": 11.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#4ad1d3"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n3035",
+                      "x": 99.0,
+                      "y": 39.6,
+                      "width": 15.400000000000002,
+                      "height": 52.8,
+                      "cornerRadius": 4.4,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n3036",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "content": "atajo",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 30.0,
+                  "fontWeight": 700,
+                  "lineHeight": 1.2,
+                  "textGrowth": "auto",
+                  "fill": [
+                    {
+                      "type": "solid",
+                      "color": "#cfd7eb"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3037",
+                  "layout": "horizontal",
+                  "gap": 8.0,
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n3038",
+                      "name": "icono atajo",
+                      "width": 32.0,
+                      "height": 32.0,
+                      "layout": "none",
+                      "clipContent": true,
+                      "cornerRadius": 7.466666666666667,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 135.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#222a47"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#0d111d"
+                            }
+                          ]
+                        }
+                      ],
+                      "stroke": {
+                        "thickness": 1.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#3a4466"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "path",
+                          "id": "n3039",
+                          "x": 5.866666666666666,
+                          "y": 9.6,
+                          "d": "M2,2 L28,24 L2,46",
+                          "width": 9.066666666666666,
+                          "height": 12.8,
+                          "fill": [],
+                          "stroke": {
+                            "thickness": 11.0,
+                            "fill": [
+                              {
+                                "type": "solid",
+                                "color": "#7fc1fe"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "path",
+                          "id": "n3040",
+                          "x": 13.333333333333334,
+                          "y": 9.6,
+                          "d": "M2,2 L28,24 L2,46",
+                          "width": 9.066666666666666,
+                          "height": 12.8,
+                          "fill": [],
+                          "stroke": {
+                            "thickness": 11.0,
+                            "fill": [
+                              {
+                                "type": "solid",
+                                "color": "#4ad1d3"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n3041",
+                          "x": 24.0,
+                          "y": 9.6,
+                          "width": 3.7333333333333334,
+                          "height": 12.8,
+                          "cornerRadius": 1.0666666666666669,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#7fd096"
+                            }
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n3042",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "$ atajo README.md",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fc1fe"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3043",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3044",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Atajo = shortcut: la",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3045",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3046",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "promesa del teclado",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3047",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3048",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "primero.",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3049",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3050",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Ojo: \"Atajos\" es la app",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#f5a574"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3051",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3052",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Shortcuts de Apple en español",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#f5a574"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3053",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3054",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "✓ libre en GitHub, crates, npm,",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3055",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3056",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "PyPI y brew",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n3057",
+              "name": "candidato buril",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 8.0,
+              "padding": [
+                20.0,
+                12.0,
+                16.0,
+                12.0
+              ],
+              "alignItems": "center",
+              "cornerRadius": 12.0,
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#0f131f"
+                }
+              ],
+              "stroke": {
+                "thickness": 1.0,
+                "fill": [
+                  {
+                    "type": "solid",
+                    "color": "#424a5e"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n3058",
+                  "name": "icono buril",
+                  "width": 132.0,
+                  "height": 132.0,
+                  "layout": "none",
+                  "clipContent": true,
+                  "cornerRadius": 30.800000000000004,
+                  "fill": [
+                    {
+                      "type": "linear_gradient",
+                      "angle": 135.0,
+                      "stops": [
+                        {
+                          "offset": 0.0,
+                          "color": "#222a47"
+                        },
+                        {
+                          "offset": 1.0,
+                          "color": "#0d111d"
+                        }
+                      ]
+                    }
+                  ],
+                  "stroke": {
+                    "thickness": 1.0,
+                    "fill": [
+                      {
+                        "type": "solid",
+                        "color": "#3a4466"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "n3059",
+                      "x": 33.0,
+                      "y": 15.400000000000002,
+                      "d": "M40,0 L64,24 L26,62 L2,38 Z",
+                      "width": 70.4,
+                      "height": 70.4,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#a9b6d8"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "path",
+                      "id": "n3060",
+                      "x": 28.6,
+                      "y": 57.2,
+                      "d": "M10,10 L34,34 L2,38 Z",
+                      "width": 37.400000000000006,
+                      "height": 44.0,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#4ad1d3"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n3061",
+                      "x": 28.6,
+                      "y": 107.8,
+                      "width": 74.80000000000001,
+                      "height": 5.5,
+                      "cornerRadius": 2.75,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#4a5578"
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n3062",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "content": "buril",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 30.0,
+                  "fontWeight": 700,
+                  "lineHeight": 1.2,
+                  "textGrowth": "auto",
+                  "fill": [
+                    {
+                      "type": "solid",
+                      "color": "#cfd7eb"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3063",
+                  "layout": "horizontal",
+                  "gap": 8.0,
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n3064",
+                      "name": "icono buril",
+                      "width": 32.0,
+                      "height": 32.0,
+                      "layout": "none",
+                      "clipContent": true,
+                      "cornerRadius": 7.466666666666667,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 135.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#222a47"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#0d111d"
+                            }
+                          ]
+                        }
+                      ],
+                      "stroke": {
+                        "thickness": 1.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#3a4466"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "path",
+                          "id": "n3065",
+                          "x": 8.0,
+                          "y": 3.7333333333333334,
+                          "d": "M40,0 L64,24 L26,62 L2,38 Z",
+                          "width": 17.066666666666666,
+                          "height": 17.066666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#a9b6d8"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "path",
+                          "id": "n3066",
+                          "x": 6.933333333333334,
+                          "y": 13.866666666666667,
+                          "d": "M10,10 L34,34 L2,38 Z",
+                          "width": 9.066666666666666,
+                          "height": 10.666666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#4ad1d3"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n3067",
+                          "x": 6.933333333333334,
+                          "y": 26.133333333333333,
+                          "width": 18.133333333333333,
+                          "height": 1.3333333333333333,
+                          "cornerRadius": 0.6666666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#4a5578"
+                            }
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n3068",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "$ buril README.md",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#4ad1d3"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3069",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3070",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Herramienta del grabador:",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3071",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3072",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "precisión sobre el texto.",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3073",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3074",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "5 letras, poco común y muy",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3075",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3076",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "propio",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3077",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3078",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "✓ libre en GitHub, crates, npm,",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3079",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3080",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "PyPI y brew",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "n3081",
+              "name": "candidato rafaga",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 8.0,
+              "padding": [
+                20.0,
+                12.0,
+                16.0,
+                12.0
+              ],
+              "alignItems": "center",
+              "cornerRadius": 12.0,
+              "fill": [
+                {
+                  "type": "solid",
+                  "color": "#0f131f"
+                }
+              ],
+              "stroke": {
+                "thickness": 1.0,
+                "fill": [
+                  {
+                    "type": "solid",
+                    "color": "#424a5e"
+                  }
+                ]
+              },
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "n3082",
+                  "name": "icono rafaga",
+                  "width": 132.0,
+                  "height": 132.0,
+                  "layout": "none",
+                  "clipContent": true,
+                  "cornerRadius": 30.800000000000004,
+                  "fill": [
+                    {
+                      "type": "linear_gradient",
+                      "angle": 135.0,
+                      "stops": [
+                        {
+                          "offset": 0.0,
+                          "color": "#222a47"
+                        },
+                        {
+                          "offset": 1.0,
+                          "color": "#0d111d"
+                        }
+                      ]
+                    }
+                  ],
+                  "stroke": {
+                    "thickness": 1.0,
+                    "fill": [
+                      {
+                        "type": "solid",
+                        "color": "#3a4466"
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "n3083",
+                      "x": 22.0,
+                      "y": 37.400000000000006,
+                      "opacity": 0.4,
+                      "width": 52.8,
+                      "height": 12.1,
+                      "cornerRadius": 6.050000000000001,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cca8f6"
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n3084",
+                      "x": 22.0,
+                      "y": 59.400000000000006,
+                      "opacity": 0.7,
+                      "width": 41.8,
+                      "height": 12.1,
+                      "cornerRadius": 6.050000000000001,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cca8f6"
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n3085",
+                      "x": 22.0,
+                      "y": 81.4,
+                      "width": 30.800000000000004,
+                      "height": 12.1,
+                      "cornerRadius": 6.050000000000001,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cca8f6"
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "n3086",
+                      "x": 85.80000000000001,
+                      "y": 30.800000000000004,
+                      "width": 24.200000000000003,
+                      "height": 70.4,
+                      "cornerRadius": 5.5,
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#d5b85e"
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n3087",
+                  "width": "fit_content",
+                  "height": "fit_content",
+                  "content": "rafaga",
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 30.0,
+                  "fontWeight": 700,
+                  "lineHeight": 1.2,
+                  "textGrowth": "auto",
+                  "fill": [
+                    {
+                      "type": "solid",
+                      "color": "#cfd7eb"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3088",
+                  "layout": "horizontal",
+                  "gap": 8.0,
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n3089",
+                      "name": "icono rafaga",
+                      "width": 32.0,
+                      "height": 32.0,
+                      "layout": "none",
+                      "clipContent": true,
+                      "cornerRadius": 7.466666666666667,
+                      "fill": [
+                        {
+                          "type": "linear_gradient",
+                          "angle": 135.0,
+                          "stops": [
+                            {
+                              "offset": 0.0,
+                              "color": "#222a47"
+                            },
+                            {
+                              "offset": 1.0,
+                              "color": "#0d111d"
+                            }
+                          ]
+                        }
+                      ],
+                      "stroke": {
+                        "thickness": 1.0,
+                        "fill": [
+                          {
+                            "type": "solid",
+                            "color": "#3a4466"
+                          }
+                        ]
+                      },
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "n3090",
+                          "x": 5.333333333333333,
+                          "y": 9.066666666666666,
+                          "opacity": 0.4,
+                          "width": 12.8,
+                          "height": 2.933333333333333,
+                          "cornerRadius": 1.4666666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#cca8f6"
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n3091",
+                          "x": 5.333333333333333,
+                          "y": 14.4,
+                          "opacity": 0.7,
+                          "width": 10.133333333333333,
+                          "height": 2.933333333333333,
+                          "cornerRadius": 1.4666666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#cca8f6"
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n3092",
+                          "x": 5.333333333333333,
+                          "y": 19.733333333333334,
+                          "width": 7.466666666666667,
+                          "height": 2.933333333333333,
+                          "cornerRadius": 1.4666666666666666,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#cca8f6"
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "n3093",
+                          "x": 20.8,
+                          "y": 7.466666666666667,
+                          "width": 5.866666666666666,
+                          "height": 17.066666666666666,
+                          "cornerRadius": 1.3333333333333333,
+                          "fill": [
+                            {
+                              "type": "solid",
+                              "color": "#d5b85e"
+                            }
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n3094",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "$ rafaga README.md",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cca8f6"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3095",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3096",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "Ráfaga de pulsaciones:",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3097",
+                  "width": "fill_container",
+                  "height": 20.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3098",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "velocidad y fluidez.",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 13.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#cfd7eb"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3099",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3100",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "6 letras; sin tildes en el",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3101",
+                  "width": "fill_container",
+                  "height": 18.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3102",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "comando",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 12.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#75809c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3103",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3104",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "✓ libre en GitHub, crates, npm,",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "n3105",
+                  "width": "fill_container",
+                  "height": 17.0,
+                  "layout": "horizontal",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "fill": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n3106",
+                      "width": "fit_content",
+                      "height": "fit_content",
+                      "content": "PyPI y brew",
+                      "fontFamily": "JetBrains Mono",
+                      "fontSize": 11.0,
+                      "fontWeight": 400,
+                      "lineHeight": 1.2,
+                      "textGrowth": "auto",
+                      "fill": [
+                        {
+                          "type": "solid",
+                          "color": "#7fd096"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "editorMeta": {

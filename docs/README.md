@@ -62,6 +62,7 @@ cuadrícula de terminal de 120×36 celdas.
 | Tema claro | [`09`](design/exports/09-tema-claro-normal.png) |
 | Diálogo de cambios sin guardar | [`10`](design/exports/10-dialogo-cambios-sin-guardar.png) |
 | Iconos por tipo de archivo y modo sin Nerd Font | [`11`](design/exports/11-iconos-y-explorador.png) |
+| Marca: candidatos de nombre e icono (provisional) | [`12`](design/exports/12-marca-candidatos.png) |
 
 ![Layout principal](design/exports/01-layout-principal-normal.png)
 

@@ -8,16 +8,16 @@ cómo **ver**, **modificar** y **regenerar** el diseño.
 
 ```
 docs/design/
-├── editor.op          ← el diseño completo (12 pantallas). Se abre con OpenPencil.
+├── editor.op          ← el diseño completo (12 pantallas + el tablero de marca). Se abre con OpenPencil.
 ├── exports/           ← una imagen PNG por pantalla, para verlas sin abrir nada
 │   ├── 00-guia-de-estilo.png
 │   ├── 01-layout-principal-normal.png
-│   └── ... (hasta 11-iconos-y-explorador.png)
+│   └── ... (hasta 12-marca-candidatos.png)
 ├── src/               ← scripts que GENERAN el diseño (fuente de verdad de las maquetas)
 │   ├── palette.js     ← GENERADO: paleta Tinta (oscuro y claro)
 │   ├── icons.js       ← GENERADO: iconos de archivo como trazados vectoriales
 │   ├── lib.js         ← piezas compartidas: líneas, explorador, statusline, popups, tabla...
-│   └── 00-… a 11-….js ← una pantalla por archivo
+│   └── 00-… a 12-….js ← una pantalla por archivo
 └── tools/             ← generadores de palette.js e icons.js (Python)
     ├── make-palette.py
     └── make-icons.py
@@ -47,7 +47,7 @@ Tres formas, de la más rápida a la más completa:
    op start --file docs/design/editor.op
    ```
 
-   Se abre la ventana de OpenPencil con las 12 pantallas en el lienzo, en una cuadrícula de 3 columnas.
+   Se abre la ventana de OpenPencil con todas las pantallas en el lienzo, en una cuadrícula de 3 columnas.
 
    También puedes abrir `OpenPencil.AppImage`; la documentación indica que los archivos `.op` se asocian a la aplicación
    (doble clic para abrir) y que el menú de archivo incluye "Open Recent" y "Save As".
@@ -107,6 +107,7 @@ El README oficial no explica los paneles de capas y propiedades, la selección m
   | Fila 2 | 03 Modo Visual | 04 Menú líder | 05 Picker de archivos |
   | Fila 3 | 06 Paleta de comandos | 07 Markdown vista previa | 08 Markdown dividido |
   | Fila 4 | 09 Tema claro | 10 Diálogo cambios sin guardar | 11 Iconos y explorador |
+  | Fila 5 | 12 Marca: candidatos (provisional; se sustituye al elegir nombre) | | |
 
 ## Paleta e iconos
 
