@@ -17,5 +17,5 @@
 ## 3. Calidad y CI
 
 - [x] 3.1 Crear `Makefile` con `build`, `test`, `vet` y `run`; verificar ejecutando cada objetivo
-- [ ] 3.2 Crear `.github/workflows/ci.yml` con vet, test y build; verificar que el workflow pasa en un PR de prueba a `dev`
+- [x] 3.2 Crear `.github/workflows/ci.yml` con vet, test y build; verificar que el workflow pasa en un PR de prueba a `dev`
 - [x] 3.3 Actualizar `docs/README.md` con los comandos de desarrollo reales; verificar que un clon limpio compila siguiendo solo el README
