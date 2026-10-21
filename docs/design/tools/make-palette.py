@@ -14,6 +14,8 @@ BRAND_HUE = 268          # tono de las superficies (azul-violeta de tinta)
 ACCENT_HUES = {         # tono de cada acento
     'blue': 248, 'green': 152, 'mauve': 305, 'peach': 52, 'yellow': 92, 'red': 18, 'teal': 196,
 }
+# Color de marca: verde fosforo (el de los monitores CRT). (L, C, H) por tema.
+BRAND = {'dark': (0.86, 0.17, 153), 'light': (0.52, 0.15, 153)}
 THEMES = {
     'dark': {
         'surfaces': {   # (L, C)
@@ -68,10 +70,11 @@ for name, t in THEMES.items():
     for k, (L, C) in t['surfaces'].items(): lin[k] = oklch_to_srgb(L, C, BRAND_HUE)
     for k, (L, C) in t['text'].items(): lin[k] = oklch_to_srgb(L, C, BRAND_HUE)
     for k, h in ACCENT_HUES.items(): lin[k] = oklch_to_srgb(*t['accent'][:1], t['accent'][1], h)
+    lin['brand'] = oklch_to_srgb(*BRAND[name])
     for k, v in lin.items(): hexes[k] = to_hex(v)
     out[name] = hexes
     bg = lin['bg']
-    checks = [('fg', 7.0), ('dim', 3.0)] + [(k, 4.5) for k in ACCENT_HUES]
+    checks = [('fg', 7.0), ('dim', 3.0), ('brand', 4.5)] + [(k, 4.5) for k in ACCENT_HUES]
     print(f'\n== {name}: contraste sobre bg {hexes["bg"]}')
     for k, minimum in checks:
         r = contrast(lin[k], bg); ok = r >= minimum

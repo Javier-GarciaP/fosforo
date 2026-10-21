@@ -10,7 +10,7 @@ guardado son la fuente típica de pérdida de datos, así que se cimientan prime
 - Buffer de texto en memoria: abrir, editar y guardar archivos UTF-8 con guardado atómico.
 - Vista del editor: números de línea, scroll, relleno `~`, statusline y línea de comandos (ver `docs/design/exports/01-layout-principal-normal.png`).
 - Escritura básica tipo modo Insert: insertar, borrar, saltos de línea, flechas, `Ctrl+S` guardar y `Ctrl+Q` salir (atajos transitorios que `modal-editing` sustituye, conservando el comportamiento).
-- Abrir el archivo pasado como argumento (`ted <ruta>`).
+- Abrir el archivo pasado como argumento (`fosforo <ruta>`).
 
 ## Capabilities
 
@@ -31,6 +31,6 @@ Ninguna.
 
 ## Impact
 
-- Código nuevo: `internal/buffer`, `internal/editor`, `internal/ui`, `cmd/ted`.
+- Código nuevo: `internal/buffer`, `internal/editor`, `internal/ui`, `cmd/fosforo`.
 - Dependencias: `rivo/uniseg` (y/o `go-runewidth`) para grafemas y ancho de celdas.
 - Depende de: `bootstrap-project`.

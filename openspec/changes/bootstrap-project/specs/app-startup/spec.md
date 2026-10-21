@@ -20,15 +20,15 @@ The application SHALL use the alternate screen while running and MUST restore th
 The application SHALL accept `--version`, `--help` and an optional positional `<path>` argument.
 
 #### Scenario: Mostrar versión
-- **WHEN** se ejecuta `ted --version`
+- **WHEN** se ejecuta `fosforo --version`
 - **THEN** imprime la versión en una línea y termina con código 0 sin abrir la pantalla alternativa
 
 #### Scenario: Flag desconocido
-- **WHEN** se ejecuta `ted --no-existe`
+- **WHEN** se ejecuta `fosforo --no-existe`
 - **THEN** imprime un mensaje de uso y termina con código 2
 
 #### Scenario: Ruta como argumento
-- **WHEN** se ejecuta `ted README.md`
+- **WHEN** se ejecuta `fosforo README.md`
 - **THEN** la aplicación recibe la ruta `README.md` para abrirla (el comportamiento de apertura lo define `core-text-editing`)
 
 ### Requirement: Minimum terminal size

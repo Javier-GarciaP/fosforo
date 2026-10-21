@@ -212,4 +212,4 @@ Decisiones que no se tomaron todavía y que conviene fijar cuando aparezcan:
   versión publicada no hace falta; después habrá que decidir si se permite `hotfix/*` desde `main` con vuelta a `dev`.
 - **Número de personas revisoras:** el flujo exige PR y CI en verde; cuántas aprobaciones se necesitan depende de quiénes sean
   las personas que colaboren.
-- **Nombre del proyecto y del repositorio:** `ted` es provisional.
+- **Repositorio remoto:** el proyecto se llama `fosforo`; falta crear el repositorio en GitHub y fijar su visibilidad y la protección de ramas.

@@ -8,7 +8,7 @@ function column(T, titulo) {
   line(c, [[' ', T.fg]]);
   const names = [['bg', 'fondo del editor'], ['panel', 'explorador, tabs, statusline'], ['sel', 'linea actual / seleccion en lista'], ['visual', 'seleccion visual'],
     ['fg', 'texto'], ['dim', 'secundario, numeros de linea'], ['blue', 'carpetas, funciones, NORMAL'], ['green', 'cadenas, INSERT, exito'], ['mauve', 'palabras clave, VISUAL, lider'],
-    ['peach', 'numeros, [+], COMMAND'], ['yellow', 'tipos, coincidencias'], ['red', 'errores'], ['teal', 'markdown, PREVIEW'], ['border', 'bordes y separadores'], ['code', 'bloque de codigo md']];
+    ['peach', 'numeros, [+], COMMAND'], ['yellow', 'tipos, coincidencias'], ['red', 'errores'], ['teal', 'markdown, PREVIEW'], ['brand', 'marca: verde fosforo'], ['border', 'bordes y separadores'], ['code', 'bloque de codigo md']];
   names.forEach((n) => {
     const row = I(c, { type: 'frame', layout: 'horizontal', gap: 0, height: CH, width: 'fill_container', alignItems: 'center', fill: [] });
     I(row, { type: 'rectangle', width: 45, height: 14, fill: solid(T[n[0]]), stroke: { thickness: 1, fill: solid(T.border) } });

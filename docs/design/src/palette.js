@@ -16,7 +16,8 @@ const THEMES = {
     "peach": "#f5a574",
     "yellow": "#d5b85e",
     "red": "#fc9c9f",
-    "teal": "#4ad1d3"
+    "teal": "#4ad1d3",
+    "brand": "#69f19a"
   },
   "light": {
     "bg": "#f4f7fc",
@@ -33,6 +34,7 @@ const THEMES = {
     "peach": "#a24e04",
     "yellow": "#7f6601",
     "red": "#ae3b47",
-    "teal": "#037879"
+    "teal": "#037879",
+    "brand": "#067e42"
   }
 };

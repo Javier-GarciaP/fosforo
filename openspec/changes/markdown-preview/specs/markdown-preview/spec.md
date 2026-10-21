@@ -9,7 +9,7 @@ Define cómo se muestran los archivos Markdown renderizados dentro del editor, c
 Opening a `.md` or `.markdown` file SHALL show it as a rendered preview in a read-only pane, with the statusline showing the `PREVIEW` mode.
 
 #### Scenario: Abrir un README
-- **WHEN** se abre `README.md` desde el explorador o con `ted README.md`
+- **WHEN** se abre `README.md` desde el explorador o con `fosforo README.md`
 - **THEN** se muestra el documento renderizado y la statusline indica `PREVIEW`, sin modificar el archivo
 
 ### Requirement: GitHub-style rendering

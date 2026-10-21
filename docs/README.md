@@ -1,7 +1,8 @@
-# ted — editor de código en la terminal
+<p align="center"><img src="design/brand/fosforo-icon.png" width="128" alt="fosforo"></p>
 
-> **Nombre provisional.** `ted` es un nombre de trabajo. Está concentrado en pocos sitios para poder cambiarlo
-> barato (ver la pregunta abierta en `openspec/changes/bootstrap-project/design.md`).
+# fosforo — editor de código en la terminal
+
+> **fosforo**: la cerilla y el fósforo de los monitores CRT. Un cursor verde que enciende ideas.
 >
 > **Estado del proyecto: fase de documentación y diseño. Todavía no hay código.**
 
@@ -62,7 +63,7 @@ cuadrícula de terminal de 120×36 celdas.
 | Tema claro | [`09`](design/exports/09-tema-claro-normal.png) |
 | Diálogo de cambios sin guardar | [`10`](design/exports/10-dialogo-cambios-sin-guardar.png) |
 | Iconos por tipo de archivo y modo sin Nerd Font | [`11`](design/exports/11-iconos-y-explorador.png) |
-| Marca: candidatos de nombre e icono (provisional) | [`12`](design/exports/12-marca-candidatos.png) |
+| Marca: icono, versiones, tamaños y colores | [`12`](design/exports/12-marca-fosforo.png) |
 
 ![Layout principal](design/exports/01-layout-principal-normal.png)
 
@@ -148,7 +149,7 @@ abierta). Cada archivo lleva el icono de su tipo (Go, Markdown, JSON, Makefile, 
 - **Un solo binario**, sin dependencias en tiempo de ejecución (`rg` es opcional para buscar más rápido).
 
 ```
-cmd/ted/            arranque y flags
+cmd/fosforo/            arranque y flags
 internal/buffer/    texto, cursor, undo/redo, cargar y guardar (sin UI)
 internal/editor/    modos, estado global (buffers, foco), despacho de comandos
 internal/command/   registro de comandos con nombre

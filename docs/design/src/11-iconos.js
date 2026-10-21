@@ -27,7 +27,7 @@ line(base, [[' ', T.fg]]);
 line(base, [['SIN NERD FONT', T.fg, { fontWeight: 700 }], ['   icons = "none"', T.dim]]);
 line(base, [['Las carpetas llevan "/" al final: abiertas en azul con sus hijos sangrados, cerradas atenuadas.', T.dim]]);
 line(base, [[' ', T.fg]]);
-[[0, 'terminal-IDE/', 'o'], [1, 'cmd/', 'o'], [2, 'ted/', 'o'], [3, 'main.go', 'f'], [1, 'internal/', 'o'], [2, 'buffer/', 'c'], [2, 'keymap/', 'o'], [3, 'trie.go', 'f'], [1, 'docs/', 'c'], [1, 'go.mod', 'f']].forEach((e) => {
+[[0, 'fosforo/', 'o'], [1, 'cmd/', 'o'], [2, 'fosforo/', 'o'], [3, 'main.go', 'f'], [1, 'internal/', 'o'], [2, 'buffer/', 'c'], [2, 'keymap/', 'o'], [3, 'trie.go', 'f'], [1, 'docs/', 'c'], [1, 'go.mod', 'f']].forEach((e) => {
   const col = e[2] === 'o' ? T.blue : (e[2] === 'c' ? T.dim : T.fg);
   line(base, [['  '.repeat(e[0]) + e[1], col, e[2] === 'o' && e[0] === 0 ? { fontWeight: 700 } : {}]]);
 });

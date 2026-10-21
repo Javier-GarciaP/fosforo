@@ -34,4 +34,4 @@ Con las funciones de v1 completas, falta personalización, búsqueda en el proye
 
 ## Open Questions
 
-- Nombre definitivo del binario y del módulo (afecta a rutas de instalación, nombre del archivo de configuración y a los textos de esta spec).
+- Alias corto del comando (p. ej. `fos`) y ruta del módulo: pendientes de crear el repositorio.

@@ -25,5 +25,5 @@
 - [ ] 4.1 Implementar la escritura (insertar, Enter con sangría, Backspace/Delete, unión de líneas); verificar con `teatest`
 - [ ] 4.2 Implementar flechas, Home, End, PageUp y PageDown con límites; verificar con `teatest`
 - [ ] 4.3 Implementar `Ctrl+S` y `Ctrl+Q` con diálogo de cambios sin guardar; verificar con `teatest` y comparando con la maqueta 10
-- [ ] 4.4 Abrir la ruta pasada como argumento; verificar abriendo un archivo real con `ted <ruta>` y guardando una edición
+- [ ] 4.4 Abrir la ruta pasada como argumento; verificar abriendo un archivo real con `fosforo <ruta>` y guardando una edición
 - [ ] 4.5 Actualizar `docs/README.md` con el estado real de funciones; verificar que la lista coincide con lo implementado

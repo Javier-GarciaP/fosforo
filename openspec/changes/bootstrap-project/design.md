@@ -16,7 +16,7 @@ las decisiones de arquitectura de fondo (buffer, comandos, keymap) viven en los 
 
 ## Decisions
 
-- **Disposición del repo:** `cmd/ted/` para el binario e `internal/` para todo lo demás (nada se publica como librería).
+- **Disposición del repo:** `cmd/fosforo/` para el binario e `internal/` para todo lo demás (nada se publica como librería).
   Alternativa descartada: `pkg/`, porque no hay consumidores externos.
 - **Versiones de dependencias:** al empezar se verifica la versión vigente de Bubble Tea, Lip Gloss y Bubbles (la línea v2
   cambió las rutas de importación) y se fija en `go.mod`. No se mezclan líneas v1 y v2.
@@ -25,7 +25,7 @@ las decisiones de arquitectura de fondo (buffer, comandos, keymap) viven en los 
 - **Pruebas:** `teatest` para el modelo y pruebas de tabla para el parseo de flags; el ciclo de vida se prueba lanzando
   el binario compilado en un pseudo-terminal.
 - **CI:** GitHub Actions con `go vet`, `go test ./...` y `go build ./...` en cada PR a `dev` y a `main`.
-- **Nombre:** `ted` es provisional y se concentra en `cmd/ted` y en una sola constante de nombre, para renombrar barato.
+- **Nombre:** el producto se llama `fosforo` (binario `fosforo`, directorio `cmd/fosforo`). El nombre vive en una sola constante para no esparcirlo por el código.
 
 ## Risks / Trade-offs
 
@@ -35,4 +35,4 @@ las decisiones de arquitectura de fondo (buffer, comandos, keymap) viven en los 
 
 ## Open Questions
 
-- Nombre definitivo del producto y ruta del módulo (`github.com/<usuario>/<repo>`).
+- Ruta del módulo (`github.com/<usuario>/fosforo`) y alias corto opcional del comando (p. ej. `fos`): pendientes de crear el repositorio.

@@ -84,8 +84,8 @@ function treeRow(t, T, depth, kind, name, selected) {
   return row;
 }
 const TREE_ROWS = [
-  [0, 'root', 'terminal-IDE'],
-  [1, 'dir-open', 'cmd'], [2, 'dir-open', 'ted'], [3, 'file', 'main.go'],
+  [0, 'root', 'fosforo'],
+  [1, 'dir-open', 'cmd'], [2, 'dir-open', 'fosforo'], [3, 'file', 'main.go'],
   [1, 'dir-open', 'internal'], [2, 'dir-closed', 'buffer'], [2, 'dir-closed', 'editor'], [2, 'dir-open', 'keymap'],
   [3, 'file', 'trie.go'], [3, 'file', 'trie_test.go'], [2, 'dir-closed', 'ui'],
   [1, 'dir-open', 'docs'], [2, 'dir-closed', 'design'], [2, 'file', 'README.md'],
@@ -189,7 +189,7 @@ function mdPreview(parent, T, o) {
   line(pane, [[' README.md ', T.fg, { fontWeight: 700 }], [' preview', T.teal]], T.panel);
   const P = '  ', rule = '─'.repeat(o.rule || 54);
   const bl = () => line(pane, [[' ', T.fg]]);
-  line(pane, [[P + 'ted — editor de código en la terminal', T.fg, { fontWeight: 700 }]]);
+  line(pane, [[P + 'fosforo — editor de código en la terminal', T.fg, { fontWeight: 700 }]]);
   line(pane, [[P + rule, T.border]]); bl();
   line(pane, [[P + 'Un editor ligero con la fluidez de ', T.fg], ['Neovim', T.blue], [' y la', T.fg]]);
   line(pane, [[P + 'comodidad de VS Code, hecho en Go.', T.fg]]); bl();
@@ -201,8 +201,8 @@ function mdPreview(parent, T, o) {
   line(pane, [[P + '☐ ', T.dim], ['Búsqueda en proyecto', T.fg]]); bl();
   line(pane, [[P + 'Instalación', T.fg, { fontWeight: 700 }]]);
   line(pane, [[P + rule, T.border]]); bl();
-  line(pane, [[P + ' ', T.fg, { bg: T.code }], ['go install github.com/usuario/ted@latest' + ' '.repeat(12), T.green, { bg: T.code }]]);
-  line(pane, [[P + ' ', T.fg, { bg: T.code }], ['ted README.md' + ' '.repeat(39), T.green, { bg: T.code }]]); bl();
+  line(pane, [[P + ' ', T.fg, { bg: T.code }], ['go install github.com/usuario/fosforo@latest' + ' '.repeat(8), T.green, { bg: T.code }]]);
+  line(pane, [[P + ' ', T.fg, { bg: T.code }], ['fosforo README.md' + ' '.repeat(35), T.green, { bg: T.code }]]); bl();
   line(pane, [[P, T.fg], ['▎ ', T.blue], ['Nota: los .md se abren en vista previa.', T.dim]]); bl();
   tableGrid(pane, T, [13, 27], [['Tecla', 'Acción'], ['Space f f', 'Buscar archivo'], ['Space m p', 'Alternar vista previa']]); bl();
   line(pane, [[P + 'Más información en ', T.fg], ['docs/README.md', T.blue]]);

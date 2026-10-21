@@ -12,7 +12,8 @@ docs/design/
 ├── exports/           ← una imagen PNG por pantalla, para verlas sin abrir nada
 │   ├── 00-guia-de-estilo.png
 │   ├── 01-layout-principal-normal.png
-│   └── ... (hasta 12-marca-candidatos.png)
+│   └── ... (hasta 12-marca-fosforo.png)
+├── brand/             ← marca: icono vectorial (SVG) y PNG del icono y los lockups
 ├── src/               ← scripts que GENERAN el diseño (fuente de verdad de las maquetas)
 │   ├── palette.js     ← GENERADO: paleta Tinta (oscuro y claro)
 │   ├── icons.js       ← GENERADO: iconos de archivo como trazados vectoriales
@@ -107,7 +108,7 @@ El README oficial no explica los paneles de capas y propiedades, la selección m
   | Fila 2 | 03 Modo Visual | 04 Menú líder | 05 Picker de archivos |
   | Fila 3 | 06 Paleta de comandos | 07 Markdown vista previa | 08 Markdown dividido |
   | Fila 4 | 09 Tema claro | 10 Diálogo cambios sin guardar | 11 Iconos y explorador |
-  | Fila 5 | 12 Marca: candidatos (provisional; se sustituye al elegir nombre) | | |
+  | Fila 5 | 12 Marca fosforo | | |
 
 ## Paleta e iconos
 
@@ -148,6 +149,39 @@ python3 docs/design/tools/make-icons.py <ruta>/SymbolsNerdFont-Regular.ttf <ruta
 La tabla de qué icono usa cada tipo vive en `tools/make-icons.py` (diccionario `SET`), que es la referencia para implementarla.
 Sin Nerd Font se usa el modo `icons = "none"`: las carpetas llevan `/` al final, las abiertas en azul con sus hijos sangrados y las
 cerradas atenuadas (ver pantalla `11`).
+
+## Marca
+
+**fosforo** = la cerilla y el fósforo de los monitores CRT. El icono es un **cursor de bloque verde fósforo coronado por la cabeza
+de una cerilla**: el cursor que enciende ideas. La pantalla [`12`](exports/12-marca-fosforo.png) muestra el icono, sus versiones
+(oscura, clara y monocroma), los tamaños desde 128 hasta 16 px y los colores de marca.
+
+| Archivo | Qué es |
+| --- | --- |
+| `brand/fosforo-icon.svg` | Icono vectorial (fuente de verdad del icono) |
+| `brand/fosforo-icon.png` | Icono 512 px (generado desde el SVG) |
+| `brand/fosforo-lockup.png` / `fosforo-lockup-light.png` | Icono + nombre sobre fondo oscuro / claro |
+
+Colores: **verde fósforo** `#69f19a` (oscuro) / `#067e42` (claro), **ember** `#ff8f4e` (la cabeza), tinta `#0d111d`, papel `#fbf8ef`.
+El verde de marca está en la paleta como `brand` (ver *Paleta e iconos*).
+
+El SVG y el dibujo de `src/12-marca.js` usan **la misma geometría** (cuadrado de 512 unidades): si cambias uno, cambia el otro.
+El SVG se valida con un renderizador independiente (librsvg, el de ImageMagick), porque el importador de SVG de OpenPencil
+**no admite degradados**. Para regenerar los PNG de la marca, desde la raíz del repositorio y con el diseño ya generado:
+
+```bash
+mkdir -p docs/design/brand
+magick -background none docs/design/brand/fosforo-icon.svg -resize 512x512 docs/design/brand/fosforo-icon.png
+
+op start --headless --file docs/design/editor.op &
+sleep 4
+for pair in "logo lockup oscuro:fosforo-lockup" "logo lockup claro:fosforo-lockup-light"; do
+  name=${pair%%:*}; out=${pair##*:}
+  id=$(op find_node_by_name name="$name" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
+  op export --item "$id" --output "docs/design/brand/$out.png" --format png --scale 2
+done
+op stop
+```
 
 ## Modificar el diseño
 
@@ -200,7 +234,8 @@ mismas herramientas (`op tools` lista las 166 disponibles: `batch_design`, `inse
 ## Trampas conocidas (aprendidas al construir estas maquetas)
 
 - **El primer hijo queda encima.** En un frame, el orden de dibujo es inverso al de creación: lo primero que se crea se
-  pinta *encima*. Los popups y el fondo atenuado deben crearse **antes** que la aplicación (ver `src/05-picker-archivos.js`).
+  pinta *encima*. Los popups y el fondo atenuado deben crearse **antes** que la aplicación (ver `src/05-picker-archivos.js`);
+  en el icono, el reflejo y la cabeza antes que el palo y los brillos (ver `src/12-marca.js`).
 - **Los glifos de caja (`┌ │ ┬ …`) se renderizan con otra altura de línea** y desalinean las filas. Las tablas del diseño
   se dibujan con bordes (`tableGrid` en `lib.js`); en el editor real sí se usarán caracteres de caja.
 - **No uses el carácter backtick dentro de un script**: el preprocesador del DSL lo confunde con una plantilla. Constrúyelo
