@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: vet · test · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: ripgrep (las pruebas de búsqueda comprueban también el motor rg)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
+      - run: make vet
+      - run: make test
+      - run: make build
+
+  branch-rules:
+    name: origen del PR
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: A main solo se llega desde dev
+        run: |
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "::error::Los PR a main deben salir de dev (este sale de ${{ github.head_ref }})."
+            exit 1
+          fi

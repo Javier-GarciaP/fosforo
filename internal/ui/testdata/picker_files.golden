@@ -1,0 +1,36 @@
+ fosforo                │  1 package keymap
+   cmd/                 │  2
+     fosforo/           │  3 type Node struct {
+       mai Buscar archivos                                                                              5/42
+   interna│                                                                                                 │
+     buffe│ > trie                                                                                          │
+     edito│▸ internal/keymap/trie.go             │  1 package keymap                                        │
+     keyma│  internal/keymap/trie_test.go        │  2                                                       │
+       tri│  changes/keymap-trie/design.md       │  3 type Node struct {                                    │
+       tri│  changes/keymap-trie/tasks.md        │  4     children map[rune]*Node                           │
+     ui/  │  changes/keymap-trie/proposal.md     │  5     command  string                                   │
+   docs/  │                                      │  6 }                                                     │
+     desig│                                      │  7                                                       │
+     READM│                                      │  8 // Lookup resuelve una secuencia de teclas.           │
+   openspe│                                      │  9 func (n *Node) Lookup(seq []rune) (string, bool) {    │
+   .gitign│                                      │ 10     cur := n                                          │
+   CONTRIB│                                      │ 11     for _, r := range seq {                           │
+   go.mod │                                      │ 12         next, ok := cur.children[r]                   │
+   LICENSE│                                      │ 13         if !ok { return "", false }                   │
+   Makefil│                                      │ 14         cur = next                                    │
+          │                                      │ 15     }                                                 │
+          │                                      │ 16     return cur.command, cur.command != ""             │
+          │                                      │ 17 }                                                     │
+          │                                      │                                                          │
+          │                                      │                                                          │
+          │                                      │                                                          │
+          │                                      │                                                          │
+           ↑↓ navegar   ⏎ abrir   Ctrl+n/p mover   Esc cerrar
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+ NORMAL  internal/keymap/trie.go                                                                  utf-8  LF  12:35  70%
+

@@ -1,0 +1,44 @@
+# Configuración de GoReleaser: binarios estáticos de fos para Linux y macOS (amd64 y arm64) con sumas SHA256.
+version: 2
+
+project_name: fos
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: fos
+    main: ./cmd/fos
+    binary: fos
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w
+      - -X github.com/Javier-GarciaP/fosforo/internal/version.Version={{ .Version }}
+      - -X github.com/Javier-GarciaP/fosforo/internal/version.Commit={{ .ShortCommit }}
+
+archives:
+  - formats: [tar.gz]
+    name_template: "fos_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  disable: true # las notas de la release salen de CHANGELOG.md
+
+release:
+  github:
+    owner: Javier-GarciaP
+    name: fosforo
+  prerelease: auto # 0.x.y se marca como pre-release
+  name_template: "fos {{ .Version }}"

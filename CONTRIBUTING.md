@@ -103,5 +103,3 @@ Si el cambio altera la interfaz, actualiza `docs/design/` **en el mismo PR** (sc
 ## 🔮 Pendiente de decidir
 
 - **Hotfix sobre `main`:** el flujo no contempla una corrección urgente que salte `dev`. Se decidirá cuando haya una versión publicada con usuarios.
-- **Comprobación de CI** de que los PR a `main` vienen de `dev`: llega con `bootstrap-project`.
-- **Licencia** del proyecto.

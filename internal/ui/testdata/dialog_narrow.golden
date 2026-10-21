@@ -1,0 +1,16 @@
+  1 package keymap
+ ┌────────────────────────────────────┐
+ │ Cambios sin guardar                │
+ │                                    │
+ │ "internal/keymap/trie.go" tiene c… │
+ │ ¿Qué quieres hacer?                │
+ │                                    │
+ │  Guardar (y)                       │
+ │  Descartar (n)                     │s
+ │  Cancelar (Esc)                    │
+ │                                    │
+ │ ←→ elegir   ⏎ confirmar            │
+ └────────────────────────────────────┘
+ 14         cur = next
+ INSERT  trie.go                1:1  5%
+-- INSERT --

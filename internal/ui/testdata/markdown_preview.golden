@@ -1,0 +1,36 @@
+ fosforo                │  fosforo — editor de código en la terminal
+   cmd/                 │  ──────────────────────────────────────────────────────
+     fosforo/           │
+       main.go          │  Un editor ligero con la fluidez de Neovim y la
+   internal/            │  comodidad de VS Code, hecho en Go.
+     buffer/            │
+     editor/            │  Características
+     keymap/            │  ──────────────────────────────────────────────────────
+       trie.go          │
+       trie_test.go     │  • Teclado modal con tecla líder Space
+     ui/                │  • Explorador de archivos y paleta de comandos
+   docs/                │  ☑ Vista previa de Markdown
+     design/            │  ☐ Búsqueda en proyecto
+     README.md          │
+   openspec/            │  Instalación
+   .gitignore           │  ──────────────────────────────────────────────────────
+   CONTRIBUTING.md      │
+   go.mod               │   go install github.com/usuario/fosforo@latest
+   LICENSE              │   fosforo README.md
+   Makefile             │
+                        │  ┃ Nota: los .md se abren en vista previa.
+                        │
+                        │  ┌───────────┬───────────────────────┐
+                        │  │ Tecla     │ Acción                │
+                        │  ├───────────┼───────────────────────┤
+                        │  │ Space f f │ Buscar archivo        │
+                        │  │ Space m p │ Alternar vista previa │
+                        │  └───────────┴───────────────────────┘
+                        │
+                        │  Más información en docs/README.md
+                        │
+                        │
+                        │
+                        │
+ PREVIEW  README.md (e: editar   Space m s: dividir)                                 markdown  utf-8  LF  28 líneas  0%
+
