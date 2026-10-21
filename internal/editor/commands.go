@@ -15,9 +15,15 @@ import (
 // registry y defaultKeymap se construyen una vez: toda acción del editor es un comando con nombre en el registro,
 // y las teclas solo apuntan a esos nombres.
 var (
-	registry      = buildRegistry()
-	defaultKeymap = buildKeymap()
+	registry      *command.Registry[*Model]
+	defaultKeymap *keymap.Keymap
 )
+
+// Se construyen en init (y no en la declaración) porque algunos comandos, a través de la paleta, vuelven a consultar el registro.
+func init() {
+	registry = buildRegistry()
+	defaultKeymap = buildKeymap()
+}
 
 // Registry devuelve el registro de comandos del editor (para la paleta, la ayuda y las pruebas).
 func Registry() *command.Registry[*Model] { return registry }
@@ -30,10 +36,19 @@ func displayKeys(keys ...string) []string {
 	return out
 }
 
+// shortLabels son las etiquetas cortas que usa el menú de la tecla líder (si un comando no tiene, se usa su descripción).
+var shortLabels = map[string]string{
+	"explorer.toggle": "explorador (alternar)", "file.save": "guardar", "buffer.close": "cerrar buffer", "app.quit": "salir",
+	"theme.toggle": "tema claro / oscuro", "palette.open": "paleta de comandos", "mode.search": "buscar en el archivo",
+	"mode.command": "línea de comandos", "help.keys": "lista de atajos", "file.find": "buscar archivos",
+	"file.recent": "abrir reciente", "file.new": "nuevo archivo", "buffer.pick": "buscar buffers",
+	"buffer.next": "buffer siguiente", "buffer.prev": "buffer anterior",
+}
+
 func buildRegistry() *command.Registry[*Model] {
 	r := command.NewRegistry[*Model]()
 	reg := func(name, desc string, keys []string, run func(m *Model, a command.Args) tea.Cmd) {
-		r.MustRegister(command.Command[*Model]{Name: name, Desc: desc, Keys: keys, Run: run})
+		r.MustRegister(command.Command[*Model]{Name: name, Desc: desc, Short: shortLabels[name], Keys: keys, Run: run})
 	}
 	none := func(f func(m *Model, a command.Args)) func(*Model, command.Args) tea.Cmd {
 		return func(m *Model, a command.Args) tea.Cmd { f(m, a); return nil }
@@ -70,16 +85,33 @@ func buildRegistry() *command.Registry[*Model] {
 	reg("mode.command", "Abrir la línea de comandos", []string{":"}, none(func(m *Model, _ command.Args) { m.openPrompt(":") }))
 	reg("mode.search", "Buscar en el archivo", []string{"/"}, none(func(m *Model, _ command.Args) { m.openPrompt("/") }))
 	reg("visual.swap_end", "Intercambiar el extremo de la selección", []string{"o"}, none(func(m *Model, _ command.Args) {
-		m.anchor, m.cur.Pos = m.cur.Pos, m.anchor
+		if m.mode.isVisual() {
+			m.anchor, m.cur.Pos = m.cur.Pos, m.anchor
+		}
 	}))
 
 	// escritura (Insert)
+	// Los comandos de escritura solo tienen sentido en Insert; si se lanzan desde la paleta en otro modo no hacen nada.
 	reg("edit.newline", "Salto de línea conservando la sangría", []string{"Enter"}, none(func(m *Model, _ command.Args) {
-		m.insertText("\n" + m.indentBeforeCursor())
+		if m.mode == ModeInsert {
+			m.insertText("\n" + m.indentBeforeCursor())
+		}
 	}))
-	reg("edit.tab", "Insertar un tabulador", []string{"Tab"}, none(func(m *Model, _ command.Args) { m.insertText("\t") }))
-	reg("edit.backspace", "Borrar el carácter anterior", []string{"Backspace"}, none(func(m *Model, _ command.Args) { m.backspace() }))
-	reg("edit.delete_forward", "Borrar el carácter siguiente", []string{"Delete"}, none(func(m *Model, _ command.Args) { m.deleteForward() }))
+	reg("edit.tab", "Insertar un tabulador", []string{"Tab"}, none(func(m *Model, _ command.Args) {
+		if m.mode == ModeInsert {
+			m.insertText("\t")
+		}
+	}))
+	reg("edit.backspace", "Borrar el carácter anterior", []string{"Backspace"}, none(func(m *Model, _ command.Args) {
+		if m.mode == ModeInsert {
+			m.backspace()
+		}
+	}))
+	reg("edit.delete_forward", "Borrar el carácter siguiente", []string{"Delete"}, none(func(m *Model, _ command.Args) {
+		if m.mode == ModeInsert {
+			m.deleteForward()
+		}
+	}))
 
 	// edición en Normal y Visual
 	reg("edit.undo", "Deshacer", []string{"u"}, none(func(m *Model, _ command.Args) { m.undo(false) }))
@@ -122,10 +154,10 @@ func buildRegistry() *command.Registry[*Model] {
 	registerExplorerCommands(r)
 	reg("buffer.next", "Ir al buffer siguiente", []string{"Space b n", ":bn"}, none(func(m *Model, _ command.Args) { m.nextBuffer(1) }))
 	reg("buffer.prev", "Ir al buffer anterior", []string{"Space b p", ":bp"}, none(func(m *Model, _ command.Args) { m.nextBuffer(-1) }))
-	reg("buffer.close", "Cerrar el buffer actual (:bd, :bd! descarta)", []string{"Space b d", ":bd"}, none(func(m *Model, a command.Args) { m.closeActive(a.Bang) }))
+	reg("buffer.close", "Cerrar buffer", []string{"Space b d", ":bd"}, none(func(m *Model, a command.Args) { m.closeActive(a.Bang) }))
 
 	// archivo y aplicación
-	reg("file.save", "Guardar el archivo (:w [ruta])", []string{"Ctrl+S", ":w"}, none(func(m *Model, a command.Args) { m.save(a.Text) }))
+	reg("file.save", "Guardar archivo", []string{"Ctrl+S", ":w"}, none(func(m *Model, a command.Args) { m.save(a.Text) }))
 	reg("file.save_quit", "Guardar y salir", []string{":wq"}, none(func(m *Model, a command.Args) {
 		if m.save(a.Text) {
 			m.requestQuit(false) // sale salvo que otros buffers tengan cambios
@@ -137,8 +169,17 @@ func buildRegistry() *command.Registry[*Model] {
 		}
 	}))
 	reg("theme.toggle", "Alternar entre el tema oscuro y el claro", []string{"Space t"}, none(func(m *Model, _ command.Args) { m.toggleTheme() }))
-	reg("file.open", "Abrir un archivo (:e ruta); sin ruta, recargar el actual", []string{":e"}, none(func(m *Model, a command.Args) { m.openFile(a) }))
-	reg("app.quit", "Salir (:q, :q! descarta los cambios)", []string{":q"}, none(func(m *Model, a command.Args) { m.requestQuit(a.Bang) }))
+	reg("file.find", "Buscar archivos del proyecto", []string{"Space f f"}, func(m *Model, _ command.Args) tea.Cmd { return m.openFilePicker() })
+	reg("file.recent", "Abrir un archivo reciente", []string{"Space f r"}, func(m *Model, _ command.Args) tea.Cmd { return m.openRecentPicker() })
+	reg("file.new", "Nuevo archivo", []string{"Space f n"}, none(func(m *Model, _ command.Args) {
+		m.openPrompt(":")
+		m.prompt.insert("e ")
+	}))
+	reg("buffer.pick", "Buscar entre los buffers abiertos", []string{"Space b b"}, func(m *Model, _ command.Args) tea.Cmd { return m.openBufferPicker() })
+	reg("palette.open", "Paleta de comandos", []string{"Space Space"}, func(m *Model, _ command.Args) tea.Cmd { return m.openPalette("Paleta de comandos") })
+	reg("help.keys", "Lista de atajos", []string{"Space ?", "Space h"}, func(m *Model, _ command.Args) tea.Cmd { return m.openPalette("Atajos") })
+	reg("file.open", "Abrir archivo", []string{":e"}, none(func(m *Model, a command.Args) { m.openFile(a) }))
+	reg("app.quit", "Salir", []string{":q"}, none(func(m *Model, a command.Args) { m.requestQuit(a.Bang) }))
 	return r
 }
 
@@ -185,10 +226,16 @@ func buildKeymap() *keymap.Keymap {
 	} {
 		bind(both, key, cmd)
 	}
+	// La tecla líder (Space): las mismas secuencias en el editor y en el explorador. El panel de ayuda se genera de este árbol.
 	for key, cmd := range map[string]string{
-		"space t": "theme.toggle", "space e": "explorer.toggle", "space b n": "buffer.next", "space b p": "buffer.prev", "space b d": "buffer.close",
-		"tab": "focus.toggle", "ctrl+w": "focus.toggle",
+		"space space": "palette.open", "space f f": "file.find", "space f r": "file.recent", "space f n": "file.new",
+		"space e": "explorer.toggle", "space b b": "buffer.pick", "space b n": "buffer.next", "space b p": "buffer.prev",
+		"space b d": "buffer.close", "space w": "file.save", "space q": "buffer.close", "space Q": "app.quit",
+		"space t": "theme.toggle", "space /": "mode.search", "space :": "mode.command", "space h": "help.keys", "space ?": "help.keys",
 	} {
+		bind([]string{"normal", modeExplorer}, key, cmd)
+	}
+	for key, cmd := range map[string]string{"tab": "focus.toggle", "ctrl+w": "focus.toggle"} {
 		bind(normal, key, cmd)
 	}
 	for key, cmd := range map[string]string{
@@ -196,7 +243,7 @@ func buildKeymap() *keymap.Keymap {
 		"g g": "explorer.top", "G": "explorer.bottom",
 		"enter": "explorer.open", "l": "explorer.open", "right": "explorer.open", "h": "explorer.collapse", "left": "explorer.collapse",
 		"a": "explorer.create", "r": "explorer.rename", "d": "explorer.delete", "R": "explorer.refresh",
-		"space e": "explorer.toggle", "space t": "theme.toggle", "tab": "focus.toggle", "ctrl+w": "focus.toggle",
+		"tab": "focus.toggle", "ctrl+w": "focus.toggle",
 		":": "mode.command", "ctrl+s": "file.save",
 	} {
 		bind([]string{modeExplorer}, key, cmd)

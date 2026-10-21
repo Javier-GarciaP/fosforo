@@ -78,7 +78,9 @@ type EditorView struct {
 	Selection *Selection      // selección de Visual, o nil
 	Highlight [][]syntax.Span // tramos de color de cada línea del buffer (puede ser más corto o nil: texto plano)
 	Explorer  *ExplorerView
-	BufIndex  int // posición del buffer activo (1..BufCount); solo se muestra con más de uno
+	Picker    *PickerView // ventana de selección (archivos, buffers, paleta), o nil
+	Leader    *LeaderView // panel de ayuda de la tecla líder, o nil
+	BufIndex  int         // posición del buffer activo (1..BufCount); solo se muestra con más de uno
 	BufCount  int
 	Prompt    *Prompt // línea de comandos en edición, o nil
 	Dialog    *Dialog
@@ -95,9 +97,13 @@ func TextCols(w, lines int) int { return max(1, w-GutterWidth(lines)) }
 
 // CursorCell devuelve la celda de pantalla donde debe mostrarse el cursor, y false si no es visible.
 func CursorCell(v EditorView, w, h int) (x, y int, ok bool) {
-	if v.Prompt != nil && v.Dialog == nil {
+	if v.Prompt != nil && v.Dialog == nil { // la línea de comandos (aunque muestre sugerencias) conserva el cursor
 		x = textWidth(v.Prompt.Prefix) + buffer.VisualCol(v.Prompt.Text, v.Prompt.Cursor)
 		return x, h - 1, x < w
+	}
+	if v.Picker != nil && v.Dialog == nil {
+		x, y = PickerCursorCell(v.Picker, w, h)
+		return x, y, x < w
 	}
 	px := PanelCols(w, v.Explorer != nil)
 	gw := GutterWidth(v.Buf.LineCount())
@@ -148,6 +154,13 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 
 	drawStatusline(g, rows, v, th)
 	drawCommandLine(g, rows+1, v, th)
+	if v.Leader != nil {
+		drawLeader(g, v.Leader, rows, th)
+	}
+	if v.Picker != nil {
+		g.dim(0.55)
+		drawPicker(g, v.Picker, th)
+	}
 	if v.Dialog != nil {
 		drawDialog(g, v.Dialog, th)
 	}

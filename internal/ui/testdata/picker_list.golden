@@ -1,0 +1,28 @@
+ fosforo                │  1 package keymap
+   cmd/                 │  2
+     fosforo/           │  3 type Node struct {
+       main.go          │  4     children map[rune]*Node
+   internal/            │  5     command  string
+     buffer/            │  6 }
+     editor/            │  7
+     keymap/            │ Buffers                                      3/3
+       trie.go          ││                                                │l) {
+       trie_test.go     ││ >                                              │
+     ui/                ││  internal/keymap/trie.go                   [+] │
+   docs/                ││▸ docs/README.md                                │
+     design/            ││  [Sin nombre]                                  │
+     README.md          │ ↑↓ navegar   ⏎ cambiar   Esc cerrar
+   openspec/            │ 15     }
+   .gitignore           │ 16     return cur.command, cur.command != ""
+   CONTRIBUTING.md      │ 17 }
+   go.mod               │  ~
+   LICENSE              │  ~
+   Makefile             │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+ NORMAL  internal/keymap/trie.go                                              utf-8  LF  12:35  70%
+

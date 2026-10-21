@@ -31,6 +31,13 @@ const scrollMargin = 3
 // DefaultTimeout es lo que se espera la siguiente tecla de una secuencia incompleta (p. ej. «g» antes de «gg»).
 const DefaultTimeout = 1000 * time.Millisecond
 
+// LeaderDelay es lo que se espera tras pulsar la tecla líder antes de mostrar el panel de ayuda. Es distinto del
+// DefaultTimeout (1000 ms) con que caduca una secuencia incompleta: el panel, una vez visible, espera sin caducar.
+const LeaderDelay = 300 * time.Millisecond
+
+// LeaderMsg lo envía el temporizador de 300 ms de la tecla líder; Seq se comprueba igual que en TimeoutMsg.
+type LeaderMsg struct{ Seq int }
+
 // TimeoutMsg lo envía el temporizador de una secuencia incompleta. Seq identifica la secuencia: si ya pasó otra
 // tecla, el mensaje es viejo y se ignora.
 type TimeoutMsg struct{ Seq int }
@@ -56,18 +63,24 @@ type Model struct {
 	focus        Focus
 	icons        ui.IconMode
 
-	mode    Mode
-	anchor  buffer.Pos // origen de la selección en Visual
-	prompt  *prompt
-	pending []string // teclas de una secuencia incompleta
-	count   int      // conteo escrito (0 = ninguno)
-	op      string   // operador pendiente: "d", "c" o "y"
-	opCount int      // conteo escrito antes del operador
-	seq     int      // se incrementa con cada tecla; invalida temporizadores viejos
-	timeout time.Duration
-	hlDelay time.Duration
-	hlJobs  *atomic.Int64
-	light   bool // tema claro
+	mode        Mode
+	anchor      buffer.Pos // origen de la selección en Visual
+	prompt      *prompt
+	pending     []string // teclas de una secuencia incompleta
+	count       int      // conteo escrito (0 = ninguno)
+	op          string   // operador pendiente: "d", "c" o "y"
+	opCount     int      // conteo escrito antes del operador
+	seq         int      // se incrementa con cada tecla; invalida temporizadores viejos
+	timeout     time.Duration
+	leaderDelay time.Duration
+	hlDelay     time.Duration
+	hlJobs      *atomic.Int64
+	light       bool // tema claro
+
+	picker      *picker   // ventana de selección abierta (archivos, buffers, paleta...)
+	recent      []string  // archivos abiertos en esta sesión, el más reciente primero
+	pendingCmds []tea.Cmd // comandos que dejaron los comandos del registro ejecutados desde la paleta
+	leaderShown bool      // el panel de ayuda de la tecla líder está a la vista
 
 	reg           register
 	clipboard     Clipboard
@@ -83,6 +96,9 @@ type Option func(*Model)
 // WithTimeout cambia la espera de las secuencias incompletas.
 func WithTimeout(d time.Duration) Option { return func(m *Model) { m.timeout = d } }
 
+// WithLeaderDelay cambia lo que se espera para mostrar el panel de ayuda de la tecla líder (por defecto LeaderDelay).
+func WithLeaderDelay(d time.Duration) Option { return func(m *Model) { m.leaderDelay = d } }
+
 // WithClipboard cambia cómo se copia al portapapeles (por defecto OSC 52 y la utilidad del sistema).
 func WithClipboard(c Clipboard) Option { return func(m *Model) { m.clipboard = c } }
 
@@ -90,7 +106,7 @@ func WithClipboard(c Clipboard) Option { return func(m *Model) { m.clipboard = c
 func New(b *buffer.Buffer, label string, opts ...Option) Model {
 	m := Model{
 		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label,
-		timeout: DefaultTimeout, clipboard: defaultClipboard, lastForward: true,
+		timeout: DefaultTimeout, leaderDelay: LeaderDelay, clipboard: defaultClipboard, lastForward: true,
 		hlDelay: DefaultHighlightDelay, hlJobs: new(atomic.Int64),
 	}
 	m.bufs = []*bufState{newBufState(b, label)}
@@ -161,16 +177,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.PasteMsg:
 		switch {
 		case m.dialog != nil:
+		case m.picker != nil:
+			cmd = m.pickerInsert(msg.Content)
 		case m.mode == ModeCommand:
 			m.prompt.insert(msg.Content)
+			m.prompt.refreshSuggestions()
 		case m.mode == ModeInsert:
 			m.msg, m.msgErr = "", false
 			m.withUndo(func() { m.insertText(msg.Content) })
 		}
 	case TimeoutMsg:
-		if msg.Seq == m.seq && len(m.pending) > 0 {
-			m.resetPending() // la secuencia incompleta se descarta sin cambiar el texto
+		if msg.Seq == m.seq && len(m.pending) > 0 && !m.leaderShown {
+			m.resetPending() // la secuencia incompleta se descarta sin cambiar el texto (el panel del líder espera sin caducar)
 		}
+	case LeaderMsg:
+		if msg.Seq == m.seq && len(m.pending) > 0 && m.pending[0] == "space" && m.picker == nil {
+			m.leaderShown = true
+		}
+	case filesMsg:
+		cmd = m.filesArrived(msg)
+	case scoredMsg:
+		cmd = m.pickerScored(msg)
 	case tea.FocusMsg: // la terminal recupera el foco: se revisan el disco y el explorador
 		m.checkExternal()
 		m.refreshExplorer()
@@ -182,6 +209,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.clampCursor()
 	m.scroll()
 	m.scrollExplorer()
+	if len(m.pendingCmds) > 0 {
+		cmd = tea.Batch(append([]tea.Cmd{cmd}, m.pendingCmds...)...)
+		m.pendingCmds = nil
+	}
 	// Cada mensaje puede haber cambiado el texto: se programa (con debounce) retokenizar lo que haga falta.
 	// Si acaba de terminar una tokenización y el texto ya cambió, se vuelve a programar.
 	if next := m.scheduleHighlight(); next != nil {
@@ -197,6 +228,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) handleKey(k tea.KeyPressMsg) tea.Cmd {
 	if m.dialog != nil {
 		return m.dialogKey(k)
+	}
+	if m.picker != nil {
+		return m.pickerKey(k)
 	}
 	m.seq++
 	m.msg, m.msgErr = "", false
@@ -246,10 +280,10 @@ func (m *Model) modalKey(k tea.KeyPressMsg) tea.Cmd {
 	switch res.Status {
 	case keymap.Pending:
 		m.pending = append(m.pending[:len(m.pending):len(m.pending)], key)
-		return m.armTimeout()
+		return tea.Batch(m.armTimeout(), m.armLeader())
 	case keymap.Complete:
 		args := command.Args{Count: m.count, HasCount: m.count > 0}
-		m.pending, m.count = nil, 0
+		m.pending, m.count, m.leaderShown = nil, 0, false
 		return m.dispatchResolved(res.Command, args)
 	}
 	if m.mode == ModeInsert && k.Text != "" && k.Mod&(tea.ModCtrl|tea.ModAlt) == 0 {
@@ -266,8 +300,17 @@ func (m *Model) armTimeout() tea.Cmd {
 	return tea.Tick(m.timeout, func(time.Time) tea.Msg { return TimeoutMsg{Seq: seq} })
 }
 
+// armLeader programa el panel de ayuda de la tecla líder: aparece si pasan 300 ms sin otra tecla.
+func (m *Model) armLeader() tea.Cmd {
+	if len(m.pending) == 0 || m.pending[0] != "space" || m.leaderShown {
+		return nil
+	}
+	seq := m.seq
+	return tea.Tick(m.leaderDelay, func(time.Time) tea.Msg { return LeaderMsg{Seq: seq} })
+}
+
 func (m *Model) resetPending() {
-	m.pending, m.count, m.op, m.opCount = nil, 0, "", 0
+	m.pending, m.count, m.op, m.opCount, m.leaderShown = nil, 0, "", 0, false
 }
 
 // dispatchResolved ejecuta el comando al que llevó una secuencia; con un operador pendiente solo valen los movimientos.
@@ -475,6 +518,13 @@ func (m Model) view() ui.EditorView {
 	}
 	if m.prompt != nil {
 		v.Prompt = &ui.Prompt{Prefix: m.prompt.prefix, Text: m.prompt.String(), Cursor: m.prompt.cur}
+		v.Picker = m.prompt.suggestionView(m.height, m.width)
+	}
+	if m.picker != nil {
+		v.Picker = m.pickerView()
+	}
+	if m.leaderShown && len(m.pending) > 0 {
+		v.Leader, v.Pending = m.leaderView()
 	}
 	if m.dialog != nil {
 		v.Dialog = m.dialog.view()

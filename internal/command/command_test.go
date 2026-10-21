@@ -105,3 +105,14 @@ func TestMustRegisterPanics(t *testing.T) {
 	}()
 	command.NewRegistry[*state]().MustRegister(cmd("mal"))
 }
+
+func TestLabelFallsBackToDescription(t *testing.T) {
+	c := cmd("file.save")
+	if c.Label() != "descripción de file.save" {
+		t.Errorf("Label = %q", c.Label())
+	}
+	c.Short = "guardar"
+	if c.Label() != "guardar" {
+		t.Errorf("Label = %q", c.Label())
+	}
+}

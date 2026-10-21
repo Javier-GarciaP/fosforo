@@ -127,6 +127,7 @@ func (m *Model) openPath(path, label string) bool {
 	m.stash()
 	for i, bs := range m.bufs {
 		if absPath(bs.buf.Path()) == abs {
+			m.rememberFile(path)
 			m.activate(i)
 			return true
 		}
@@ -147,6 +148,7 @@ func (m *Model) openPath(path, label string) bool {
 	}
 	m.resetPending()
 	m.setMode(ModeNormal)
+	m.rememberFile(path)
 	m.msg, m.msgErr = fmt.Sprintf("%q %dL", label, b.LineCount()), false
 	if ro, why := b.ReadOnly(); ro {
 		m.msg, m.msgErr = "Solo lectura: "+why, true

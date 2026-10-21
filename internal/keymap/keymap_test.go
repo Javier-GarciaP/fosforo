@@ -129,3 +129,22 @@ func TestWalkListsEverythingInStableOrder(t *testing.T) {
 		}
 	}
 }
+
+func TestChildren(t *testing.T) {
+	k := newKM(t)
+	got := k.Children("normal", []string{"space"})
+	want := []keymap.Child{{Key: "f", Group: true}, {Key: "space", Command: "palette.open"}}
+	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
+		t.Errorf("hijos de space = %+v", got)
+	}
+	ff := k.Children("normal", []string{"space", "f"})
+	if len(ff) != 2 || ff[0] != (keymap.Child{Key: "b", Command: "picker.buffers"}) || ff[1] != (keymap.Child{Key: "f", Command: "picker.files"}) {
+		t.Errorf("hijos de space f = %+v", ff)
+	}
+	if k.Children("normal", []string{"nada"}) != nil || k.Children("otro", nil) != nil {
+		t.Error("prefijos que no existen devuelven nil")
+	}
+	if root := k.Children("normal", nil); len(root) < 5 {
+		t.Errorf("hijos de la raíz = %+v", root)
+	}
+}
