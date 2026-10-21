@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -46,7 +47,6 @@ type Model struct {
 	msg           string
 	msgErr        bool
 	dialog        *dialog
-	theme         ui.Theme
 	quit          bool
 	batchSave     bool // se guardan varios buffers seguidos: un conflicto con el disco aborta en lugar de preguntar
 
@@ -65,6 +65,9 @@ type Model struct {
 	opCount int      // conteo escrito antes del operador
 	seq     int      // se incrementa con cada tecla; invalida temporizadores viejos
 	timeout time.Duration
+	hlDelay time.Duration
+	hlJobs  *atomic.Int64
+	light   bool // tema claro
 
 	reg           register
 	clipboard     Clipboard
@@ -86,8 +89,9 @@ func WithClipboard(c Clipboard) Option { return func(m *Model) { m.clipboard = c
 // New crea un modelo sobre un buffer ya cargado; label es el nombre que se muestra. Empieza en modo Normal.
 func New(b *buffer.Buffer, label string, opts ...Option) Model {
 	m := Model{
-		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, theme: ui.Dark(),
+		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label,
 		timeout: DefaultTimeout, clipboard: defaultClipboard, lastForward: true,
+		hlDelay: DefaultHighlightDelay, hlJobs: new(atomic.Int64),
 	}
 	m.bufs = []*bufState{newBufState(b, label)}
 	for _, o := range opts {
@@ -170,10 +174,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.FocusMsg: // la terminal recupera el foco: se revisan el disco y el explorador
 		m.checkExternal()
 		m.refreshExplorer()
+	case hlDebounceMsg:
+		cmd = m.highlightDebounce(msg)
+	case hlDoneMsg:
+		m.highlightDone(msg)
 	}
 	m.clampCursor()
 	m.scroll()
 	m.scrollExplorer()
+	// Cada mensaje puede haber cambiado el texto: se programa (con debounce) retokenizar lo que haga falta.
+	// Si acaba de terminar una tokenización y el texto ya cambió, se vuelve a programar.
+	if next := m.scheduleHighlight(); next != nil {
+		cmd = tea.Batch(cmd, next)
+	}
 	if m.quit {
 		cmd = tea.Sequence(cmd, tea.Quit)
 	}
@@ -409,6 +422,23 @@ func (m *Model) scroll() {
 	m.left = max(0, m.left)
 }
 
+func (m Model) currentTheme() ui.Theme {
+	if m.light {
+		return ui.Light()
+	}
+	return ui.Dark()
+}
+
+// toggleTheme alterna entre el tema oscuro y el claro. Los tramos de sintaxis no cambian: solo cambian sus colores.
+func (m *Model) toggleTheme() {
+	m.light = !m.light
+	if m.light {
+		m.msg = "Tema claro"
+	} else {
+		m.msg = "Tema oscuro"
+	}
+}
+
 // TooSmall indica si la terminal es menor que el mínimo. Mientras no se conoce el tamaño (0x0) no se avisa.
 func (m Model) TooSmall() bool {
 	if m.width == 0 && m.height == 0 {
@@ -426,6 +456,9 @@ func (m Model) view() ui.EditorView {
 		Buf: m.buf, Cursor: m.cur.Pos, Top: m.top, Left: m.left,
 		Mode: mode, PathLabel: m.label, Message: m.msg, IsError: m.msgErr, Pending: m.Pending(),
 		Explorer: m.explorerView(), BufIndex: m.active + 1, BufCount: len(m.bufs),
+	}
+	if hl := m.bufs[m.active].hl; hl != nil {
+		v.Highlight = hl.lines
 	}
 	if m.mode.isVisual() {
 		r := m.visualRange()
@@ -459,7 +492,7 @@ func (m Model) View() tea.View {
 		v = tea.NewView(fmt.Sprintf("Terminal demasiado pequeña (%dx%d).\nMínimo: %dx%d.", m.width, m.height, MinWidth, MinHeight))
 	default:
 		ev := m.view()
-		v = tea.NewView(ui.RenderEditor(ev, m.width, m.height, m.theme))
+		v = tea.NewView(ui.RenderEditor(ev, m.width, m.height, m.currentTheme()))
 		if x, y, ok := ui.CursorCell(ev, m.width, m.height); ok {
 			c := tea.NewCursor(x, y)
 			c.Shape = tea.CursorBlock

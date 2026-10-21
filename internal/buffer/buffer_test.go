@@ -350,3 +350,43 @@ func TestRange(t *testing.T) {
 		}
 	}
 }
+
+func TestRevAndOnChange(t *testing.T) {
+	b := buffer.FromString("", "uno\ndos\n")
+	if b.Rev() != 0 {
+		t.Fatal("el texto recién cargado está en la revisión 0")
+	}
+	var seen []buffer.Edit
+	b.OnChange(func(e buffer.Edit) { seen = append(seen, e) })
+	b.Insert(buffer.Pos{0, 3}, "!\r\nmás") // CRLF se normaliza
+	if b.Rev() != 1 || len(seen) != 1 || seen[0].Inserted != "!\nmás" || seen[0].Start != (buffer.Pos{0, 3}) {
+		t.Fatalf("tras insertar: rev=%d seen=%+v", b.Rev(), seen)
+	}
+	b.Delete(buffer.Pos{0, 0}, buffer.Pos{0, 1})
+	if b.Rev() != 2 || seen[1].Deleted != "u" {
+		t.Errorf("tras borrar: %d %+v", b.Rev(), seen)
+	}
+	b.Undo()
+	b.Undo()
+	if b.Rev() != 4 || len(seen) != 4 {
+		t.Errorf("deshacer también cuenta: rev=%d, avisos=%d", b.Rev(), len(seen))
+	}
+	if seen[2].Inserted != "u" || seen[3].Deleted != "!\nmás" {
+		t.Errorf("deshacer avisa con la edición inversa: %+v", seen[2:])
+	}
+	b.Redo()
+	if b.Rev() != 5 {
+		t.Error("rehacer cuenta")
+	}
+	// ediciones fallidas y de solo lectura no cambian la revisión
+	before := b.Rev()
+	b.Apply(buffer.Edit{Start: buffer.Pos{9, 9}})
+	if b.Rev() != before || len(seen) != 5 {
+		t.Error("una edición fallida no avisa")
+	}
+	b.OnChange(nil)
+	b.Insert(buffer.Pos{}, "x")
+	if len(seen) != 5 {
+		t.Error("OnChange(nil) quita el aviso")
+	}
+}

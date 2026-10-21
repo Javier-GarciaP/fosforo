@@ -21,6 +21,8 @@ type bufState struct {
 	mtime     time.Time
 	size      int64
 	onDisk    bool
+	id        int64    // identificador estable (los resultados asíncronos del resaltado lo usan para encontrar su buffer)
+	hl        *hlState // resaltado de sintaxis
 }
 
 // snapshot guarda la fecha y el tamaño actuales del archivo en disco.
@@ -47,8 +49,9 @@ func (bs *bufState) changedOnDisk() bool {
 }
 
 func newBufState(b *buffer.Buffer, label string) *bufState {
-	bs := &bufState{buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label}
+	bs := &bufState{buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, id: nextBufID.Add(1)}
 	bs.snapshot()
+	bs.initHighlight()
 	return bs
 }
 
@@ -191,6 +194,7 @@ func (m *Model) reloadActive(notice string) {
 	m.buf = b
 	m.bufs[m.active].buf = b
 	m.bufs[m.active].snapshot()
+	m.bufs[m.active].initHighlight()
 	m.cur.Set(m.buf, m.cur.Pos)
 	m.clampCursor()
 	if notice != "" {

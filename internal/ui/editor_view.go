@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Javier-GarciaP/fosforo/internal/buffer"
+	"github.com/Javier-GarciaP/fosforo/internal/syntax"
 )
 
 // Dialog es un cuadro modal centrado (p. ej. «Cambios sin guardar»).
@@ -72,9 +73,10 @@ type EditorView struct {
 	PathLabel string // nombre mostrado; si está vacío se muestra [Sin nombre]
 	Message   string // mensaje de la línea de comandos
 	IsError   bool
-	Pending   string     // teclas pendientes de completar (p. ej. «3d»)
-	Info      string     // texto de la statusline en lugar de «utf-8  LF» (p. ej. «3 líneas» en Visual)
-	Selection *Selection // selección de Visual, o nil
+	Pending   string          // teclas pendientes de completar (p. ej. «3d»)
+	Info      string          // texto de la statusline en lugar de «utf-8  LF» (p. ej. «3 líneas» en Visual)
+	Selection *Selection      // selección de Visual, o nil
+	Highlight [][]syntax.Span // tramos de color de cada línea del buffer (puede ser más corto o nil: texto plano)
 	Explorer  *ExplorerView
 	BufIndex  int // posición del buffer activo (1..BufCount); solo se muestra con más de uno
 	BufCount  int
@@ -132,7 +134,11 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 		num := strconv.Itoa(i + 1)
 		g.put(px+gw-1-len(num), r, num, numStyle)
 		from, to := v.Selection.cols(i, v.Buf.LineLen(i))
-		drawLine(g, px+gw, r, v.Buf.Line(i), v.Left, tw, rowStyle, th.Visual, from, to)
+		var spans []syntax.Span
+		if i < len(v.Highlight) {
+			spans = v.Highlight[i]
+		}
+		drawLine(g, px+gw, r, v.Buf.Line(i), v.Left, tw, rowStyle, th, spans, from, to)
 		if to > v.Buf.LineLen(i) { // la selección incluye el salto de línea: se marca una celda tras el texto
 			if x := buffer.VisualCol(v.Buf.Line(i), v.Buf.LineLen(i)) - v.Left; x >= 0 && x < tw {
 				g.put(px+gw+x, r, " ", style{fg: th.FG, bg: th.Visual})
@@ -150,8 +156,9 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 
 // drawLine dibuja la parte de line visible entre las columnas visuales left y left+width.
 // Los grafemas de selFrom a selTo (sin incluir) se pintan con el fondo selBG.
-func drawLine(g *grid, x0, y int, line string, left, width int, st style, selBG string, selFrom, selTo int) {
-	vc := 0
+// Los tramos de sintaxis (spans, por bytes de la línea) dan el color del texto; el fondo (línea actual o selección) no se toca.
+func drawLine(g *grid, x0, y int, line string, left, width int, st style, th Theme, spans []syntax.Span, selFrom, selTo int) {
+	vc, bo, si := 0, 0, 0
 	for idx, c := range buffer.Clusters(line) {
 		s, cw := displayCluster(c, vc)
 		if vc >= left+width {
@@ -159,8 +166,15 @@ func drawLine(g *grid, x0, y int, line string, left, width int, st style, selBG 
 		}
 		cst := st
 		if idx >= selFrom && idx < selTo {
-			cst.bg = selBG
+			cst.bg = th.Visual
 		}
+		for si < len(spans) && spans[si].End <= bo {
+			si++
+		}
+		if si < len(spans) && spans[si].Start <= bo {
+			cst.fg = th.syntaxColor(spans[si].Kind)
+		}
+		bo += len(c)
 		if buffer.IsControl(c) {
 			cst.fg = ""
 			cst.bold = false

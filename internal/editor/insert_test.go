@@ -44,6 +44,7 @@ type ed struct {
 	t    *testing.T
 	m    editor.Model
 	quit bool
+	cmds []tea.Cmd // comandos devueltos por Update que aún no se han ejecutado (ver settle)
 }
 
 // newEd crea un editor de 80x24 en modo Normal sobre content.
@@ -62,9 +63,12 @@ func newIns(t *testing.T, content string) *ed {
 
 func (e *ed) send(msgs ...tea.Msg) *ed {
 	for _, msg := range msgs {
-		nm, _ := e.m.Update(msg)
+		nm, cmd := e.m.Update(msg)
 		e.m = nm.(editor.Model)
 		e.quit = e.m.Quitting()
+		if cmd != nil {
+			e.cmds = append(e.cmds, cmd)
+		}
 	}
 	return e
 }

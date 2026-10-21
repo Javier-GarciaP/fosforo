@@ -61,10 +61,14 @@ Implementado en la rama `dev` (aún sin publicar):
 | Iconos | Un icono por tipo (nombre exacto → extensión → por defecto) y carpeta cerrada/abierta, con los colores de la paleta; `--icons=none` los quita (carpetas con `/`, abiertas en azul y cerradas atenuadas) |
 | Buffers | Varios archivos abiertos (`:e ruta`, el explorador); si ya está abierto se reutiliza con su cursor y scroll; `Space b n/p/d` o `:bn :bp :bd`; `n/m` en la statusline; cerrar o salir pregunta por cada buffer modificado |
 | Cambios externos | Se detectan al activar un buffer, al volver el foco a la terminal y al guardar: sin modificar se recarga con aviso; modificado pide confirmación antes de sobrescribir |
+| Sintaxis | Colores por lenguaje según el nombre o la extensión (Chroma): palabras clave, tipos, funciones, cadenas, números y comentarios con la paleta del tema; construcciones de varias líneas correctas tras editar |
+| Resaltado asíncrono | Escribir nunca espera: los colores anteriores se desplazan con cada edición y se actualizan 50 ms después de la última; los textos de hasta 100 KiB se colorean al abrirlos |
+| Límites | Archivos de más de 2 MiB y líneas de más de 2000 caracteres se muestran sin color |
+| Temas | `Space t` alterna oscuro/claro y recolorea al instante sin volver a analizar el código |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: resaltado de sintaxis, buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Todavía **no** hay: buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -155,10 +159,16 @@ En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan
 | `Space s g` / `Space s w` | Buscar en el proyecto / la palabra bajo el cursor |
 | `Space m p` / `Space m s` | Markdown: alternar vista previa / dividir |
 | `Space w` | Guardar |
-| `Space t` | Alternar tema claro/oscuro |
+| `Space t` | Alternar tema claro/oscuro (**ya funciona**) |
 | `Space b n` `Space b p` `Space b d` | Buffer siguiente, anterior, cerrar |
 
 Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`).
+
+## Lenguajes con resaltado
+
+Se elige por nombre o extensión (sin distinguir mayúsculas) y funciona con los más de 200 lenguajes de Chroma. Verificados con pruebas:
+**Go** (también `go.mod`/`go.work`), **Markdown**, **JSON**, **YAML**, **TOML**, **JavaScript**, **TypeScript**, **Python**, **Rust**, **shell/Bash**,
+**Makefile**, **Dockerfile**, **CSS** y **HTML**. Los tipos desconocidos (`.txt`, `.xyz`) se ven como texto plano sin errores.
 
 ## Markdown como en GitHub
 
