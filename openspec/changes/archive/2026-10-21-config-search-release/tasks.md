@@ -19,5 +19,5 @@
 
 - [x] 3.1 Inyectar versión y commit con `-ldflags` y mostrarlos en `--version`; verificar con una prueba del binario compilado
 - [x] 3.2 Configurar GoReleaser (Linux y macOS, amd64 y arm64, checksums); verificar con `goreleaser release --snapshot --clean`
-- [ ] 3.3 Crear `.github/workflows/release.yml` con la comprobación de que la etiqueta pertenece a `main`; verificar con una etiqueta de prueba fuera de `main` (debe fallar)
+- [x] 3.3 Crear `.github/workflows/release.yml` con la comprobación de que la etiqueta pertenece a `main`; verificar con una etiqueta de prueba fuera de `main` (debe fallar)
 - [x] 3.4 Documentar instalación, configuración, búsqueda y la dependencia opcional de `rg` en `docs/README.md`; verificar siguiéndolo en una máquina limpia
