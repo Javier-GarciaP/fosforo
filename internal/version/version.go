@@ -2,6 +2,7 @@
 package version
 
 import (
+	"regexp"
 	"runtime/debug"
 	"strings"
 )
@@ -35,10 +36,22 @@ func String() string {
 // moduleVersion devuelve la versión del módulo si el binario se instaló con «go install» desde una etiqueta (sin la «v»).
 func moduleVersion() string {
 	info, ok := debug.ReadBuildInfo()
-	if !ok || info.Main.Version == "" || info.Main.Version == "(devel)" || strings.Contains(info.Main.Version, "+dirty") {
+	if !ok {
 		return ""
 	}
-	return strings.TrimPrefix(info.Main.Version, "v")
+	return releaseVersion(info.Main.Version)
+}
+
+// pseudoVersion reconoce las versiones de módulo que Go inventa para un commit sin etiqueta (v0.0.0-AAAAMMDDhhmmss-abcdef123456).
+var pseudoVersion = regexp.MustCompile(`[-.]\d{14}-[0-9a-f]{12}`)
+
+// releaseVersion devuelve v sin la «v» si es una versión etiquetada; para compilaciones locales, pseudo-versiones o
+// árboles modificados devuelve "".
+func releaseVersion(v string) string {
+	if v == "" || v == "(devel)" || strings.Contains(v, "+dirty") || pseudoVersion.MatchString(v) {
+		return ""
+	}
+	return strings.TrimPrefix(v, "v")
 }
 
 func vcsRevision() string {
