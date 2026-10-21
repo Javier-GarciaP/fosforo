@@ -10,7 +10,7 @@ Each release SHALL publish static binaries for Linux and macOS on amd64 and arm6
 
 #### Scenario: Versión impresa
 - **WHEN** se ejecuta `fosforo --version` en un binario de release
-- **THEN** imprime algo como `fosforo 1.0.0 (abc1234)`
+- **THEN** imprime algo como `fosforo 0.8.0 (abc1234)`
 
 ### Requirement: Installation from source
 The project SHALL be installable with `go install` from the repository.
