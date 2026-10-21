@@ -13,15 +13,14 @@
 </p>
 
 <p align="center">
-  <img alt="versión 0.0.1" src="https://img.shields.io/badge/versi%C3%B3n-0.0.1-orange">
-  <img alt="estado: beta, en diseño" src="https://img.shields.io/badge/estado-beta%20en%20dise%C3%B1o-yellow">
+  <img alt="versión 0.8.0" src="https://img.shields.io/badge/versi%C3%B3n-0.8.0-orange">
+  <img alt="estado: beta" src="https://img.shields.io/badge/estado-beta-yellow">
   <img alt="hecho con Go" src="https://img.shields.io/badge/hecho%20con-Go-00ADD8">
   <img alt="licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
 > [!NOTE]
-> **fosforo está empezando.** Todavía no se puede instalar: ahora mismo hay diseño, planificación y documentación.
-> Aquí puedes ver qué se está construyendo y seguir el avance versión a versión.
+> **fosforo está en beta (`0.8.0`).** Ya puedes instalarlo y usarlo a diario; entre versiones `0.x` pueden cambiar cosas. Mira [cómo instalarlo](#-instalación).
 
 <p align="center">
   <img src="docs/design/exports/01-layout-principal-normal.png" width="820" alt="fosforo: explorador de archivos, editor con colores y barra de estado">
@@ -85,21 +84,23 @@ Con `Space` pulsado, fosforo te muestra las opciones. Estas son las más usadas:
 
 ## 🗺️ Versiones y hoja de ruta
 
-fosforo se publica en **versiones pequeñas y frecuentes**. Mientras el proyecto está en beta, los números empiezan por `0`.
+fosforo se publica por versiones. Mientras el proyecto está en beta, los números empiezan por `0`.
 
-| Versión | Estado | Qué traerá |
+| Versión | Estado | Qué trae |
 | :-: | :-: | --- |
-| **0.0.1** | ✅ Hecha | **Fundación:** diseño, planificación, marca y documentación. |
-| 0.1.0 | 🛠️ Siguiente | **Editor básico:** abrir, editar y guardar archivos. |
-| 0.2.0 | ⏳ Prevista | **Edición con teclado** al estilo Neovim. |
-| 0.3.0 | ⏳ Prevista | **Explorador de archivos** y varios archivos abiertos a la vez. |
-| 0.4.0 | ⏳ Prevista | **Colores** en el código según el lenguaje. |
-| 0.5.0 | ⏳ Prevista | **Buscador y paleta de comandos**, y el menú de ayuda de `Space`. |
-| 0.6.0 | ⏳ Prevista | **Markdown como en GitHub**, con vista previa. |
-| 0.7.0 | ⏳ Prevista | **Ratón:** clic, arrastrar y rueda. |
-| 0.8.0 | ⏳ Prevista | **Configuración, búsqueda en el proyecto** y programa descargable. |
+| **0.8.0** | ✅ Hecha | **La primera versión con programa**, que reúne todo lo de las filas siguientes y se instala con una línea de comandos. |
+| ↳ 0.1.0 | ✅ En la 0.8.0 | **Editor básico:** abrir, editar y guardar archivos. |
+| ↳ 0.2.0 | ✅ En la 0.8.0 | **Edición con teclado** al estilo Neovim. |
+| ↳ 0.3.0 | ✅ En la 0.8.0 | **Explorador de archivos** y varios archivos abiertos a la vez. |
+| ↳ 0.4.0 | ✅ En la 0.8.0 | **Colores** en el código según el lenguaje. |
+| ↳ 0.5.0 | ✅ En la 0.8.0 | **Buscador y paleta de comandos**, y el menú de ayuda de `Space`. |
+| ↳ 0.6.0 | ✅ En la 0.8.0 | **Markdown como en GitHub**, con vista previa. |
+| ↳ 0.7.0 | ✅ En la 0.8.0 | **Ratón:** clic, arrastrar y rueda. |
+| ↳ 0.8.0 | ✅ En la 0.8.0 | **Configuración, búsqueda en el proyecto** y programa descargable. |
 | 0.9.x | ⏳ Prevista | **Pulido** y corrección de errores. |
 | **1.0.0** | 🎯 Meta | **Primera versión estable.** |
+
+Se construyó en nueve pasos pequeños (cada uno con su especificación y su pull request) y se publica en una sola versión: la `0.8.0`.
 
 <details>
 <summary><b>¿Cómo se leen los números de versión?</b></summary>
@@ -119,9 +120,29 @@ Cada versión se publica como *pre-release* mientras sea `0.x`, y todo lo que ca
 
 ## 📦 Instalación
 
-**Próximamente.** Cuando llegue la versión `0.1.0` podrás descargar un único programa y ejecutarlo, sin instalar nada más. Se abrirá escribiendo **`fos`** en la terminal (`fos archivo.md`, `fos carpeta/`).
+Un único programa, sin dependencias, para **Linux y macOS** (Intel y ARM). Elige una forma:
 
-El explorador no muestra iconos por defecto. Si tienes una fuente [Nerd Font](https://www.nerdfonts.com) en tu terminal, actívalos con `fos --icons=nerd` o `icons = "nerd"` en la configuración.
+```bash
+# 1) La más simple: un comando (descarga el binario, verifica su suma SHA256 y lo instala en ~/.local/bin)
+curl -fsSL https://raw.githubusercontent.com/Javier-GarciaP/fosforo/main/scripts/install.sh | sh
+
+# 2) Con Go 1.27 o superior
+go install github.com/Javier-GarciaP/fosforo/cmd/fos@latest
+```
+
+Después, en cualquier terminal:
+
+```bash
+fos --version      # comprueba la instalación
+fos archivo.md     # abre un archivo (los .md se ven con vista previa)
+fos carpeta/       # abre el explorador sobre una carpeta
+fos                # buffer vacío; dentro: Space Space abre la paleta de comandos, :q sale
+```
+
+- **Si `fos` no se encuentra**, añade `~/.local/bin` a tu `PATH` (el instalador te lo avisa) o instala en otra carpeta: `curl … | INSTALL_DIR=/usr/local/bin sh` (puede requerir `sudo`).
+- **Otra versión:** `curl … | FOS_VERSION=0.8.0 sh`. **Actualizar:** repite el mismo comando. **Desinstalar:** `rm ~/.local/bin/fos` (la configuración, si existe, está en `~/.config/fos/`).
+- **A mano:** descarga `fos_<versión>_<sistema>_<arquitectura>.tar.gz` de la [página de releases](https://github.com/Javier-GarciaP/fosforo/releases), comprueba `checksums.txt` y copia `fos` a una carpeta de tu `PATH`.
+- **Opcionales:** [`rg`](https://github.com/BurntSushi/ripgrep) para una búsqueda en el proyecto más rápida, y una fuente [Nerd Font](https://www.nerdfonts.com) si quieres iconos en el explorador (`fos --icons=nerd` o `icons = "nerd"` en la [configuración](docs/README.md#configuración)); por defecto no se muestran.
 
 ## 📚 Más información
 

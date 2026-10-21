@@ -11,7 +11,7 @@
 >
 > Documentación técnica del proyecto. Para una presentación general, mira el [README](../README.md).
 >
-> **Estado del proyecto: beta en desarrollo (última versión publicada `0.0.1`).** Ya hay código: edición modal tipo Vim, Unicode correcto y guardado seguro. Ver «Qué funciona hoy».
+> **Estado del proyecto: beta (`0.8.0`, la primera versión con programa).** Edición modal tipo Vim, explorador, colores, búsqueda, Markdown, ratón y configuración. Ver «Instalación» y «Qué funciona hoy».
 
 ## Qué queremos lograr
 
@@ -39,7 +39,7 @@ sin salir del editor.
 
 ## Qué funciona hoy
 
-Implementado en la rama `dev` (aún sin publicar):
+Incluido en la `0.8.0`:
 
 | Función | Detalle |
 | --- | --- |
@@ -275,24 +275,32 @@ internal/search/    búsqueda en el proyecto
 Cada hito es un **cambio de OpenSpec** en [`openspec/changes/`](../openspec/changes/) con propuesta, specs, diseño y tareas
 (125 tareas en total). Se implementan en este orden; "depende de" indica qué debe estar archivado antes.
 
-| # | Versión | Cambio | Qué entrega | Depende de |
-| --- | :-: | --- | --- | --- |
-| 1 | 0.1.0 | `bootstrap-project` | Go, esqueleto, arranque/salida limpia, CI | — |
-| 2 | 0.1.0 | `core-text-editing` | Buffer, vista, abrir/guardar, escritura básica | 1 |
-| 3 | 0.2.0 | `modal-editing` | Comandos con nombre, modos, teclas, motions, operadores, `:` | 2 |
-| 4 | 0.3.0 | `file-explorer-buffers` | Explorador, varios buffers, cambios externos | 3 |
-| 5 | 0.4.0 | `syntax-highlighting` | Resaltado de sintaxis asíncrono | 2 |
-| 6 | 0.5.0 | `picker-and-palette` | Picker fuzzy, paleta, menú líder | 3, 4, 5 |
-| 7 | 0.6.0 | `markdown-preview` | Vista previa y dividido estilo GitHub | 2, 4, 5 |
-| 8 | 0.7.0 | `mouse-support` | Clic, arrastrar, rueda | 3, 4, 6 |
-| 9 | 0.8.0 | `config-search-release` | Configuración, búsqueda en proyecto, releases | todos |
+| # | Cambio | Qué entregó | Estado |
+| --- | --- | --- | :-: |
+| 1 | `bootstrap-project` | Go, esqueleto, arranque/salida limpia, CI | ✅ |
+| 2 | `core-text-editing` | Buffer, vista, abrir/guardar, escritura básica | ✅ |
+| 3 | `modal-editing` | Comandos con nombre, modos, teclas, motions, operadores, `:` | ✅ |
+| 4 | `file-explorer-buffers` | Explorador, varios buffers, cambios externos | ✅ |
+| 5 | `syntax-highlighting` | Resaltado de sintaxis asíncrono | ✅ |
+| 6 | `picker-and-palette` | Picker fuzzy, paleta, menú líder | ✅ |
+| 7 | `markdown-preview` | Vista previa y dividido estilo GitHub | ✅ |
+| 8 | `mouse-support` | Clic, arrastrar, rueda | ✅ |
+| 9 | `config-search-release` | Configuración, búsqueda en proyecto, releases | ✅ |
+| + | `icons-off-by-default` | Iconos desactivados por defecto (sin Nerd Font se veían cuadros) | ✅ |
 
-Los nueve cambios están implementados en `dev`; la `0.8.0` es la primera versión publicada con binarios.
+Los diez cambios se publican juntos en la **`0.8.0`** (los hitos `0.1.0`–`0.7.0` del plan original quedaron incluidos en ella), con binarios para Linux y macOS.
 
 Después de `0.8.0` vienen `0.9.x` (pulido y errores) y `1.0.0` (primera versión estable). La numeración sigue el
 [Versionado Semántico](https://semver.org/lang/es/): ver [`CONTRIBUTING.md`](../CONTRIBUTING.md) y el [`CHANGELOG`](../CHANGELOG.md).
 
-Si se quiere ver Markdown cuanto antes, el cambio 7 puede adelantarse justo después del 5 (no depende del modo Vim); las versiones se renumeran en ese caso.
+## Cómo se construyó
+
+Todo el programa se hizo siguiendo el flujo de [`CONTRIBUTING.md`](../CONTRIBUTING.md): una **especificación (OpenSpec) por cambio**, una rama `feat/<cambio>`
+desde `dev`, un pull request a `dev` con CI en verde (`vet · test · build`), el cambio archivado en [`openspec/changes/archive/`](../openspec/changes/archive/)
+y, al final, un único PR `dev` → `main` con la etiqueta `v0.8.0`. Quedan 23 especificaciones vigentes en [`openspec/specs/`](../openspec/specs/).
+Decisiones que conviene conocer: Go + Bubble Tea con una cuadrícula de celdas propia (los colores y el ratón comparten una sola geometría), un registro único de
+comandos (teclas, `:`, paleta y ratón ejecutan lo mismo), goldmark propio para Markdown en lugar de Glamour, Chroma asíncrono para la sintaxis, y pruebas con
+`teatest` y con un pseudo-terminal real. El detalle de cada cambio está en su PR y en su `design.md` archivado.
 
 ## Cómo trabajamos
 
