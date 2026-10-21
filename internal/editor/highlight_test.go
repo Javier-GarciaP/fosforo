@@ -436,8 +436,9 @@ func TestTeatestTypingDoesNotWaitForHighlight(t *testing.T) {
 	teatest.WaitFor(t, tm.Output(), func(b []byte) bool { return bytes.Contains(b, []byte("NORMAL")) }, teatest.WithDuration(5*time.Second))
 	tm.Type("ixyz") // la tokenización de ~270 KB tarda mucho más que esto
 	start := time.Now()
-	teatest.WaitFor(t, tm.Output(), func(b []byte) bool { return bytes.Contains(b, []byte("xyzfunc")) }, teatest.WithDuration(2*time.Second))
-	if d := time.Since(start); d > time.Second {
+	// el marcador [+] aparece en cuanto se pinta el primer cambio (el renderizador solo emite diferencias, no el texto entero)
+	teatest.WaitFor(t, tm.Output(), func(b []byte) bool { return bytes.Contains(b, []byte("[+]")) }, teatest.WithDuration(3*time.Second))
+	if d := time.Since(start); d > 2*time.Second {
 		t.Errorf("la pulsación tardó %v en verse", d)
 	}
 	tm.Send(keyEsc)
