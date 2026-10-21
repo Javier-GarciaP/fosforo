@@ -9,7 +9,9 @@
 
 > **fosforo**: la cerilla y el fósforo de los monitores CRT. Código que enciende ideas.
 >
-> **Estado del proyecto: fase de documentación y diseño. Todavía no hay código.**
+> Documentación técnica del proyecto. Para una presentación general, mira el [README](../README.md).
+>
+> **Estado del proyecto: beta `0.0.1`, fase de documentación y diseño. Todavía no hay código.**
 
 ## Qué queremos lograr
 
@@ -172,19 +174,22 @@ internal/search/    búsqueda en el proyecto
 Cada hito es un **cambio de OpenSpec** en [`openspec/changes/`](../openspec/changes/) con propuesta, specs, diseño y tareas
 (125 tareas en total). Se implementan en este orden; "depende de" indica qué debe estar archivado antes.
 
-| # | Cambio | Qué entrega | Depende de |
-| --- | --- | --- | --- |
-| 1 | `bootstrap-project` | Go, esqueleto, arranque/salida limpia, CI | — |
-| 2 | `core-text-editing` | Buffer, vista, abrir/guardar, escritura básica | 1 |
-| 3 | `modal-editing` | Comandos con nombre, modos, teclas, motions, operadores, `:` | 2 |
-| 4 | `file-explorer-buffers` | Explorador, varios buffers, cambios externos | 3 |
-| 5 | `syntax-highlighting` | Resaltado de sintaxis asíncrono | 2 |
-| 6 | `picker-and-palette` | Picker fuzzy, paleta, menú líder | 3, 4, 5 |
-| 7 | `markdown-preview` | Vista previa y dividido estilo GitHub | 2, 4, 5 |
-| 8 | `mouse-support` | Clic, arrastrar, rueda | 3, 4, 6 |
-| 9 | `config-search-release` | Configuración, búsqueda en proyecto, releases | todos |
+| # | Versión | Cambio | Qué entrega | Depende de |
+| --- | :-: | --- | --- | --- |
+| 1 | 0.1.0 | `bootstrap-project` | Go, esqueleto, arranque/salida limpia, CI | — |
+| 2 | 0.1.0 | `core-text-editing` | Buffer, vista, abrir/guardar, escritura básica | 1 |
+| 3 | 0.2.0 | `modal-editing` | Comandos con nombre, modos, teclas, motions, operadores, `:` | 2 |
+| 4 | 0.3.0 | `file-explorer-buffers` | Explorador, varios buffers, cambios externos | 3 |
+| 5 | 0.4.0 | `syntax-highlighting` | Resaltado de sintaxis asíncrono | 2 |
+| 6 | 0.5.0 | `picker-and-palette` | Picker fuzzy, paleta, menú líder | 3, 4, 5 |
+| 7 | 0.6.0 | `markdown-preview` | Vista previa y dividido estilo GitHub | 2, 4, 5 |
+| 8 | 0.7.0 | `mouse-support` | Clic, arrastrar, rueda | 3, 4, 6 |
+| 9 | 0.8.0 | `config-search-release` | Configuración, búsqueda en proyecto, releases | todos |
 
-Si se quiere ver Markdown cuanto antes, el cambio 7 puede adelantarse justo después del 5: no depende del modo Vim.
+Después de `0.8.0` vienen `0.9.x` (pulido y errores) y `1.0.0` (primera versión estable). La numeración sigue el
+[Versionado Semántico](https://semver.org/lang/es/): ver [`CONTRIBUTING.md`](../CONTRIBUTING.md) y el [`CHANGELOG`](../CHANGELOG.md).
+
+Si se quiere ver Markdown cuanto antes, el cambio 7 puede adelantarse justo después del 5 (no depende del modo Vim); las versiones se renumeran en ese caso.
 
 ## Cómo trabajamos
 
