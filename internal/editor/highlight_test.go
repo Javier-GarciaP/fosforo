@@ -398,6 +398,7 @@ func TestMarkdownAndJSONAreHighlighted(t *testing.T) {
 		t.Errorf("número JSON en melocotón: %q", sgr)
 	}
 	e = colored(t, "LEEME.MD", "# Título\n\ntexto\n")
+	e.typ("e") // los .md se abren en vista previa: «e» pasa al fuente, que es lo que se resalta
 	if !strings.Contains(sgrBefore(e.rows()[0], "Título"), darkBlue) && !strings.Contains(sgrBefore(e.rows()[0], "# Título"), darkBlue) {
 		t.Errorf("encabezado Markdown (extensión en mayúsculas): %q", e.rows()[0])
 	}

@@ -14,6 +14,9 @@ import (
 type style struct {
 	fg, bg string
 	bold   bool
+	italic bool
+	under  bool
+	strike bool
 }
 
 // cell es una celda de pantalla. Los caracteres anchos ocupan una celda con texto seguida de celdas de continuación.
@@ -143,6 +146,15 @@ func (s style) sgr() string {
 	sb.WriteString("\x1b[0")
 	if s.bold {
 		sb.WriteString(";1")
+	}
+	if s.italic {
+		sb.WriteString(";3")
+	}
+	if s.under {
+		sb.WriteString(";4")
+	}
+	if s.strike {
+		sb.WriteString(";9")
 	}
 	if r, g, b, ok := hexRGB(s.fg); ok {
 		fmt.Fprintf(&sb, ";38;2;%d;%d;%d", r, g, b)

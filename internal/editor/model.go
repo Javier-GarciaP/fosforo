@@ -75,6 +75,8 @@ type Model struct {
 	leaderDelay time.Duration
 	hlDelay     time.Duration
 	hlJobs      *atomic.Int64
+	mdDelay     time.Duration
+	mdJobs      *atomic.Int64
 	light       bool // tema claro
 
 	picker      *picker   // ventana de selección abierta (archivos, buffers, paleta...)
@@ -108,6 +110,7 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label,
 		timeout: DefaultTimeout, leaderDelay: LeaderDelay, clipboard: defaultClipboard, lastForward: true,
 		hlDelay: DefaultHighlightDelay, hlJobs: new(atomic.Int64),
+		mdDelay: DefaultMarkdownDelay, mdJobs: new(atomic.Int64),
 	}
 	m.bufs = []*bufState{newBufState(b, label)}
 	for _, o := range opts {
@@ -116,7 +119,15 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 	if ro, why := b.ReadOnly(); ro {
 		m.msg, m.msgErr = "Solo lectura: "+why, true
 	}
+	m.noticeMarkdown()
 	return m
+}
+
+// noticeMarkdown avisa si el documento Markdown abierto es demasiado grande para la vista previa.
+func (m *Model) noticeMarkdown() {
+	if md := m.mdState(); md != nil && md.tooBig {
+		m.msg, m.msgErr = "Vista previa desactivada: el documento supera los 2 MiB", true
+	}
 }
 
 // Open abre path en un modelo nuevo. Sin ruta, empieza con un buffer vacío sin nombre.
@@ -205,6 +216,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd = m.highlightDebounce(msg)
 	case hlDoneMsg:
 		m.highlightDone(msg)
+	case mdDebounceMsg:
+		cmd = m.markdownDebounce(msg)
+	case mdDoneMsg:
+		m.markdownDone(msg)
 	}
 	m.clampCursor()
 	m.scroll()
@@ -216,6 +231,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Cada mensaje puede haber cambiado el texto: se programa (con debounce) retokenizar lo que haga falta.
 	// Si acaba de terminar una tokenización y el texto ya cambió, se vuelve a programar.
 	if next := m.scheduleHighlight(); next != nil {
+		cmd = tea.Batch(cmd, next)
+	}
+	if next := m.scheduleMarkdown(); next != nil {
 		cmd = tea.Batch(cmd, next)
 	}
 	if m.quit {
@@ -264,6 +282,8 @@ func (m *Model) modalKey(k tea.KeyPressMsg) tea.Cmd {
 		mode = modeOperator
 	case m.focusInExplorer():
 		mode = modeExplorer
+	case m.mdFull():
+		mode = modePreview
 	}
 	if m.mode != ModeInsert && len(m.pending) == 0 && isCountKey(key, m.count) {
 		m.count = m.count*10 + int(key[0]-'0')
@@ -454,7 +474,7 @@ func (m *Model) scroll() {
 	}
 	m.top = max(0, min(m.top, lines-rows))
 
-	cols := ui.TextCols(m.editorCols(), lines)
+	cols := ui.TextCols(max(1, m.editorCols()), lines)
 	vc := m.cur.VisualCol(m.buf)
 	if vc < m.left {
 		m.left = vc - cols/2 // al volver atrás se centra el cursor, o se vuelve al inicio si la línea cabe
@@ -492,8 +512,11 @@ func (m Model) TooSmall() bool {
 
 func (m Model) view() ui.EditorView {
 	mode := m.mode.Label()
-	if m.focusInExplorer() && m.mode == ModeNormal {
+	switch {
+	case m.focusInExplorer() && m.mode == ModeNormal:
 		mode = "EXPLORER"
+	case m.mdFull() && m.mode == ModeNormal:
+		mode = "PREVIEW"
 	}
 	v := ui.EditorView{
 		Buf: m.buf, Cursor: m.cur.Pos, Top: m.top, Left: m.left,
@@ -502,6 +525,14 @@ func (m Model) view() ui.EditorView {
 	}
 	if hl := m.bufs[m.active].hl; hl != nil {
 		v.Highlight = hl.lines
+	}
+	if md := m.mdState(); md != nil && md.view != mdSource {
+		v.Markdown = &ui.MarkdownView{Doc: md.doc, Scroll: m.previewScroll(), Split: md.view == mdSplit}
+		if md.view == mdPreview {
+			v.PathHint, v.Right = "(e: editar   Space m s: dividir)", m.previewStatus()
+		} else {
+			v.PathHint = "| vista previa sincronizada"
+		}
 	}
 	if m.mode.isVisual() {
 		r := m.visualRange()

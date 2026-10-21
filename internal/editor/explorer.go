@@ -54,7 +54,8 @@ func (m *Model) focusInExplorer() bool { return m.focus == FocusExplorer && m.ex
 
 // editorCols es el ancho de la zona del editor (sin el panel del explorador).
 func (m *Model) editorCols() int {
-	return m.width - ui.PanelCols(m.width, m.showExplorer && m.explorer != nil)
+	md := m.mdState()
+	return ui.EditorWidth(m.width, m.showExplorer && m.explorer != nil, md != nil && md.view != mdSource, m.mdSplit())
 }
 
 func (m *Model) ensureTree() bool {
@@ -292,7 +293,8 @@ func (m *Model) finishRename(oldPath, newName string) {
 		}
 		bs.buf.SetPath(np)
 		bs.label = m.displayName(np)
-		bs.detectLanguage() // el nuevo nombre puede ser de otro lenguaje
+		bs.detectLanguage()    // el nuevo nombre puede ser de otro lenguaje
+		bs.initMarkdown(false) // y volverse (o dejar de ser) un documento Markdown; se conserva cómo se veía
 	}
 	m.load(m.active)
 	m.explorer.tree.Refresh()

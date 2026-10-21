@@ -94,6 +94,8 @@ func (m *Model) keymapContext() string {
 	switch {
 	case m.focusInExplorer():
 		return modeExplorer
+	case m.mdFull():
+		return modePreview
 	}
 	return m.mode.keymapName()
 }

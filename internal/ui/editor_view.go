@@ -78,9 +78,12 @@ type EditorView struct {
 	Selection *Selection      // selección de Visual, o nil
 	Highlight [][]syntax.Span // tramos de color de cada línea del buffer (puede ser más corto o nil: texto plano)
 	Explorer  *ExplorerView
-	Picker    *PickerView // ventana de selección (archivos, buffers, paleta), o nil
-	Leader    *LeaderView // panel de ayuda de la tecla líder, o nil
-	BufIndex  int         // posición del buffer activo (1..BufCount); solo se muestra con más de uno
+	Markdown  *MarkdownView // vista previa de Markdown (a pantalla completa o dividida), o nil
+	PathHint  string        // texto tras el nombre en la statusline (p. ej. «(e: editar)»)
+	Right     string        // si no está vacío, sustituye al texto de la derecha de la statusline
+	Picker    *PickerView   // ventana de selección (archivos, buffers, paleta), o nil
+	Leader    *LeaderView   // panel de ayuda de la tecla líder, o nil
+	BufIndex  int           // posición del buffer activo (1..BufCount); solo se muestra con más de uno
 	BufCount  int
 	Prompt    *Prompt // línea de comandos en edición, o nil
 	Dialog    *Dialog
@@ -105,12 +108,15 @@ func CursorCell(v EditorView, w, h int) (x, y int, ok bool) {
 		x, y = PickerCursorCell(v.Picker, w, h)
 		return x, y, x < w
 	}
-	px := PanelCols(w, v.Explorer != nil)
+	px, ew, _, _ := Areas(w, v.Explorer != nil, v.Markdown)
+	if ew == 0 { // vista previa a pantalla completa: no hay cursor de edición
+		return 0, 0, false
+	}
 	gw := GutterWidth(v.Buf.LineCount())
 	x = px + gw + buffer.VisualCol(v.Buf.Line(v.Cursor.Line), v.Cursor.Col) - v.Left
 	y = v.Cursor.Line - v.Top
 	focusInEditor := v.Explorer == nil || !v.Explorer.Focused
-	ok = v.Dialog == nil && focusInEditor && y >= 0 && y < TextRows(h) && x >= px+gw && x < w
+	ok = v.Dialog == nil && focusInEditor && y >= 0 && y < TextRows(h) && x >= px+gw && x < px+ew
 	return
 }
 
@@ -119,14 +125,21 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 	base := style{fg: th.FG, bg: th.BG}
 	g := newGrid(w, h, base)
 	lines := v.Buf.LineCount()
-	px := PanelCols(w, v.Explorer != nil)
-	ew := w - px // ancho del área del editor
-	gw, tw, rows := GutterWidth(lines), TextCols(ew, lines), TextRows(h)
+	px, ew, mx, mw := Areas(w, v.Explorer != nil, v.Markdown)
+	gw, tw, rows := GutterWidth(lines), TextCols(max(ew, 1), lines), TextRows(h)
 	if v.Explorer != nil && px > 0 {
 		drawExplorer(g, v.Explorer, rows, th)
 	}
+	if v.Markdown != nil {
+		if v.Markdown.Split {
+			for r := 0; r < rows; r++ {
+				g.put(px+ew, r, "│", style{fg: th.Border, bg: th.BG})
+			}
+		}
+		drawMarkdown(g, mx, mw, rows, v.Markdown, th)
+	}
 
-	for r := 0; r < rows; r++ {
+	for r := 0; r < rows && ew > 0; r++ {
 		i := v.Top + r
 		if i >= lines {
 			g.put(px+gw-2, r, "~", style{fg: th.Dim, bg: th.BG})
@@ -250,6 +263,9 @@ func drawStatusline(g *grid, y int, v EditorView, th Theme) {
 		}
 		info = "utf-8  " + eol + "  " + pos
 	}
+	if v.Right != "" {
+		info = v.Right
+	}
 	g.putRight(g.w-1, y, info, style{fg: th.Dim, bg: th.Panel})
 
 	// Las marcas [+] y [solo lectura] siempre se ven: si el nombre no cabe, se recorta por la izquierda.
@@ -268,6 +284,9 @@ func drawStatusline(g *grid, y int, v EditorView, th Theme) {
 	for _, m := range marks {
 		room -= textWidth(m.text) + 1
 	}
+	if v.PathHint != "" { // el aviso se reserva su sitio antes de repartir lo que queda para el nombre
+		room -= min(textWidth(v.PathHint), g.w/2) + 1
+	}
 	name := v.PathLabel
 	if name == "" {
 		name = "[Sin nombre]"
@@ -275,6 +294,9 @@ func drawStatusline(g *grid, y int, v EditorView, th Theme) {
 	x = g.put(x+1, y, truncateLeft(name, room), bar)
 	for _, m := range marks {
 		x = g.put(x+1, y, m.text, m.st)
+	}
+	if v.PathHint != "" {
+		g.put(x+1, y, truncateRight(v.PathHint, max(0, g.w-x-1-textWidth(info)-2)), style{fg: th.Dim, bg: th.Panel})
 	}
 }
 

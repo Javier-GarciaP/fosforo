@@ -43,6 +43,7 @@ var shortLabels = map[string]string{
 	"mode.command": "línea de comandos", "help.keys": "lista de atajos", "file.find": "buscar archivos",
 	"file.recent": "abrir reciente", "file.new": "nuevo archivo", "buffer.pick": "buscar buffers",
 	"buffer.next": "buffer siguiente", "buffer.prev": "buffer anterior",
+	"markdown.toggle": "vista previa / fuente", "markdown.split": "fuente | vista previa",
 }
 
 func buildRegistry() *command.Registry[*Model] {
@@ -152,6 +153,7 @@ func buildRegistry() *command.Registry[*Model] {
 	reg("search.prev", "Coincidencia anterior", []string{"N"}, none(func(m *Model, _ command.Args) { m.search("", !m.lastForward) }))
 
 	registerExplorerCommands(r)
+	registerMarkdownCommands(r)
 	reg("buffer.next", "Ir al buffer siguiente", []string{"Space b n", ":bn"}, none(func(m *Model, _ command.Args) { m.nextBuffer(1) }))
 	reg("buffer.prev", "Ir al buffer anterior", []string{"Space b p", ":bp"}, none(func(m *Model, _ command.Args) { m.nextBuffer(-1) }))
 	reg("buffer.close", "Cerrar buffer", []string{"Space b d", ":bd"}, none(func(m *Model, a command.Args) { m.closeActive(a.Bang) }))
@@ -232,8 +234,18 @@ func buildKeymap() *keymap.Keymap {
 		"space e": "explorer.toggle", "space b b": "buffer.pick", "space b n": "buffer.next", "space b p": "buffer.prev",
 		"space b d": "buffer.close", "space w": "file.save", "space q": "buffer.close", "space Q": "app.quit",
 		"space t": "theme.toggle", "space /": "mode.search", "space :": "mode.command", "space h": "help.keys", "space ?": "help.keys",
+		"space m p": "markdown.toggle", "space m s": "markdown.split",
 	} {
-		bind([]string{"normal", modeExplorer}, key, cmd)
+		bind([]string{"normal", modeExplorer, modePreview}, key, cmd)
+	}
+	// vista previa de Markdown a pantalla completa: solo lectura, con su propio juego de teclas
+	for key, cmd := range map[string]string{
+		"j": "preview.down", "down": "preview.down", "k": "preview.up", "up": "preview.up",
+		"ctrl+d": "preview.half_down", "ctrl+u": "preview.half_up", "pgdown": "preview.page_down", "pgup": "preview.page_up",
+		"g g": "preview.top", "home": "preview.top", "G": "preview.bottom", "end": "preview.bottom",
+		"e": "markdown.toggle", ":": "mode.command", "ctrl+s": "file.save", "tab": "focus.toggle", "ctrl+w": "focus.toggle",
+	} {
+		bind([]string{modePreview}, key, cmd)
 	}
 	for key, cmd := range map[string]string{"tab": "focus.toggle", "ctrl+w": "focus.toggle"} {
 		bind(normal, key, cmd)
