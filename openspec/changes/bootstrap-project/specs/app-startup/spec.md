@@ -20,15 +20,15 @@ The application SHALL use the alternate screen while running and MUST restore th
 The application SHALL accept `--version`, `--help` and an optional positional `<path>` argument.
 
 #### Scenario: Mostrar versión
-- **WHEN** se ejecuta `fosforo --version`
+- **WHEN** se ejecuta `fos --version`
 - **THEN** imprime la versión en una línea y termina con código 0 sin abrir la pantalla alternativa
 
 #### Scenario: Flag desconocido
-- **WHEN** se ejecuta `fosforo --no-existe`
+- **WHEN** se ejecuta `fos --no-existe`
 - **THEN** imprime un mensaje de uso y termina con código 2
 
 #### Scenario: Ruta como argumento
-- **WHEN** se ejecuta `fosforo README.md`
+- **WHEN** se ejecuta `fos README.md`
 - **THEN** la aplicación recibe la ruta `README.md` para abrirla (el comportamiento de apertura lo define `core-text-editing`)
 
 ### Requirement: Minimum terminal size

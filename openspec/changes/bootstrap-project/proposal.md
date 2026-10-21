@@ -9,7 +9,7 @@ terminal tiene un riesgo temprano muy concreto: si el programa sale mal (error, 
 ## What Changes
 
 - Instalar Go y fijar la versión en `go.mod`.
-- Crear el esqueleto del módulo: `cmd/fosforo/` y los paquetes vacíos previstos en `internal/` (ver `docs/README.md`).
+- Crear el esqueleto del módulo: `cmd/fos/` y los paquetes vacíos previstos en `internal/` (ver `docs/README.md`).
 - Un binario Bubble Tea mínimo que abre la pantalla alternativa, muestra un marcador y sale con `q` o `Ctrl+C`.
 - Flags `--version` y `--help`; el argumento posicional `<ruta>` se acepta y se guarda (lo usan cambios posteriores).
 - Restaurar siempre la terminal, también ante pánico o señal.
@@ -31,6 +31,6 @@ Ninguna: no existen specs previas.
 
 ## Impact
 
-- Código nuevo: `go.mod`, `cmd/fosforo/main.go`, `internal/*/doc.go`, `Makefile`, `.github/workflows/ci.yml`.
+- Código nuevo: `go.mod`, `cmd/fos/main.go`, `internal/*/doc.go`, `Makefile`, `.github/workflows/ci.yml`.
 - Dependencias: Bubble Tea y, para pruebas, `teatest`.
 - Sin impacto en datos ni APIs externas.

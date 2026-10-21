@@ -6,18 +6,18 @@ Define cómo se construye, versiona y publica el editor para que cualquier perso
 ## ADDED Requirements
 
 ### Requirement: Versioned binaries
-Each release SHALL publish static binaries for Linux and macOS on amd64 and arm64, with SHA256 checksums, and `fosforo --version` MUST print the semantic version and short commit.
+Each release SHALL publish static binaries for Linux and macOS on amd64 and arm64, with SHA256 checksums, and `fos --version` MUST print the semantic version and short commit.
 
 #### Scenario: Versión impresa
-- **WHEN** se ejecuta `fosforo --version` en un binario de release
-- **THEN** imprime algo como `fosforo 0.8.0 (abc1234)`
+- **WHEN** se ejecuta `fos --version` en un binario de release
+- **THEN** imprime algo como `fos 0.8.0 (abc1234)`
 
 ### Requirement: Installation from source
 The project SHALL be installable with `go install` from the repository.
 
 #### Scenario: Instalar con Go
-- **WHEN** se ejecuta `go install <módulo>/cmd/fosforo@latest` con Go instalado
-- **THEN** el comando `fosforo` queda disponible
+- **WHEN** se ejecuta `go install <módulo>/cmd/fos@latest` con Go instalado
+- **THEN** el comando `fos` queda disponible
 
 ### Requirement: Release tied to main
 A release MUST be created only from a tag `vX.Y.Z` on `main`, following the branching workflow in `CONTRIBUTING.md`, and the release workflow SHALL fail if the tag does not point to a commit on `main`.
@@ -31,4 +31,4 @@ A release MUST be created only from a tag `vX.Y.Z` on `main`, following the bran
 
 #### Scenario: Instrucciones completas
 - **WHEN** una persona sigue el README en una máquina limpia
-- **THEN** consigue ejecutar `fosforo` sin pasos no documentados
+- **THEN** consigue ejecutar `fos` sin pasos no documentados
