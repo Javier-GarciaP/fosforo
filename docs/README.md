@@ -73,10 +73,12 @@ Implementado en la rama `dev` (aún sin publicar):
 | Markdown | Los `.md` y `.markdown` se abren en **vista previa** (solo lectura, `PREVIEW`): encabezados con regla, listas, tareas `☑ ☐`, citas, tablas con bordes, código con colores, enlaces, imágenes como `[imagen: alt]`; se ajusta al ancho y se vuelve a ajustar al redimensionar |
 | Editar Markdown | `e` (en la vista previa) o `Space m p` alterna con el fuente, dejando el cursor en el encabezado de la sección que veías; `Space m s` divide fuente \| vista previa con scroll sincronizado y actualización 150 ms después de editar |
 | Límites de Markdown | Documentos de más de 2 MiB se abren como fuente con aviso; HTML crudo y diagramas se omiten con un aviso; las tablas anchas se recortan con `…` |
+| Ratón | Clic: coloca el cursor (con números de línea, tabuladores y caracteres anchos); arrastrar: selección Visual; doble clic: la palabra; rueda: 3 líneas por muesca en el panel bajo el puntero (editor, explorador, vista previa, listas) sin cambiar el foco; clic en el explorador abre archivos y alterna carpetas; clic y doble clic en picker, paleta y botones de diálogos; clic fuera cierra el picker |
+| Ratón y selección nativa | `:mouse` (o `mouse.toggle` en la paleta) suelta el ratón para usar la selección de texto del terminal; con el ratón activado, `Shift`+arrastrar sigue seleccionando de forma nativa en la mayoría de terminales y en `tmux` |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: ratón, búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Todavía **no** hay: búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 

@@ -154,6 +154,7 @@ func buildRegistry() *command.Registry[*Model] {
 
 	registerExplorerCommands(r)
 	registerMarkdownCommands(r)
+	registerMouseCommands(r)
 	reg("buffer.next", "Ir al buffer siguiente", []string{"Space b n", ":bn"}, none(func(m *Model, _ command.Args) { m.nextBuffer(1) }))
 	reg("buffer.prev", "Ir al buffer anterior", []string{"Space b p", ":bp"}, none(func(m *Model, _ command.Args) { m.nextBuffer(-1) }))
 	reg("buffer.close", "Cerrar buffer", []string{"Space b d", ":bd"}, none(func(m *Model, a command.Args) { m.closeActive(a.Bang) }))

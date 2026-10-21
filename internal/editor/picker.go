@@ -355,13 +355,7 @@ func (m *Model) pickerKey(k tea.KeyPressMsg) tea.Cmd {
 	case "esc", "ctrl+c":
 		m.closePicker()
 	case "enter":
-		if len(p.results) == 0 {
-			return nil
-		}
-		it := p.items[p.results[p.sel].Index]
-		accept := p.accept
-		m.closePicker()
-		accept(m, it)
+		m.pickerAccept()
 	case "up", "ctrl+p":
 		p.sel = max(0, p.sel-1)
 	case "down", "ctrl+n":
@@ -413,6 +407,18 @@ func (m *Model) pickerKey(k tea.KeyPressMsg) tea.Cmd {
 		}
 	}
 	return nil
+}
+
+// pickerAccept acepta el elemento seleccionado: cierra la ventana y ejecuta la acción.
+func (m *Model) pickerAccept() {
+	p := m.picker
+	if p == nil || len(p.results) == 0 {
+		return
+	}
+	it := p.items[p.results[p.sel].Index]
+	accept := p.accept
+	m.closePicker()
+	accept(m, it)
 }
 
 func (m *Model) pickerInsert(text string) tea.Cmd {

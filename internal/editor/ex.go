@@ -18,6 +18,7 @@ var exCommands = map[string]string{
 	"bn": "buffer.next", "bnext": "buffer.next",
 	"bp": "buffer.prev", "bprev": "buffer.prev", "bprevious": "buffer.prev",
 	"bd": "buffer.close", "bdelete": "buffer.close",
+	"mouse": "mouse.toggle",
 }
 
 // parseEx divide una línea de «:» en nombre, «!» y argumento: «w! ruta» → ("w", true, "ruta").

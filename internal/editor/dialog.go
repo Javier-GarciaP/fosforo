@@ -52,11 +52,20 @@ func (m *Model) dialogKey(k tea.KeyPressMsg) tea.Cmd {
 		}
 	}
 	if choice >= 0 {
-		m.dialog = nil
-		m.msg, m.msgErr = "", false
-		d.choose(m, choice)
+		m.chooseDialog(choice)
 	}
 	return nil
+}
+
+// chooseDialog cierra el diálogo y ejecuta el botón elegido (con el teclado o con el ratón).
+func (m *Model) chooseDialog(choice int) {
+	d := m.dialog
+	if d == nil || choice < 0 || choice >= len(d.buttons) {
+		return
+	}
+	m.dialog = nil
+	m.msg, m.msgErr = "", false
+	d.choose(m, choice)
 }
 
 // view convierte el diálogo en lo que dibuja la interfaz.

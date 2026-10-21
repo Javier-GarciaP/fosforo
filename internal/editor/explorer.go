@@ -23,9 +23,10 @@ const (
 
 // explorerState es el árbol de archivos y la fila seleccionada.
 type explorerState struct {
-	tree   *fs.Tree
-	sel    int // índice en tree.Visible()
-	scroll int
+	tree    *fs.Tree
+	sel     int // índice en tree.Visible()
+	lastSel int // selección en la última vez que se ajustó el desplazamiento
+	scroll  int
 }
 
 // WithRoot fija la carpeta raíz del explorador (por defecto, la carpeta de trabajo).
@@ -330,7 +331,14 @@ func (m *Model) scrollExplorer() {
 		return
 	}
 	m.selected()
-	m.explorer.scroll = ui.ExplorerScroll(m.explorer.scroll, m.explorer.sel, len(m.explorer.tree.Visible()), ui.TextRows(m.height))
+	rows, total := ui.TextRows(m.height), len(m.explorer.tree.Visible())
+	if m.explorer.sel != m.explorer.lastSel {
+		// la selección se movió (teclado, creación...): se mantiene a la vista. Si solo se movió la vista (rueda),
+		// se respeta el desplazamiento aunque la fila seleccionada quede fuera.
+		m.explorer.scroll = ui.ExplorerScroll(m.explorer.scroll, m.explorer.sel, total, rows)
+		m.explorer.lastSel = m.explorer.sel
+	}
+	m.explorer.scroll = max(0, min(m.explorer.scroll, max(0, total-rows)))
 }
 
 func registerExplorerCommands(r *command.Registry[*Model]) {

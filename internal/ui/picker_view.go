@@ -143,12 +143,9 @@ func drawPicker(g *grid, p *PickerView, th Theme) {
 	g.put(r.x+2, r.y+2, p.Prefix, style{fg: th.Blue, bg: th.Panel, bold: true})
 	g.put(r.x+2+textWidth(p.Prefix)+1, r.y+2, truncateRight(p.Query, r.w-6), panel)
 
-	listTop, listH := r.y+3, r.h-4
-	listW := r.w - 2
-	var prevX int
+	geo := PickerGeom(p, g.w, g.h)
+	listTop, listH, listW, prevX := geo.ListY, geo.ListRows, geo.ListW, geo.PreviewX
 	if p.Kind == PickerFiles {
-		listW = (r.w - 3) * 40 / 100
-		prevX = r.x + 1 + listW + 1
 		for y := 0; y < listH; y++ {
 			g.put(prevX-1, listTop+y, "│", style{fg: th.Border, bg: th.Panel})
 		}

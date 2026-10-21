@@ -77,7 +77,14 @@ type Model struct {
 	hlJobs      *atomic.Int64
 	mdDelay     time.Duration
 	mdJobs      *atomic.Int64
-	light       bool // tema claro
+
+	mouseOn    bool // el editor captura el ratón
+	now        func() time.Time
+	click      lastClick  // última pulsación (para el doble clic)
+	dragging   bool       // botón izquierdo pulsado en el texto
+	dragAnchor buffer.Pos // dónde empezó el arrastre
+	dragCell   [2]int     // última celda del arrastre
+	light      bool       // tema claro
 
 	picker      *picker   // ventana de selección abierta (archivos, buffers, paleta...)
 	recent      []string  // archivos abiertos en esta sesión, el más reciente primero
@@ -111,6 +118,7 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 		timeout: DefaultTimeout, leaderDelay: LeaderDelay, clipboard: defaultClipboard, lastForward: true,
 		hlDelay: DefaultHighlightDelay, hlJobs: new(atomic.Int64),
 		mdDelay: DefaultMarkdownDelay, mdJobs: new(atomic.Int64),
+		mouseOn: true, now: time.Now,
 	}
 	m.bufs = []*bufState{newBufState(b, label)}
 	for _, o := range opts {
@@ -214,6 +222,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.refreshExplorer()
 	case hlDebounceMsg:
 		cmd = m.highlightDebounce(msg)
+	case tea.MouseMsg:
+		cmd = m.mouse(msg)
 	case hlDoneMsg:
 		m.highlightDone(msg)
 	case mdDebounceMsg:
@@ -585,6 +595,9 @@ func (m Model) View() tea.View {
 	}
 	v.AltScreen = true
 	v.ReportFocus = true
+	if m.mouseOn {
+		v.MouseMode = tea.MouseModeCellMotion
+	}
 	v.WindowTitle = m.label0() + " - " + version.Name
 	return v
 }

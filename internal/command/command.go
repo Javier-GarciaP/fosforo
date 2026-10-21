@@ -16,7 +16,11 @@ type Args struct {
 	Count    int    // repeticiones o número de línea; 0 si no se indicó
 	HasCount bool   // se escribió un conteo explícito
 	Bang     bool   // se usó «!» (p. ej. :q!)
-	Text     string // argumento de texto (p. ej. la ruta de :e)
+	Text     string // argumento de texto (p. ej. la ruta de :e, o el panel de view.scroll)
+
+	// Posiciones (línea y grafema, desde 0) para los comandos que vienen del ratón: Line/Col es el punto principal y
+	// Line2/Col2 el segundo extremo de una selección.
+	Line, Col, Line2, Col2 int
 }
 
 // N devuelve el conteo, o 1 si no se indicó ninguno.
