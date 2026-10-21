@@ -7,7 +7,9 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
-Será la **0.8.0**, la primera versión con programa: todo lo anterior a esta entrada era diseño y planificación.
+## [0.8.0] - 2026-10-21
+
+**La primera versión con programa.** Todo lo anterior era diseño y planificación.
 
 ### Añadido
 
@@ -39,5 +41,6 @@ Será la **0.8.0**, la primera versión con programa: todo lo anterior a esta en
 - **Documentación:** `README.md`, guía técnica en `docs/`, guía de diseño y `CONTRIBUTING.md`.
 - **Proceso de trabajo:** ramas `main` y `dev` protegidas, flujo por pull request con specs, plantilla de PR y política de versiones.
 
-[Sin publicar]: https://github.com/Javier-GarciaP/fosforo/compare/v0.0.1...HEAD
+[Sin publicar]: https://github.com/Javier-GarciaP/fosforo/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/Javier-GarciaP/fosforo/releases/tag/v0.8.0
 [0.0.1]: https://github.com/Javier-GarciaP/fosforo/releases/tag/v0.0.1
