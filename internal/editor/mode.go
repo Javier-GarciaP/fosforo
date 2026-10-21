@@ -43,3 +43,6 @@ func (m Mode) isVisual() bool { return m == ModeVisual || m == ModeVisualLine }
 
 // modeOperator es el árbol de teclas que se usa mientras hay un operador pendiente (d, c, y): solo movimientos.
 const modeOperator = "operator"
+
+// modeExplorer es el contexto de teclas del panel del explorador.
+const modeExplorer = "explorer"

@@ -9,8 +9,19 @@ import (
 	"github.com/Javier-GarciaP/fosforo/internal/buffer"
 )
 
-// prompt es la línea de comandos en edición: «:» para comandos o «/» para buscar.
+type promptKind int
+
+const (
+	promptEx     promptKind = iota // «:» comandos
+	promptSearch                   // «/» búsqueda
+	promptCreate                   // explorador: nombre del archivo o carpeta nuevos
+	promptRename                   // explorador: nuevo nombre
+)
+
+// prompt es la línea de comandos en edición: «:» para comandos, «/» para buscar o un nombre en el explorador.
 type prompt struct {
+	kind    promptKind
+	target  string // carpeta (crear) o ruta (renombrar) sobre la que actúa el explorador
 	prefix  string
 	text    []string // grafemas
 	cur     int      // posición del cursor en grafemas
@@ -33,13 +44,20 @@ func (p *prompt) setText(s string) {
 	p.cur = len(p.text)
 }
 
-// openPrompt abre la línea de comandos con el prefijo dado y entra en modo Command.
+// openPrompt abre la línea de comandos «:» o la búsqueda «/» y entra en modo Command.
 func (m *Model) openPrompt(prefix string) {
-	hist := m.exHistory
+	kind, hist := promptEx, m.exHistory
 	if prefix == "/" {
-		hist = m.searchHistory
+		kind, hist = promptSearch, m.searchHistory
 	}
-	m.prompt = &prompt{prefix: prefix, hist: hist, histIdx: len(hist)}
+	m.prompt = &prompt{kind: kind, prefix: prefix, hist: hist, histIdx: len(hist)}
+	m.setMode(ModeCommand)
+}
+
+// openPromptKind abre un prompt del explorador con un texto inicial.
+func (m *Model) openPromptKind(kind promptKind, prefix, initial, target string) {
+	m.prompt = &prompt{kind: kind, prefix: prefix, target: target}
+	m.prompt.setText(initial)
 	m.setMode(ModeCommand)
 }
 
@@ -55,20 +73,29 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 	case "esc", "ctrl+c":
 		m.closePrompt()
 	case "enter":
-		line := p.String()
-		prefix := p.prefix
+		line, kind, target := p.String(), p.kind, p.target
 		if line != "" {
-			if prefix == "/" {
+			switch kind {
+			case promptSearch:
 				m.searchHistory = appendHistory(m.searchHistory, line)
-			} else {
+			case promptEx:
 				m.exHistory = appendHistory(m.exHistory, line)
 			}
 		}
 		m.closePrompt()
-		if prefix == "/" {
+		switch kind {
+		case promptSearch:
 			m.search(line, true)
-		} else {
+		case promptEx:
 			m.runEx(line)
+		case promptCreate:
+			if strings.TrimSpace(line) != "" {
+				m.finishCreate(target, line)
+			}
+		case promptRename:
+			if strings.TrimSpace(line) != "" {
+				m.finishRename(target, line)
+			}
 		}
 	case "backspace":
 		if len(p.text) == 0 {

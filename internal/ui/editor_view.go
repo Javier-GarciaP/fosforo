@@ -23,6 +23,39 @@ type Selection struct {
 	Linewise   bool
 }
 
+// Anchura del panel del explorador y mínimo de columnas para mostrarlo; en terminales más estrechas se oculta solo.
+const (
+	ExplorerWidth       = 24
+	explorerMinTermCols = 80
+)
+
+// ExplorerRow es una fila visible del árbol de archivos.
+type ExplorerRow struct {
+	Name     string
+	Depth    int
+	IsDir    bool
+	Expanded bool
+	Root     bool // la fila del proyecto: nombre en negrita
+	Err      bool // no se pudo leer el directorio
+}
+
+// ExplorerView es el panel lateral del explorador.
+type ExplorerView struct {
+	Rows     []ExplorerRow
+	Selected int
+	Scroll   int // primera fila visible
+	Focused  bool
+	Icons    IconMode
+}
+
+// PanelCols son las columnas que ocupa el panel (con su separador): 0 si el explorador está oculto o la terminal es estrecha.
+func PanelCols(w int, show bool) int {
+	if !show || w < explorerMinTermCols {
+		return 0
+	}
+	return ExplorerWidth + 1
+}
+
 // Prompt es la línea de comandos en edición («:wq», «/patrón»).
 type Prompt struct {
 	Prefix string
@@ -42,7 +75,10 @@ type EditorView struct {
 	Pending   string     // teclas pendientes de completar (p. ej. «3d»)
 	Info      string     // texto de la statusline en lugar de «utf-8  LF» (p. ej. «3 líneas» en Visual)
 	Selection *Selection // selección de Visual, o nil
-	Prompt    *Prompt    // línea de comandos en edición, o nil
+	Explorer  *ExplorerView
+	BufIndex  int // posición del buffer activo (1..BufCount); solo se muestra con más de uno
+	BufCount  int
+	Prompt    *Prompt // línea de comandos en edición, o nil
 	Dialog    *Dialog
 }
 
@@ -61,9 +97,12 @@ func CursorCell(v EditorView, w, h int) (x, y int, ok bool) {
 		x = textWidth(v.Prompt.Prefix) + buffer.VisualCol(v.Prompt.Text, v.Prompt.Cursor)
 		return x, h - 1, x < w
 	}
-	x = GutterWidth(v.Buf.LineCount()) + buffer.VisualCol(v.Buf.Line(v.Cursor.Line), v.Cursor.Col) - v.Left
+	px := PanelCols(w, v.Explorer != nil)
+	gw := GutterWidth(v.Buf.LineCount())
+	x = px + gw + buffer.VisualCol(v.Buf.Line(v.Cursor.Line), v.Cursor.Col) - v.Left
 	y = v.Cursor.Line - v.Top
-	ok = v.Dialog == nil && y >= 0 && y < TextRows(h) && x >= GutterWidth(v.Buf.LineCount()) && x < w
+	focusInEditor := v.Explorer == nil || !v.Explorer.Focused
+	ok = v.Dialog == nil && focusInEditor && y >= 0 && y < TextRows(h) && x >= px+gw && x < w
 	return
 }
 
@@ -72,26 +111,31 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 	base := style{fg: th.FG, bg: th.BG}
 	g := newGrid(w, h, base)
 	lines := v.Buf.LineCount()
-	gw, tw, rows := GutterWidth(lines), TextCols(w, lines), TextRows(h)
+	px := PanelCols(w, v.Explorer != nil)
+	ew := w - px // ancho del área del editor
+	gw, tw, rows := GutterWidth(lines), TextCols(ew, lines), TextRows(h)
+	if v.Explorer != nil && px > 0 {
+		drawExplorer(g, v.Explorer, rows, th)
+	}
 
 	for r := 0; r < rows; r++ {
 		i := v.Top + r
 		if i >= lines {
-			g.put(gw-2, r, "~", style{fg: th.Dim, bg: th.BG})
+			g.put(px+gw-2, r, "~", style{fg: th.Dim, bg: th.BG})
 			continue
 		}
 		rowStyle, numStyle := base, style{fg: th.Dim, bg: th.BG}
 		if i == v.Cursor.Line {
 			rowStyle.bg, numStyle = th.Sel, style{fg: th.Yellow, bg: th.Sel, bold: true}
-			g.fill(0, r, w, rowStyle)
+			g.fill(px, r, ew, rowStyle)
 		}
 		num := strconv.Itoa(i + 1)
-		g.put(gw-1-len(num), r, num, numStyle)
+		g.put(px+gw-1-len(num), r, num, numStyle)
 		from, to := v.Selection.cols(i, v.Buf.LineLen(i))
-		drawLine(g, gw, r, v.Buf.Line(i), v.Left, tw, rowStyle, th.Visual, from, to)
+		drawLine(g, px+gw, r, v.Buf.Line(i), v.Left, tw, rowStyle, th.Visual, from, to)
 		if to > v.Buf.LineLen(i) { // la selección incluye el salto de línea: se marca una celda tras el texto
 			if x := buffer.VisualCol(v.Buf.Line(i), v.Buf.LineLen(i)) - v.Left; x >= 0 && x < tw {
-				g.put(gw+x, r, " ", style{fg: th.FG, bg: th.Visual})
+				g.put(px+gw+x, r, " ", style{fg: th.FG, bg: th.Visual})
 			}
 		}
 	}
@@ -165,6 +209,10 @@ func drawStatusline(g *grid, y int, v EditorView, th Theme) {
 	// Información de la derecha; en terminales estrechas se reduce a posición y porcentaje.
 	pos := fmt.Sprintf("%d:%d  %d%%", v.Cursor.Line+1, v.Cursor.Col+1, percent(v.Cursor.Line+1, v.Buf.LineCount()))
 	info := pos
+	if v.BufCount > 1 {
+		pos = fmt.Sprintf("%d/%d  %s", v.BufIndex, v.BufCount, pos)
+		info = pos
+	}
 	switch {
 	case v.Info != "":
 		info = v.Info + "  " + pos

@@ -15,6 +15,9 @@ var exCommands = map[string]string{
 	"wq": "file.save_quit",
 	"x":  "file.update_quit", "xit": "file.update_quit",
 	"e": "file.open", "edit": "file.open",
+	"bn": "buffer.next", "bnext": "buffer.next",
+	"bp": "buffer.prev", "bprev": "buffer.prev", "bprevious": "buffer.prev",
+	"bd": "buffer.close", "bdelete": "buffer.close",
 }
 
 // parseEx divide una línea de «:» en nombre, «!» y argumento: «w! ruta» → ("w", true, "ruta").

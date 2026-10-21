@@ -11,25 +11,25 @@ import (
 	"github.com/Javier-GarciaP/fosforo/internal/cli"
 )
 
-func run(t *testing.T, ui func(string) error, args ...string) (code int, stdout, stderr string) {
+func run(t *testing.T, ui func(cli.Options) error, args ...string) (code int, stdout, stderr string) {
 	t.Helper()
 	var out, errb bytes.Buffer
 	code = cli.Run(args, &out, &errb, ui)
 	return code, out.String(), errb.String()
 }
 
-func neverUI(t *testing.T) func(string) error {
-	return func(string) error { t.Fatal("no debía abrirse la interfaz"); return nil }
+func neverUI(t *testing.T) func(cli.Options) error {
+	return func(cli.Options) error { t.Fatal("no debía abrirse la interfaz"); return nil }
 }
 
 func TestRun(t *testing.T) {
-	var gotPath string
-	record := func(p string) error { gotPath = p; return nil }
+	var gotPath, gotIcons string
+	record := func(o cli.Options) error { gotPath, gotIcons = o.Path, o.Icons; return nil }
 
 	tests := []struct {
 		name       string
 		args       []string
-		ui         func(string) error
+		ui         func(cli.Options) error
 		wantCode   int
 		wantStdout string
 		wantStderr string
@@ -43,12 +43,14 @@ func TestRun(t *testing.T) {
 		{"demasiadas rutas", []string{"a", "b"}, neverUI(t), 2, "", "demasiados argumentos", ""},
 		{"sin ruta", nil, record, 0, "", "", ""},
 		{"con ruta", []string{"README.md"}, record, 0, "", "", "README.md"},
-		{"error de la interfaz", nil, func(string) error { return errors.New("boom") }, 1, "", "boom", ""},
-		{"interrumpido", nil, func(string) error { return tea.ErrInterrupted }, 130, "", "", ""},
+		{"error de la interfaz", nil, func(cli.Options) error { return errors.New("boom") }, 1, "", "boom", ""},
+		{"interrumpido", nil, func(cli.Options) error { return tea.ErrInterrupted }, 130, "", "", ""},
+		{"iconos none", []string{"-icons=none", "x"}, record, 0, "", "", "x"},
+		{"iconos inválidos", []string{"-icons=raros"}, neverUI(t), 2, "", "icons", ""},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			gotPath = ""
+			gotPath, gotIcons = "", ""
 			code, stdout, stderr := run(t, tc.ui, tc.args...)
 			if code != tc.wantCode {
 				t.Errorf("código = %d, quería %d (stderr=%q)", code, tc.wantCode, stderr)
@@ -61,6 +63,15 @@ func TestRun(t *testing.T) {
 			}
 			if gotPath != tc.wantPath {
 				t.Errorf("ruta = %q, quería %q", gotPath, tc.wantPath)
+			}
+			if tc.wantCode == 0 && tc.ui != nil && gotPath != "" || tc.name == "sin ruta" {
+				want := "nerd"
+				if tc.name == "iconos none" {
+					want = "none"
+				}
+				if gotIcons != want {
+					t.Errorf("iconos = %q, quería %q", gotIcons, want)
+				}
 			}
 		})
 	}

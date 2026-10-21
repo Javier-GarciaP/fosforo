@@ -1,0 +1,28 @@
+ 󰷏 fosforo              │  1 package keymap
+   󰷏 cmd                │  2
+     󰷏 fosforo          │  3 type Node struct {
+        main.go        │  4     children map[rune]*Node
+   󰷏 internal           │  5     command  string
+     󰉖 buffer           │  6 }
+     󰉖 editor           │  7
+     󰷏 keymap           │  8 // Lookup resuelve una secuencia de teclas.
+        trie.go        │  9 func (n *Node) Lookup(seq []rune) (string, bool) {
+        trie_test.go   │ 10     cur := n
+     󰉖 ui               │ 11     for _, r := range seq {
+   󰷏 docs               │ 12         next, ok := cur.children[r]
+     󰉖 design           │ 13         if !ok { return "", false }
+     󰍔 README.md        │ 14         cur = next
+   󰉖 openspec           │ 15     }
+    .gitignore         │ 16     return cur.command, cur.command != ""
+   󰍔 CONTRIBUTING.md    │ 17 }
+    go.mod             │  ~
+   󰗑 LICENSE            │  ~
+   󱌣 Makefile           │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+ EXPLORER  internal/keymap/trie.go                                            utf-8  LF  12:35  70%
+

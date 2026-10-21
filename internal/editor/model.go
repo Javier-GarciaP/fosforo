@@ -4,6 +4,7 @@ package editor
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -35,6 +36,8 @@ type TimeoutMsg struct{ Seq int }
 
 // Model es el modelo de Bubble Tea del editor.
 type Model struct {
+	bufs          []*bufState // buffers abiertos; el activo también vive en buf/cur/top/left/label
+	active        int
 	buf           *buffer.Buffer
 	cur           buffer.Cursor
 	top, left     int // primera línea y primera columna visual visibles
@@ -45,6 +48,13 @@ type Model struct {
 	dialog        *dialog
 	theme         ui.Theme
 	quit          bool
+	batchSave     bool // se guardan varios buffers seguidos: un conflicto con el disco aborta en lugar de preguntar
+
+	root         string // carpeta raíz del explorador
+	explorer     *explorerState
+	showExplorer bool
+	focus        Focus
+	icons        ui.IconMode
 
 	mode    Mode
 	anchor  buffer.Pos // origen de la selección en Visual
@@ -64,11 +74,6 @@ type Model struct {
 	lastForward   bool
 }
 
-// dialog es el estado del diálogo «Cambios sin guardar».
-type dialog struct{ selected int }
-
-var dialogButtons = []string{"Guardar (y)", "Descartar (n)", "Cancelar (Esc)"}
-
 // Option configura el modelo.
 type Option func(*Model)
 
@@ -84,6 +89,7 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, theme: ui.Dark(),
 		timeout: DefaultTimeout, clipboard: defaultClipboard, lastForward: true,
 	}
+	m.bufs = []*bufState{newBufState(b, label)}
 	for _, o := range opts {
 		o(&m)
 	}
@@ -98,6 +104,12 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 func Open(path string, opts ...Option) (Model, error) {
 	if path == "" {
 		return New(buffer.New(""), "", opts...), nil
+	}
+	if info, err := os.Stat(path); err == nil && info.IsDir() {
+		// Una carpeta abre el explorador sobre ella, con el foco, y un buffer vacío.
+		m := New(buffer.New(""), "", append(opts, WithRoot(path))...)
+		m.toggleExplorer()
+		return m, nil
 	}
 	b, err := buffer.Open(path)
 	if err != nil {
@@ -155,9 +167,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Seq == m.seq && len(m.pending) > 0 {
 			m.resetPending() // la secuencia incompleta se descarta sin cambiar el texto
 		}
+	case tea.FocusMsg: // la terminal recupera el foco: se revisan el disco y el explorador
+		m.checkExternal()
+		m.refreshExplorer()
 	}
 	m.clampCursor()
 	m.scroll()
+	m.scrollExplorer()
 	if m.quit {
 		cmd = tea.Sequence(cmd, tea.Quit)
 	}
@@ -196,8 +212,11 @@ func (m *Model) modalKey(k tea.KeyPressMsg) tea.Cmd {
 		return m.dispatchByName("mode.normal", command.Args{})
 	}
 	mode := m.mode.keymapName()
-	if m.op != "" {
+	switch {
+	case m.op != "":
 		mode = modeOperator
+	case m.focusInExplorer():
+		mode = modeExplorer
 	}
 	if m.mode != ModeInsert && len(m.pending) == 0 && isCountKey(key, m.count) {
 		m.count = m.count*10 + int(key[0]-'0')
@@ -361,46 +380,6 @@ func (m Model) indentBeforeCursor() string {
 
 func (m Model) pageSize() int { return max(1, ui.TextRows(m.height)-1) }
 
-// ---- diálogo «Cambios sin guardar» ----
-
-func (m *Model) dialogKey(k tea.KeyPressMsg) tea.Cmd {
-	switch k.String() {
-	case "left", "shift+tab":
-		m.dialog.selected = (m.dialog.selected + len(dialogButtons) - 1) % len(dialogButtons)
-	case "right", "tab":
-		m.dialog.selected = (m.dialog.selected + 1) % len(dialogButtons)
-	case "y":
-		m.saveAndQuit()
-	case "n":
-		m.quit = true
-	case "esc", "ctrl+c":
-		m.closeDialog()
-	case "enter":
-		switch m.dialog.selected {
-		case 0:
-			m.saveAndQuit()
-		case 1:
-			m.quit = true
-		default:
-			m.closeDialog()
-		}
-	}
-	return nil
-}
-
-func (m *Model) closeDialog() {
-	m.dialog = nil
-	m.msg, m.msgErr = "", false
-}
-
-func (m *Model) saveAndQuit() {
-	if !m.save("") {
-		m.dialog = nil // el error se muestra en la línea de comandos y no se sale
-		return
-	}
-	m.quit = true
-}
-
 // ---- vista ----
 
 // scroll ajusta la vista para que el cursor quede visible, con margen vertical y sin partir líneas.
@@ -419,7 +398,7 @@ func (m *Model) scroll() {
 	}
 	m.top = max(0, min(m.top, lines-rows))
 
-	cols := ui.TextCols(m.width, lines)
+	cols := ui.TextCols(m.editorCols(), lines)
 	vc := m.cur.VisualCol(m.buf)
 	if vc < m.left {
 		m.left = vc - cols/2 // al volver atrás se centra el cursor, o se vuelve al inicio si la línea cabe
@@ -439,9 +418,14 @@ func (m Model) TooSmall() bool {
 }
 
 func (m Model) view() ui.EditorView {
+	mode := m.mode.Label()
+	if m.focusInExplorer() && m.mode == ModeNormal {
+		mode = "EXPLORER"
+	}
 	v := ui.EditorView{
 		Buf: m.buf, Cursor: m.cur.Pos, Top: m.top, Left: m.left,
-		Mode: m.mode.Label(), PathLabel: m.label, Message: m.msg, IsError: m.msgErr, Pending: m.Pending(),
+		Mode: mode, PathLabel: m.label, Message: m.msg, IsError: m.msgErr, Pending: m.Pending(),
+		Explorer: m.explorerView(), BufIndex: m.active + 1, BufCount: len(m.bufs),
 	}
 	if m.mode.isVisual() {
 		r := m.visualRange()
@@ -460,13 +444,7 @@ func (m Model) view() ui.EditorView {
 		v.Prompt = &ui.Prompt{Prefix: m.prompt.prefix, Text: m.prompt.String(), Cursor: m.prompt.cur}
 	}
 	if m.dialog != nil {
-		v.Dialog = &ui.Dialog{
-			Title:    "Cambios sin guardar",
-			Lines:    []string{fmt.Sprintf("%q tiene cambios sin guardar.", m.label0()), "¿Qué quieres hacer?"},
-			Buttons:  dialogButtons,
-			Selected: m.dialog.selected,
-			Hint:     "←→ elegir   ⏎ confirmar",
-		}
+		v.Dialog = m.dialog.view()
 	}
 	return v
 }
@@ -492,6 +470,7 @@ func (m Model) View() tea.View {
 		}
 	}
 	v.AltScreen = true
+	v.ReportFocus = true
 	v.WindowTitle = m.label0() + " - " + version.Name
 	return v
 }

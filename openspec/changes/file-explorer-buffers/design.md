@@ -31,6 +31,24 @@ Este cambio añade el concepto de **foco/contexto** (editor o explorador) y una 
   Alternativa descartada: sondear con códigos de escape (un glifo ausente ocupa el mismo ancho que uno presente).
 - **Layout:** el panel del explorador mide 24 columnas fijas (maqueta 01); el resto se asigna al editor. Con terminales estrechas (<80 columnas) el explorador se oculta automáticamente.
 
+- **Decisiones tomadas al implementar:**
+  - `editor.Model` conserva los campos de trabajo `buf/cur/top/left/label` del buffer activo y una lista `bufs []*bufState`; `stash()` y `load()` los
+    intercambian al cambiar de buffer. Así el código de edición de `modal-editing` no cambió y las 220 pruebas anteriores siguen valiendo.
+  - Contextos del keymap: se añade el contexto `explorer` junto a `normal/insert/visual/operator`; con el foco en el explorador se usa ese árbol de teclas.
+    Una prueba comprueba que ninguna orden del explorador es alcanzable desde el editor (salvo `explorer.toggle`).
+  - Un solo diálogo genérico (`dialog` con botones y una función `choose`) sirve para cambios sin guardar (uno o varios buffers), cerrar buffer,
+    borrar archivo y sobrescribir tras un cambio externo. El último botón es siempre «Cancelar» y lo activa `Esc`.
+  - Raíz del explorador: la carpeta de trabajo, o la carpeta pasada a `fos`. Los nombres de buffer se muestran relativos a la raíz.
+  - El árbol trata los enlaces simbólicos como archivos (nunca los sigue) y la raíz no se puede colapsar, renombrar ni borrar.
+  - `Enter`/`l` sobre una carpeta ya abierta bajan a su primer hijo; `h` colapsa o sube a la carpeta padre.
+  - Cambios externos: se guardan fecha y tamaño al cargar/guardar. Se revisan al activar un buffer, al recuperar el foco la terminal
+    (`tea.FocusMsg`, con `ReportFocus`) y antes de guardar. Un archivo que desaparece del disco no cuenta como cambiado. «Guardar todo y salir» no
+    pregunta por sobrescrituras: aborta en el primer conflicto (`E13`) para no pisar nada sin confirmación explícita.
+  - `:wq`/`:x` guardan el buffer actual y, si otros buffers tienen cambios, muestran el diálogo de salida con ellos en lugar de salir.
+  - La tabla de iconos (`internal/ui/icons_table.go`) se **genera** desde la misma tabla del diseño con `docs/design/tools/make-icons-go.py`,
+    de modo que editor y maquetas comparten una sola fuente de verdad. Sin configuración todavía, el modo se elige con `--icons=nerd|none`.
+  - `Space e`, `Space b n/p/d` ya funcionan como secuencias; el panel de ayuda del líder llega con `picker-and-palette`.
+
 ## Risks / Trade-offs
 
 - [Borrado irreversible] → confirmación obligatoria; valorar enviar a la papelera como mejora.

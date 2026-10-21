@@ -262,3 +262,6 @@ func (b *Buffer) Next(p Pos) (Pos, bool) {
 	}
 	return p, false
 }
+
+// SetPath cambia el nombre del archivo sin tocar el texto ni el estado de modificado (p. ej. tras renombrarlo en disco).
+func (b *Buffer) SetPath(path string) { b.path = path }
