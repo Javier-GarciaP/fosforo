@@ -63,24 +63,22 @@ func exitCode(t *testing.T, done chan error) int {
 
 func checkRestored(t *testing.T, pty *termtest.PTY) {
 	t.Helper()
-	out := pty.Output()
 	for _, want := range []string{termtest.EnterAltScreen, termtest.ShowCursor, termtest.ExitAltScreen} {
-		if !strings.Contains(out, want) {
-			t.Errorf("falta %q en la salida", want)
-		}
+		pty.WaitFor(t, want, 3*time.Second) // la salida llega de forma asíncrona
 	}
+	out := pty.Output()
 	if strings.LastIndex(out, termtest.ExitAltScreen) < strings.LastIndex(out, termtest.EnterAltScreen) {
 		t.Error("la pantalla alternativa no se cerró después de abrirse")
 	}
 }
 
 func TestExitKeys(t *testing.T) {
-	for _, key := range []string{"q", "\x03"} {
-		t.Run(strings.ReplaceAll(key, "\x03", "ctrl+c"), func(t *testing.T) {
+	for _, key := range []string{"\x11", "\x03"} {
+		t.Run(map[string]string{"\x11": "ctrl+q", "\x03": "ctrl+c"}[key], func(t *testing.T) {
 			pty := termtest.New(t)
 			before := pty.State(t)
 			_, done := start(t, pty)
-			pty.WaitFor(t, "Pulsa q para salir", 5*time.Second)
+			pty.WaitFor(t, "INSERT", 5*time.Second)
 			pty.Write(key)
 			if code := exitCode(t, done); code != 0 {
 				t.Errorf("código de salida = %d, quería 0", code)
@@ -99,7 +97,7 @@ func TestSignalsRestoreTerminal(t *testing.T) {
 			pty := termtest.New(t)
 			before := pty.State(t)
 			cmd, done := start(t, pty)
-			pty.WaitFor(t, "Pulsa q para salir", 5*time.Second)
+			pty.WaitFor(t, "INSERT", 5*time.Second)
 			if err := cmd.Process.Signal(sig); err != nil {
 				t.Fatal(err)
 			}
@@ -133,5 +131,77 @@ func TestUnknownFlagExitsWithTwo(t *testing.T) {
 	_, done := start(t, pty, "--no-existe")
 	if code := exitCode(t, done); code != 2 {
 		t.Fatalf("código = %d, quería 2", code)
+	}
+}
+
+func TestOpenEditAndSaveRealFile(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "notas.txt")
+	if err := os.WriteFile(p, []byte("hola\nmundo\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	pty := termtest.New(t)
+	before := pty.State(t)
+	_, done := start(t, pty, p)
+
+	pty.WaitFor(t, "mundo", 5*time.Second) // el contenido del archivo aparece en pantalla
+	pty.Write("X")                         // escribe al inicio de «hola»
+	pty.WaitFor(t, "[+]", 5*time.Second)
+	pty.Write("\x13") // Ctrl+S
+	pty.WaitFor(t, "escritas", 5*time.Second)
+	pty.Write("\x11") // Ctrl+Q: sin cambios pendientes sale directamente
+	if code := exitCode(t, done); code != 0 {
+		t.Fatalf("código de salida = %d", code)
+	}
+	if got, _ := os.ReadFile(p); string(got) != "Xhola\nmundo\n" {
+		t.Errorf("archivo = %q", got)
+	}
+	checkRestored(t, pty)
+	if after := pty.State(t); *after != *before {
+		t.Error("el modo de la terminal no se restauró")
+	}
+}
+
+func TestQuitAsksBeforeDiscarding(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "n.txt")
+	os.WriteFile(p, []byte("a\n"), 0o644)
+	pty := termtest.New(t)
+	_, done := start(t, pty, p)
+	pty.WaitFor(t, "INSERT", 5*time.Second)
+	pty.Write("z")
+	pty.Write("\x11") // Ctrl+Q con cambios: aparece el diálogo
+	pty.WaitFor(t, "Cambios sin guardar", 5*time.Second)
+	pty.Write("n") // descartar
+	if code := exitCode(t, done); code != 0 {
+		t.Fatalf("código de salida = %d", code)
+	}
+	if got, _ := os.ReadFile(p); string(got) != "a\n" {
+		t.Errorf("descartar no debe tocar el archivo: %q", got)
+	}
+}
+
+func TestOpenMissingPathCreatesOnSave(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "nuevo.txt")
+	pty := termtest.New(t)
+	_, done := start(t, pty, p)
+	pty.WaitFor(t, "INSERT", 5*time.Second)
+	pty.Write("hola")
+	pty.Write("\x13")
+	pty.WaitFor(t, "escritas", 5*time.Second)
+	pty.Write("\x11")
+	exitCode(t, done)
+	if got, _ := os.ReadFile(p); string(got) != "hola\n" {
+		t.Errorf("archivo nuevo = %q", got)
+	}
+}
+
+func TestOpenDirectoryExitsWithError(t *testing.T) {
+	pty := termtest.New(t)
+	_, done := start(t, pty, t.TempDir())
+	if code := exitCode(t, done); code != 1 {
+		t.Fatalf("código = %d, quería 1", code)
+	}
+	pty.WaitFor(t, "directorio", 3*time.Second)
+	if strings.Contains(pty.Output(), termtest.EnterAltScreen) {
+		t.Error("no debe abrirse la pantalla alternativa si el archivo no se puede abrir")
 	}
 }

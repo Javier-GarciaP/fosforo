@@ -20,8 +20,7 @@ guardado son la fuente típica de pérdida de datos, así que se cimientan prime
 - `insert-typing`: edición directa de texto con teclado (comportamiento del futuro modo Insert).
 
 ### Modified Capabilities
-
-Ninguna.
+- `app-startup`: la salida normal pasa de `q` a `Ctrl+Q`/`Ctrl+C`, porque `q` ahora escribe una letra (ver `specs/app-startup/spec.md`).
 
 ## Non-goals
 

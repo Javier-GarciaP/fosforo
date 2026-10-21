@@ -11,7 +11,7 @@
 >
 > Documentación técnica del proyecto. Para una presentación general, mira el [README](../README.md).
 >
-> **Estado del proyecto: beta `0.0.1`, fase de documentación y diseño. Todavía no hay código.**
+> **Estado del proyecto: beta en desarrollo (última versión publicada `0.0.1`).** Ya hay código: abrir, editar y guardar texto con Unicode correcto. Ver «Qué funciona hoy».
 
 ## Qué queremos lograr
 
@@ -36,6 +36,23 @@ sin salir del editor.
    restaura siempre al salir (también ante errores).
 4. **Descubrible.** El menú líder y la paleta muestran los atajos; no hace falta memorizar nada para empezar.
 5. **Fluido.** Dibujar solo lo visible, trabajo pesado (resaltado, Markdown, búsqueda) fuera del bucle de eventos.
+
+## Qué funciona hoy
+
+Implementado en la rama `dev` (aún sin publicar):
+
+| Función | Detalle |
+| --- | --- |
+| Arranque | `fos [ruta]`, `--version`, `--help`; pantalla alternativa y terminal restaurada tras salida, pánico y señales |
+| Abrir | Archivos UTF-8 conservando LF/CRLF y salto final; ruta inexistente = archivo nuevo; binarios, UTF-8 inválido y >10 MiB en solo lectura con aviso |
+| Escribir | Insertar, Enter con sangría, Backspace/Delete (unen líneas), Tab, pegado; `Ctrl+Z`/modos llegan en `modal-editing` |
+| Moverse | Flechas, Home, End, PageUp/PageDown, columna deseada en líneas de distinta longitud |
+| Unicode | Cursor por caracteres percibidos (emoji compuestos, combinantes), ancho doble (CJK) y tabuladores de 4 |
+| Guardar | `Ctrl+S` guardado atómico (archivo temporal + `rename`) que conserva permisos; fallos sin perder el original |
+| Salir | `Ctrl+Q`/`Ctrl+C`; con cambios sin guardar aparece el diálogo Guardar / Descartar / Cancelar |
+| Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
+
+Todavía **no** hay: modos Normal/Visual, deshacer, explorador, resaltado, buscador, paleta ni Markdown (ver la hoja de ruta).
 
 ## Alcance de la versión 1
 
