@@ -30,10 +30,11 @@ func (a Args) N() int {
 // Command es una acción con nombre. S es el estado sobre el que actúa (el modelo del editor).
 // Run puede devolver un tea.Cmd (salir, copiar al portapapeles...) o nil.
 type Command[S any] struct {
-	Name string   // «área.verbo», único
-	Desc string   // descripción en español
-	Keys []string // atajos por defecto, solo informativos (p. ej. «gg», «Ctrl+S»)
-	Run  func(s S, a Args) tea.Cmd
+	Name  string   // «área.verbo», único
+	Desc  string   // descripción en español
+	Short string   // etiqueta corta para espacios reducidos, como el menú líder (si falta se usa Desc)
+	Keys  []string // atajos por defecto, solo informativos (p. ej. «gg», «Ctrl+S»)
+	Run   func(s S, a Args) tea.Cmd
 }
 
 // ErrUnknown se devuelve al invocar un comando que no existe.
@@ -102,4 +103,12 @@ func (r *Registry[S]) Exec(s S, name string, a Args) (tea.Cmd, error) {
 		return nil, UnknownError{Name: name}
 	}
 	return c.Run(s, a), nil
+}
+
+// Label devuelve la etiqueta corta del comando, o su descripción si no tiene.
+func (c Command[S]) Label() string {
+	if c.Short != "" {
+		return c.Short
+	}
+	return c.Desc
 }

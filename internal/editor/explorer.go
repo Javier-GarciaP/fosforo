@@ -333,22 +333,35 @@ func (m *Model) scrollExplorer() {
 
 func registerExplorerCommands(r *command.Registry[*Model]) {
 	reg := func(name, desc string, keys []string, run func(m *Model, a command.Args)) {
-		r.MustRegister(command.Command[*Model]{Name: name, Desc: desc, Keys: keys, Run: func(m *Model, a command.Args) tea.Cmd { run(m, a); return nil }})
+		r.MustRegister(command.Command[*Model]{Name: name, Desc: desc, Short: shortLabels[name], Keys: keys, Run: func(m *Model, a command.Args) tea.Cmd { run(m, a); return nil }})
+	}
+	// Las órdenes del explorador necesitan el árbol: lanzadas desde la paleta sin explorador no hacen nada más que avisar.
+	onTree := func(f func(m *Model, a command.Args)) func(m *Model, a command.Args) {
+		return func(m *Model, a command.Args) {
+			if m.explorer == nil || !m.showExplorer {
+				m.msg = "El explorador está oculto (Space e lo muestra)"
+				return
+			}
+			f(m, a)
+		}
+	}
+	regTree := func(name, desc string, keys []string, run func(m *Model, a command.Args)) {
+		reg(name, desc, keys, onTree(run))
 	}
 	reg("explorer.toggle", "Mostrar u ocultar el explorador", []string{"Space e"}, func(m *Model, _ command.Args) { m.toggleExplorer() })
 	reg("focus.toggle", "Cambiar el foco entre explorador y editor", []string{"Tab", "Ctrl+W"}, func(m *Model, _ command.Args) { m.toggleFocus() })
-	reg("explorer.down", "Explorador: bajar", []string{"j", "↓"}, func(m *Model, a command.Args) { m.explorerMove(a.N()) })
-	reg("explorer.up", "Explorador: subir", []string{"k", "↑"}, func(m *Model, a command.Args) { m.explorerMove(-a.N()) })
-	reg("explorer.top", "Explorador: primera fila", []string{"gg"}, func(m *Model, _ command.Args) { m.explorer.sel = 0 })
-	reg("explorer.bottom", "Explorador: última fila", []string{"G"}, func(m *Model, _ command.Args) {
+	regTree("explorer.down", "Explorador: bajar", []string{"j", "↓"}, func(m *Model, a command.Args) { m.explorerMove(a.N()) })
+	regTree("explorer.up", "Explorador: subir", []string{"k", "↑"}, func(m *Model, a command.Args) { m.explorerMove(-a.N()) })
+	regTree("explorer.top", "Explorador: primera fila", []string{"gg"}, func(m *Model, _ command.Args) { m.explorer.sel = 0 })
+	regTree("explorer.bottom", "Explorador: última fila", []string{"G"}, func(m *Model, _ command.Args) {
 		m.explorer.sel = len(m.explorer.tree.Visible()) - 1
 	})
-	reg("explorer.open", "Explorador: abrir archivo o expandir carpeta", []string{"Enter", "l"}, func(m *Model, _ command.Args) { m.explorerOpen() })
-	reg("explorer.collapse", "Explorador: colapsar carpeta o ir a la carpeta padre", []string{"h"}, func(m *Model, _ command.Args) { m.explorerCollapse() })
-	reg("explorer.create", "Explorador: crear archivo (o carpeta con «/» final)", []string{"a"}, func(m *Model, _ command.Args) { m.explorerCreate() })
-	reg("explorer.rename", "Explorador: renombrar", []string{"r"}, func(m *Model, _ command.Args) { m.explorerRename() })
-	reg("explorer.delete", "Explorador: borrar", []string{"d"}, func(m *Model, _ command.Args) { m.explorerDelete() })
-	reg("explorer.refresh", "Explorador: refrescar", []string{"R"}, func(m *Model, _ command.Args) {
+	regTree("explorer.open", "Explorador: abrir archivo o expandir carpeta", []string{"Enter", "l"}, func(m *Model, _ command.Args) { m.explorerOpen() })
+	regTree("explorer.collapse", "Explorador: colapsar carpeta o ir a la carpeta padre", []string{"h"}, func(m *Model, _ command.Args) { m.explorerCollapse() })
+	regTree("explorer.create", "Explorador: crear archivo (o carpeta con «/» final)", []string{"a"}, func(m *Model, _ command.Args) { m.explorerCreate() })
+	regTree("explorer.rename", "Explorador: renombrar", []string{"r"}, func(m *Model, _ command.Args) { m.explorerRename() })
+	regTree("explorer.delete", "Explorador: borrar", []string{"d"}, func(m *Model, _ command.Args) { m.explorerDelete() })
+	regTree("explorer.refresh", "Explorador: refrescar", []string{"R"}, func(m *Model, _ command.Args) {
 		m.refreshExplorer()
 		m.msg = "Explorador actualizado"
 	})

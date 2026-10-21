@@ -1,11 +1,16 @@
 package fs_test
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Javier-GarciaP/fosforo/internal/fs"
 )
@@ -316,5 +321,106 @@ func TestRemoveDoesNotFollowSymlink(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(root, "real", "a.txt")); err != nil {
 		t.Error("borrar el enlace no debe borrar su destino")
+	}
+}
+
+func collect(t *testing.T, root string, ignore []string, batch int) ([]string, int) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	ch := make(chan []string, 4)
+	go fs.Walk(ctx, root, ignore, batch, ch)
+	var all []string
+	batches := 0
+	for b := range ch {
+		batches++
+		all = append(all, b...)
+	}
+	return all, batches
+}
+
+func TestWalkListsFilesRelativeAndIgnores(t *testing.T) {
+	root := t.TempDir()
+	mk(t, root, "main.go", "internal/keymap/trie.go", "internal/buffer/b.go", ".git/config", "node_modules/x/y.js", "docs/README.md", ".hidden", "vacia/")
+	all, _ := collect(t, root, nil, 100)
+	want := []string{".hidden", "main.go", "docs/README.md", "internal/buffer/b.go", "internal/keymap/trie.go"}
+	got := append([]string(nil), all...)
+	sort.Strings(got)
+	sort.Strings(want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("archivos = %v, quería %v", got, want)
+	}
+	for _, f := range all {
+		if strings.Contains(f, ".git/") || strings.Contains(f, "node_modules") {
+			t.Errorf("no debe listar %s", f)
+		}
+	}
+	// lista de ignorados propia
+	all, _ = collect(t, root, []string{"internal"}, 100)
+	for _, f := range all {
+		if strings.HasPrefix(f, "internal/") {
+			t.Errorf("internal debía ignorarse: %s", f)
+		}
+	}
+}
+
+func TestWalkBatchesAndProgress(t *testing.T) {
+	root := t.TempDir()
+	for i := 0; i < 25; i++ {
+		mk(t, root, fmt.Sprintf("d%d/f%02d.txt", i%3, i))
+	}
+	all, batches := collect(t, root, nil, 10)
+	if len(all) != 25 || batches != 3 {
+		t.Errorf("%d archivos en %d lotes, quería 25 en 3", len(all), batches)
+	}
+}
+
+func TestWalkCancelStopsEarly(t *testing.T) {
+	root := t.TempDir()
+	for i := 0; i < 200; i++ {
+		mk(t, root, fmt.Sprintf("f%03d.txt", i))
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	ch := make(chan []string) // sin búfer: el recorrido se queda esperando a quien consume
+	go fs.Walk(ctx, root, nil, 10, ch)
+	<-ch
+	cancel()
+	done := make(chan struct{})
+	go func() {
+		for range ch {
+		}
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(3 * time.Second):
+		t.Fatal("cancelar debe cerrar el canal y detener el recorrido")
+	}
+}
+
+func TestWalkSkipsSymlinkedDirsAndUnreadable(t *testing.T) {
+	root := t.TempDir()
+	mk(t, root, "real/a.txt", "b.txt")
+	if err := os.Symlink(filepath.Join(root, "real"), filepath.Join(root, "enlace")); err != nil {
+		t.Skip("enlaces simbólicos no disponibles")
+	}
+	os.Symlink(root, filepath.Join(root, "real", "ciclo"))
+	all, _ := collect(t, root, nil, 100)
+	count := map[string]int{}
+	for _, f := range all {
+		count[filepath.Base(f)]++
+	}
+	if count["a.txt"] != 1 {
+		t.Errorf("a.txt aparece %d veces: %v", count["a.txt"], all)
+	}
+	if len(all) > 5 {
+		t.Errorf("hay un ciclo: %v", all)
+	}
+}
+
+func TestWalkMissingRootClosesImmediately(t *testing.T) {
+	all, batches := collect(t, filepath.Join(t.TempDir(), "no-existe"), nil, 10)
+	if len(all) != 0 || batches != 0 {
+		t.Errorf("%v %d", all, batches)
 	}
 }

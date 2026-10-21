@@ -145,3 +145,31 @@ func (k *Keymap) Walk(fn func(mode, seq, command string)) {
 		walk(k.modes[mode], nil)
 	}
 }
+
+// Child es una tecla posible tras un prefijo: un comando, o un grupo con más teclas debajo.
+type Child struct {
+	Key     string
+	Command string // vacío si es un grupo
+	Group   bool
+}
+
+// Children devuelve las teclas que pueden seguir al prefijo dado en un modo, ordenadas por tecla.
+// Si el prefijo no existe devuelve nil. Sirve para dibujar la ayuda de la tecla líder a partir del propio árbol.
+func (k *Keymap) Children(mode string, prefix []string) []Child {
+	n := k.modes[mode]
+	for _, key := range prefix {
+		if n == nil {
+			return nil
+		}
+		n = n.children[key]
+	}
+	if n == nil {
+		return nil
+	}
+	out := make([]Child, 0, len(n.children))
+	for key, c := range n.children {
+		out = append(out, Child{Key: key, Command: c.command, Group: c.command == ""})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
+	return out
+}

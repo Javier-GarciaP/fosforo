@@ -1,0 +1,36 @@
+ fosforo                │  1 package keymap
+   cmd/                 │  2
+     fosforo/           │  3 type Node struct {
+       main.go          │ Paleta de comandos                                             5/60
+   internal/            ││                                                                   │
+     buffer/            ││ : gua                                                             │
+     editor/            ││▸ Guardar archivo                                       Ctrl+S  :w │
+     keymap/            ││  Guardar y salir                                              :wq │
+       trie.go          ││  Guardar si hay cambios y salir                                :x │
+       trie_test.go     │ ↑↓ navegar   ⏎ ejecutar   Esc cerrar
+     ui/                │ 11     for _, r := range seq {
+   docs/                │ 12         next, ok := cur.children[r]
+     design/            │ 13         if !ok { return "", false }
+     README.md          │ 14         cur = next
+   openspec/            │ 15     }
+   .gitignore           │ 16     return cur.command, cur.command != ""
+   CONTRIBUTING.md      │ 17 }
+   go.mod               │  ~
+   LICENSE              │  ~
+   Makefile             │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+                        │  ~
+ COMMAND  internal/keymap/trie.go                                                                 utf-8  LF  12:35  70%
+

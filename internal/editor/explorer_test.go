@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
@@ -38,7 +39,8 @@ func project(t *testing.T, files ...string) string {
 // openProj crea un editor de 100x24 con el explorador apuntando a root (sin iconos, para leer la estructura).
 func openProj(t *testing.T, root string, opts ...editor.Option) *ed {
 	t.Helper()
-	opts = append([]editor.Option{editor.WithRoot(root), editor.WithIcons(ui.IconsNone)}, opts...)
+	opts = append([]editor.Option{editor.WithRoot(root), editor.WithIcons(ui.IconsNone),
+		editor.WithTimeout(20 * time.Millisecond), editor.WithLeaderDelay(20 * time.Millisecond)}, opts...)
 	m, err := editor.Open("", opts...)
 	if err != nil {
 		t.Fatal(err)

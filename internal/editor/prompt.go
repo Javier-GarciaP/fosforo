@@ -1,12 +1,15 @@
 package editor
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/Javier-GarciaP/fosforo/internal/buffer"
+	"github.com/Javier-GarciaP/fosforo/internal/fuzzy"
+	"github.com/Javier-GarciaP/fosforo/internal/ui"
 )
 
 type promptKind int
@@ -28,6 +31,10 @@ type prompt struct {
 	hist    []string // historial del tipo de prompt
 	histIdx int      // posición en el historial (len(hist) = línea nueva)
 	draft   string   // lo escrito antes de navegar el historial
+
+	sugg    []fuzzy.Result // sugerencias de comandos para lo escrito (solo en «:»)
+	suggSel int            // sugerencia elegida con ↑/↓ (-1: ninguna, se ejecuta el texto tal cual)
+	scroll  int
 }
 
 func (p *prompt) String() string { return strings.Join(p.text, "") }
@@ -42,6 +49,60 @@ func (p *prompt) insert(s string) {
 func (p *prompt) setText(s string) {
 	p.text = buffer.Clusters(s)
 	p.cur = len(p.text)
+	p.refreshSuggestions()
+}
+
+// refreshSuggestions recalcula las sugerencias de comandos para lo escrito en el prompt «:».
+// Sin texto no se sugiere nada, y escribir deshace cualquier elección anterior.
+func (p *prompt) refreshSuggestions() {
+	p.sugg, p.suggSel, p.scroll = nil, -1, 0
+	if p.kind != promptEx || len(p.text) == 0 {
+		return
+	}
+	p.sugg = fuzzy.Filter(p.String(), paletteTexts(), maxResults)
+}
+
+var paletteTextsCache []string
+
+func paletteTexts() []string {
+	if paletteTextsCache == nil {
+		for _, it := range palette() {
+			paletteTextsCache = append(paletteTextsCache, it.match)
+		}
+	}
+	return paletteTextsCache
+}
+
+// suggestionView devuelve la ventana de sugerencias del prompt «:» (nil si no hay).
+func (p *prompt) suggestionView(h, w int) *ui.PickerView {
+	if len(p.sugg) == 0 {
+		return nil
+	}
+	rows := ui.PickerRows(ui.PickerPalette, w, h)
+	if p.suggSel >= 0 {
+		if p.suggSel < p.scroll {
+			p.scroll = p.suggSel
+		}
+		if p.suggSel >= p.scroll+rows {
+			p.scroll = p.suggSel - rows + 1
+		}
+	}
+	pv := &ui.PickerView{
+		Kind: ui.PickerPalette, Title: "Comandos", Prefix: ":", Query: p.String(), Cursor: p.cur,
+		Counter: fmt.Sprintf("%d/%d", len(p.sugg), len(palette())), Selected: p.suggSel - p.scroll,
+		Hint: "↑↓ elegir   ⏎ ejecutar   Esc cerrar",
+	}
+	for _, r := range p.sugg[p.scroll:min(len(p.sugg), p.scroll+rows)] {
+		it := palette()[r.Index]
+		row := ui.PickerRow{Text: it.text, Detail: it.detail}
+		for _, pos := range r.Pos {
+			if pos < len([]rune(it.text)) {
+				row.Match = append(row.Match, pos)
+			}
+		}
+		pv.Rows = append(pv.Rows, row)
+	}
+	return pv
 }
 
 // openPrompt abre la línea de comandos «:» o la búsqueda «/» y entra en modo Command.
@@ -73,6 +134,13 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 	case "esc", "ctrl+c":
 		m.closePrompt()
 	case "enter":
+		if p.kind == promptEx && p.suggSel >= 0 && p.suggSel < len(p.sugg) {
+			name := palette()[p.sugg[p.suggSel].Index].data // se eligió una sugerencia con ↑/↓
+			m.exHistory = appendHistory(m.exHistory, p.String())
+			m.closePrompt()
+			m.runPaletteCommand(name)
+			return
+		}
 		line, kind, target := p.String(), p.kind, p.target
 		if line != "" {
 			switch kind {
@@ -105,10 +173,12 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 		if p.cur > 0 {
 			p.text = slices.Delete(p.text, p.cur-1, p.cur)
 			p.cur--
+			p.refreshSuggestions()
 		}
 	case "delete":
 		if p.cur < len(p.text) {
 			p.text = slices.Delete(p.text, p.cur, p.cur+1)
+			p.refreshSuggestions()
 		}
 	case "left":
 		p.cur = max(0, p.cur-1)
@@ -120,7 +190,16 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 		p.cur = len(p.text)
 	case "ctrl+u":
 		p.text, p.cur = nil, 0
+		p.refreshSuggestions()
 	case "up", "ctrl+p":
+		if len(p.sugg) > 0 && p.histIdx == len(p.hist) { // con sugerencias a la vista, ↑/↓ las recorren
+			if p.suggSel <= 0 {
+				p.suggSel = len(p.sugg) - 1
+			} else {
+				p.suggSel--
+			}
+			return
+		}
 		if p.histIdx == len(p.hist) {
 			p.draft = p.String()
 		}
@@ -129,6 +208,10 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 			p.setText(p.hist[p.histIdx])
 		}
 	case "down", "ctrl+n":
+		if len(p.sugg) > 0 && p.histIdx == len(p.hist) {
+			p.suggSel = (p.suggSel + 1) % len(p.sugg)
+			return
+		}
 		if p.histIdx < len(p.hist) {
 			p.histIdx++
 			if p.histIdx == len(p.hist) {
@@ -140,6 +223,7 @@ func (m *Model) promptKey(k tea.KeyPressMsg) {
 	default:
 		if k.Text != "" && k.Mod&(tea.ModCtrl|tea.ModAlt) == 0 {
 			p.insert(k.Text)
+			p.refreshSuggestions()
 		}
 	}
 }

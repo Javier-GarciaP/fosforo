@@ -65,10 +65,15 @@ Implementado en la rama `dev` (aún sin publicar):
 | Resaltado asíncrono | Escribir nunca espera: los colores anteriores se desplazan con cada edición y se actualizan 50 ms después de la última; los textos de hasta 100 KiB se colorean al abrirlos |
 | Límites | Archivos de más de 2 MiB y líneas de más de 2000 caracteres se muestran sin color |
 | Temas | `Space t` alterna oscuro/claro y recolorea al instante sin volver a analizar el código |
+| Buscar archivos | `Space f f`: ventana difusa con vista previa coloreada, contador `coincidencias/total` y carga progresiva en proyectos grandes (no bloquea la entrada); `Space f r` recientes; `Space f n` nuevo |
+| Buffers (picker) | `Space b b` lista los buffers abiertos marcando los modificados |
+| Paleta de comandos | `Space Space` lista todos los comandos por su descripción con sus atajos a la derecha; `Enter` lo ejecuta igual que su atajo; `Space ?`/`Space h` muestran la lista de atajos |
+| Sugerencias en `:` | Al escribir en `:` aparecen las mismas sugerencias; `Enter` ejecuta lo escrito, o la sugerencia si se eligió con `↑`/`↓` |
+| Menú líder | Tras `Space` y 300 ms aparece el panel de ayuda generado desde las teclas reales (grupos `+`, `Esc` cancela) |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Todavía **no** hay: Markdown, ratón, búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -110,7 +115,7 @@ cuadrícula de terminal de 120×36 celdas.
 ## Atajos previstos
 
 Los atajos quedan fijados por las specs (`openspec/specs/`). **Ya funcionan** todos los de «Modos», «Movimiento y edición» y «Línea de comandos»,
-(incluidos `:bn` `:bp` `:bd`). De la tecla líder `Space` ya funcionan `Space e` y `Space b n/p/d`; el panel de ayuda y el resto llegan con `picker-and-palette`.
+(incluidos `:bn` `:bp` `:bd`). La tecla líder `Space` ya funciona entera salvo los grupos `m` (Markdown) y `s` (buscar), que llegan con sus cambios y aparecerán solos en el panel.
 En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan de línea.
 
 ### Modos
@@ -156,13 +161,16 @@ En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan
 | `Space b b` | Buscar entre buffers abiertos |
 | `Space e` | Mostrar/ocultar explorador |
 | `Space Space` | Paleta de comandos |
-| `Space s g` / `Space s w` | Buscar en el proyecto / la palabra bajo el cursor |
-| `Space m p` / `Space m s` | Markdown: alternar vista previa / dividir |
-| `Space w` | Guardar |
-| `Space t` | Alternar tema claro/oscuro (**ya funciona**) |
+| `Space f r` / `Space f n` | Archivos recientes / nuevo archivo |
+| `Space w` / `Space q` / `Space Q` | Guardar / cerrar buffer / salir |
+| `Space t` | Alternar tema claro/oscuro |
+| `Space /` / `Space :` | Buscar en el archivo / línea de comandos |
+| `Space ?` / `Space h` | Lista de atajos |
 | `Space b n` `Space b p` `Space b d` | Buffer siguiente, anterior, cerrar |
+| `Space s g` / `Space s w` | Buscar en el proyecto / la palabra bajo el cursor *(llega con `config-search-release`)* |
+| `Space m p` / `Space m s` | Markdown: alternar vista previa / dividir *(llega con `markdown-preview`)* |
 
-Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`).
+Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`), generado desde las teclas reales.
 
 ## Lenguajes con resaltado
 
