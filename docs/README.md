@@ -201,9 +201,30 @@ Si se quiere ver Markdown cuanto antes, el cambio 7 puede adelantarse justo desp
 
 | Herramienta | Para qué | Estado en esta máquina |
 | --- | --- | --- |
-| Go (estable) | Compilar y probar | **Sin instalar** (primera tarea de `bootstrap-project`) |
+| Go 1.27.3 | Compilar y probar | Instalado en `~/.local/go` (enlazado en `~/.local/bin`) |
 | OpenSpec CLI | Specs, validación, archivado | Instalado |
 | OpenPencil (`op` + app de escritorio) | Ver y modificar el diseño | Instalado |
 | `gh` | PRs desde la terminal | Instalado y autenticado |
 | `rg` (ripgrep) | Búsqueda más rápida (opcional) | Instalado (14.1.1) |
 | Nerd Font o «Symbols Nerd Font» | Ver los iconos del explorador | **Sin instalar** (la fuente del sistema, Adwaita Mono, no los incluye) |
+
+## Comandos de desarrollo
+
+Con Go instalado, desde un clon limpio (no hace falta nada más para compilar):
+
+```bash
+git clone https://github.com/Javier-GarciaP/fosforo.git && cd fosforo
+make build            # compila bin/fos
+make run              # compila y abre el editor (make run ARGS="README.md")
+make test             # todas las pruebas, con detector de carreras
+make vet              # go vet + comprobación de formato (gofmt)
+make fmt              # da formato al código
+./bin/fos --version   # fos dev (abc1234)
+```
+
+Las pruebas de ciclo de vida ejecutan el binario real dentro de un pseudo-terminal (Linux/macOS) y comprueban que la terminal
+queda restaurada tras salida normal, pánico y señales (`SIGINT`, `SIGTERM`). Si falla la terminal de tu entorno,
+`reset` la deja como nueva.
+
+El CI (`.github/workflows/ci.yml`) ejecuta `make vet`, `make test` y `make build` en cada PR a `dev` y a `main`, y rechaza los PR a
+`main` que no salgan de `dev`.

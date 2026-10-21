@@ -1,0 +1,74 @@
+package cli_test
+
+import (
+	"bytes"
+	"errors"
+	"strings"
+	"testing"
+
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/Javier-GarciaP/fosforo/internal/cli"
+)
+
+func run(t *testing.T, ui func(string) error, args ...string) (code int, stdout, stderr string) {
+	t.Helper()
+	var out, errb bytes.Buffer
+	code = cli.Run(args, &out, &errb, ui)
+	return code, out.String(), errb.String()
+}
+
+func neverUI(t *testing.T) func(string) error {
+	return func(string) error { t.Fatal("no debía abrirse la interfaz"); return nil }
+}
+
+func TestRun(t *testing.T) {
+	var gotPath string
+	record := func(p string) error { gotPath = p; return nil }
+
+	tests := []struct {
+		name       string
+		args       []string
+		ui         func(string) error
+		wantCode   int
+		wantStdout string
+		wantStderr string
+		wantPath   string
+	}{
+		{"version", []string{"--version"}, neverUI(t), 0, "fos ", "", ""},
+		{"version con un guion", []string{"-version"}, neverUI(t), 0, "fos ", "", ""},
+		{"ayuda", []string{"--help"}, neverUI(t), 0, "Uso: fos", "", ""},
+		{"ayuda corta", []string{"-h"}, neverUI(t), 0, "Uso: fos", "", ""},
+		{"flag desconocido", []string{"--no-existe"}, neverUI(t), 2, "", "no-existe", ""},
+		{"demasiadas rutas", []string{"a", "b"}, neverUI(t), 2, "", "demasiados argumentos", ""},
+		{"sin ruta", nil, record, 0, "", "", ""},
+		{"con ruta", []string{"README.md"}, record, 0, "", "", "README.md"},
+		{"error de la interfaz", nil, func(string) error { return errors.New("boom") }, 1, "", "boom", ""},
+		{"interrumpido", nil, func(string) error { return tea.ErrInterrupted }, 130, "", "", ""},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			gotPath = ""
+			code, stdout, stderr := run(t, tc.ui, tc.args...)
+			if code != tc.wantCode {
+				t.Errorf("código = %d, quería %d (stderr=%q)", code, tc.wantCode, stderr)
+			}
+			if !strings.Contains(stdout, tc.wantStdout) {
+				t.Errorf("stdout = %q, debía contener %q", stdout, tc.wantStdout)
+			}
+			if !strings.Contains(stderr, tc.wantStderr) {
+				t.Errorf("stderr = %q, debía contener %q", stderr, tc.wantStderr)
+			}
+			if gotPath != tc.wantPath {
+				t.Errorf("ruta = %q, quería %q", gotPath, tc.wantPath)
+			}
+		})
+	}
+}
+
+func TestVersionIsOneLine(t *testing.T) {
+	_, stdout, _ := run(t, neverUI(t), "--version")
+	if strings.Count(strings.TrimRight(stdout, "\n"), "\n") != 0 {
+		t.Errorf("la versión debe ser una sola línea: %q", stdout)
+	}
+}
