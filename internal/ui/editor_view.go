@@ -373,23 +373,10 @@ func modeBanner(mode string) string {
 
 // drawDialog superpone el cuadro modal, centrado y con borde (ver docs/design/exports/10-dialogo-cambios-sin-guardar.png).
 func drawDialog(g *grid, d *Dialog, th Theme) {
-	boxW := min(g.w-2, 62)
-	inner := boxW - 2
+	geo := DialogGeom(d, g.w, g.h)
+	x0, y0, boxW, boxH, inner := geo.Box.X, geo.Box.Y, geo.Box.W, geo.Box.H, geo.Inner
 	panel := style{fg: th.FG, bg: th.Panel}
 	border := style{fg: th.Border, bg: th.Panel}
-
-	// ¿caben los botones en una fila?
-	rowW := 2
-	for _, b := range d.Buttons {
-		rowW += textWidth(b) + 4
-	}
-	stacked := rowW > inner
-	height := 7 + len(d.Lines) // bordes, título, huecos, botones y pista
-	if stacked {
-		height += len(d.Buttons) - 1
-	}
-	boxH := min(g.h-2, height+1)
-	x0, y0 := (g.w-boxW)/2, max(0, (g.h-2-boxH)/2)
 
 	for y := 0; y < boxH; y++ {
 		g.fill(x0, y0+y, boxW, panel)
@@ -414,21 +401,15 @@ func drawDialog(g *grid, d *Dialog, th Theme) {
 		y++
 	}
 	y++
-	bx := x0 + 2
 	for i, b := range d.Buttons {
 		st := style{fg: th.FG, bg: th.Sel}
 		if i == d.Selected {
 			st = style{fg: th.Panel, bg: th.Blue, bold: true}
 		}
-		label := " " + b + " "
-		if stacked {
-			g.put(bx, y+i, label, st)
-			continue
-		}
-		g.put(bx, y, label, st)
-		bx += textWidth(label) + 2
+		r := geo.Buttons[i]
+		g.put(r.X, r.Y, " "+b+" ", st)
 	}
-	if stacked {
+	if geo.Stacked {
 		y += len(d.Buttons) - 1
 	}
 	if d.Hint != "" && y+2 < y0+boxH {

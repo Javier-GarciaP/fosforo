@@ -116,3 +116,16 @@ func TestLabelFallsBackToDescription(t *testing.T) {
 		t.Errorf("Label = %q", c.Label())
 	}
 }
+
+func TestArgsCarryPositionsForMouseCommands(t *testing.T) {
+	r := command.NewRegistry[*state]()
+	var got command.Args
+	r.MustRegister(command.Command[*state]{Name: "cursor.move_to", Desc: "Mover", Keys: []string{"clic"},
+		Run: func(s *state, a command.Args) tea.Cmd { got = a; return nil }})
+	if _, err := r.Exec(&state{}, "cursor.move_to", command.Args{Line: 3, Col: 7, Line2: 4, Col2: 9, Text: "editor", Count: -3, HasCount: true}); err != nil {
+		t.Fatal(err)
+	}
+	if got.Line != 3 || got.Col != 7 || got.Line2 != 4 || got.Col2 != 9 || got.Text != "editor" || got.Count != -3 {
+		t.Errorf("%+v", got)
+	}
+}

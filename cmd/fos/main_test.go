@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -255,4 +256,65 @@ func TestOpenMarkdownShowsPreview(t *testing.T) {
 	if got, _ := os.ReadFile(p); !strings.HasPrefix(string(got), "# Título grande") {
 		t.Errorf("abrir no modifica el archivo: %q", got)
 	}
+}
+
+// sgr construye un evento de ratón del protocolo SGR (coordenadas desde 1): botón 0 = izquierdo, 64/65 = rueda.
+func sgr(button int, x, y int, press bool) string {
+	end := "M"
+	if !press {
+		end = "m"
+	}
+	return fmt.Sprintf("\x1b[<%d;%d;%d%s", button, x+1, y+1, end)
+}
+
+func TestMouseThroughTheRealTerminal(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "m.txt")
+	var sb strings.Builder
+	for i := 0; i < 80; i++ {
+		fmt.Fprintf(&sb, "línea número %d\n", i)
+	}
+	os.WriteFile(p, []byte(sb.String()), 0o644)
+	pty := termtest.New(t)
+	_, done := start(t, pty, p)
+	pty.WaitFor(t, "NORMAL", 5*time.Second)
+	pty.WaitFor(t, "\x1b[?1002h", 5*time.Second) // el programa activa el ratón (movimiento con botón pulsado)
+	pty.WaitFor(t, "\x1b[?1006h", 5*time.Second) // protocolo SGR
+
+	// clic en la fila 3, columna de texto 6 (el texto empieza en la columna 4 de pantalla: número de línea de 3 cifras + 1)
+	pty.Write(sgr(0, 4+6, 3, true) + sgr(0, 4+6, 3, false))
+	pty.WaitFor(t, "4:7", 5*time.Second)
+	// la rueda baja 3 líneas por muesca: el cursor sigue visible
+	pty.Write(sgr(65, 20, 5, true))
+	pty.WaitFor(t, "línea número 3", 5*time.Second)
+	pty.Write(sgr(65, 20, 5, true) + sgr(65, 20, 5, true) + sgr(65, 20, 5, true))
+	pty.WaitFor(t, "línea número 30", 5*time.Second)
+	pty.Write(":q\r")
+	if code := exitCode(t, done); code != 0 {
+		t.Fatalf("código = %d", code)
+	}
+	checkRestored(t, pty)
+	if !strings.Contains(pty.Output(), "\x1b[?1002l") && !strings.Contains(pty.Output(), "\x1b[?1000l") {
+		t.Error("al salir se desactiva la captura del ratón")
+	}
+}
+
+func TestMouseToggleReleasesTheTerminal(t *testing.T) {
+	pty := termtest.New(t)
+	_, done := start(t, pty)
+	pty.WaitFor(t, "\x1b[?1002h", 5*time.Second)
+	pty.Write(":mouse\r")
+	// con la captura desactivada el terminal vuelve a tratar el ratón como suyo (selección nativa)
+	pty.WaitFor(t, "\x1b[?1002l", 5*time.Second)
+	pty.WaitFor(t, "selección nativa", 5*time.Second)
+	mark := len(pty.Output())
+	pty.Write(":mouse\r")
+	deadline := time.Now().Add(5 * time.Second)
+	for !strings.Contains(pty.Output()[mark:], "\x1b[?1002h") { // se vuelve a capturar el ratón
+		if time.Now().After(deadline) {
+			t.Fatal("al volver a activar el ratón se debe reanudar la captura")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	pty.Write(":q\r")
+	exitCode(t, done)
 }
