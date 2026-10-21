@@ -118,27 +118,25 @@ func buildRegistry() *command.Registry[*Model] {
 	reg("search.next", "Siguiente coincidencia", []string{"n"}, none(func(m *Model, _ command.Args) { m.search("", m.lastForward) }))
 	reg("search.prev", "Coincidencia anterior", []string{"N"}, none(func(m *Model, _ command.Args) { m.search("", !m.lastForward) }))
 
+	registerExplorerCommands(r)
+	reg("buffer.next", "Ir al buffer siguiente", []string{"Space b n", ":bn"}, none(func(m *Model, _ command.Args) { m.nextBuffer(1) }))
+	reg("buffer.prev", "Ir al buffer anterior", []string{"Space b p", ":bp"}, none(func(m *Model, _ command.Args) { m.nextBuffer(-1) }))
+	reg("buffer.close", "Cerrar el buffer actual (:bd, :bd! descarta)", []string{"Space b d", ":bd"}, none(func(m *Model, a command.Args) { m.closeActive(a.Bang) }))
+
 	// archivo y aplicación
 	reg("file.save", "Guardar el archivo (:w [ruta])", []string{"Ctrl+S", ":w"}, none(func(m *Model, a command.Args) { m.save(a.Text) }))
 	reg("file.save_quit", "Guardar y salir", []string{":wq"}, none(func(m *Model, a command.Args) {
 		if m.save(a.Text) {
-			m.quit = true
+			m.requestQuit(false) // sale salvo que otros buffers tengan cambios
 		}
 	}))
 	reg("file.update_quit", "Guardar si hay cambios y salir", []string{":x"}, none(func(m *Model, a command.Args) {
 		if !m.buf.Modified() || m.save(a.Text) {
-			m.quit = true
+			m.requestQuit(false)
 		}
 	}))
-	reg("file.open", "Abrir un archivo (:e ruta)", []string{":e"}, none(func(m *Model, a command.Args) { m.openFile(a) }))
-	reg("app.quit", "Salir (:q, :q! descarta los cambios)", []string{":q"}, none(func(m *Model, a command.Args) {
-		if m.buf.Modified() && !a.Bang {
-			m.msg, m.msgErr = "E37: cambios sin guardar (usa :q! para descartarlos)", true
-			m.dialog = &dialog{}
-			return
-		}
-		m.quit = true
-	}))
+	reg("file.open", "Abrir un archivo (:e ruta); sin ruta, recargar el actual", []string{":e"}, none(func(m *Model, a command.Args) { m.openFile(a) }))
+	reg("app.quit", "Salir (:q, :q! descarta los cambios)", []string{":q"}, none(func(m *Model, a command.Args) { m.requestQuit(a.Bang) }))
 	return r
 }
 
@@ -184,6 +182,22 @@ func buildKeymap() *keymap.Keymap {
 		"d": "operator.delete", "c": "operator.change", "y": "operator.yank", "ctrl+s": "file.save",
 	} {
 		bind(both, key, cmd)
+	}
+	for key, cmd := range map[string]string{
+		"space e": "explorer.toggle", "space b n": "buffer.next", "space b p": "buffer.prev", "space b d": "buffer.close",
+		"tab": "focus.toggle", "ctrl+w": "focus.toggle",
+	} {
+		bind(normal, key, cmd)
+	}
+	for key, cmd := range map[string]string{
+		"j": "explorer.down", "down": "explorer.down", "k": "explorer.up", "up": "explorer.up",
+		"g g": "explorer.top", "G": "explorer.bottom",
+		"enter": "explorer.open", "l": "explorer.open", "right": "explorer.open", "h": "explorer.collapse", "left": "explorer.collapse",
+		"a": "explorer.create", "r": "explorer.rename", "d": "explorer.delete", "R": "explorer.refresh",
+		"space e": "explorer.toggle", "tab": "focus.toggle", "ctrl+w": "focus.toggle",
+		":": "mode.command", "ctrl+s": "file.save",
+	} {
+		bind([]string{modeExplorer}, key, cmd)
 	}
 	for key, cmd := range map[string]string{
 		"enter": "edit.newline", "tab": "edit.tab", "backspace": "edit.backspace", "delete": "edit.delete_forward", "ctrl+s": "file.save",
@@ -278,7 +292,30 @@ func (m *Model) label0() string {
 }
 
 // save guarda el buffer (en path si se indica) y deja el resultado en la línea de comandos. Devuelve si se guardó.
+// Si el archivo cambió en disco desde que se cargó y hay cambios sin guardar, pide confirmación antes de sobrescribir.
 func (m *Model) save(path string) bool {
+	if path == "" && m.buf.Path() != "" && m.buf.Modified() && m.bufs[m.active].changedOnDisk() {
+		if m.batchSave {
+			m.msg, m.msgErr = fmt.Sprintf("E13: %q cambió en disco; guarda ese archivo con :w para confirmar", m.label0()), true
+			return false
+		}
+		m.dialog = &dialog{
+			title:   "El archivo cambió en disco",
+			lines:   []string{fmt.Sprintf("%q se modificó fuera del editor.", m.label0()), "¿Sobrescribirlo con tus cambios?"},
+			buttons: []dialogButton{btnOverride, btnCancel},
+			choose: func(m *Model, i int) {
+				if i == 0 {
+					m.writeBuffer("")
+				}
+			},
+		}
+		return false
+	}
+	return m.writeBuffer(path)
+}
+
+// writeBuffer escribe el buffer en disco sin comprobar cambios externos.
+func (m *Model) writeBuffer(path string) bool {
 	var err error
 	if path != "" {
 		err = m.buf.SaveAs(path)
@@ -288,21 +325,25 @@ func (m *Model) save(path string) bool {
 	} else {
 		err = m.buf.Save()
 	}
-	if err == nil {
-		m.msg, m.msgErr = fmt.Sprintf("%q %dL escritas", m.label, m.buf.LineCount()), false
-		return true
+	if err != nil {
+		m.reportSaveError(err)
+		return false
 	}
-	m.reportSaveError(err)
-	return false
+	m.stash()
+	m.bufs[m.active].snapshot()
+	m.refreshExplorer()
+	m.msg, m.msgErr = fmt.Sprintf("%q %dL escritas", m.label, m.buf.LineCount()), false
+	return true
 }
 
-// openFile implementa :e: reemplaza el buffer por otro archivo (varios buffers llegan con el explorador).
+// openFile implementa :e. Con ruta abre el archivo en un buffer (reutilizando el que ya esté abierto);
+// sin ruta recarga el actual desde el disco (con «!» descarta los cambios).
 func (m *Model) openFile(a command.Args) {
-	path := a.Text
-	if path == "" {
-		path = m.buf.Path()
+	if a.Text != "" {
+		m.openPath(a.Text, a.Text)
+		return
 	}
-	if path == "" {
+	if m.buf.Path() == "" {
 		m.msg, m.msgErr = "E32: sin nombre de archivo", true
 		return
 	}
@@ -310,18 +351,5 @@ func (m *Model) openFile(a command.Args) {
 		m.msg, m.msgErr = "E37: cambios sin guardar (usa :e! para descartarlos)", true
 		return
 	}
-	b, err := buffer.Open(path)
-	if err != nil {
-		m.msg, m.msgErr = "E484: no se puede abrir el archivo: "+err.Error(), true
-		return
-	}
-	m.buf, m.label = b, path
-	m.cur = buffer.NewCursor(buffer.Pos{})
-	m.top, m.left = 0, 0
-	m.reg = register{}
-	m.setMode(ModeNormal)
-	m.msg, m.msgErr = fmt.Sprintf("%q %dL", path, b.LineCount()), false
-	if ro, why := b.ReadOnly(); ro {
-		m.msg, m.msgErr = "Solo lectura: "+why, true
-	}
+	m.reloadActive(fmt.Sprintf("%q recargado", m.label0()))
 }

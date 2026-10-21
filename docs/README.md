@@ -56,10 +56,15 @@ Implementado en la rama `dev` (aún sin publicar):
 | Comandos | Registro único de comandos con nombre (`file.save`, `cursor.down`...): teclas y `:` ejecutan los mismos |
 | Unicode | Cursor por caracteres percibidos (emoji compuestos, combinantes), ancho doble (CJK) y tabuladores de 4 |
 | Guardar | `Ctrl+S` o `:w`: guardado atómico (archivo temporal + `rename`) que conserva permisos; fallos sin perder el original |
+| Explorador | `Space e` lo muestra/oculta (24 columnas; se oculta solo bajo 80); `Tab`/`Ctrl+w` cambian el foco; `j k l h Enter gg G`; `a` crea (con `/` final, carpeta), `r` renombra, `d` borra con confirmación, `R` refresca; `fos carpeta/` lo abre con foco |
+| Árbol | Sangría de 2 columnas sin flechas ni líneas guía; carpetas primero y por orden alfabético; oculta `.git` y `node_modules`; carga carpetas al expandirlas; no sigue enlaces simbólicos |
+| Iconos | Un icono por tipo (nombre exacto → extensión → por defecto) y carpeta cerrada/abierta, con los colores de la paleta; `--icons=none` los quita (carpetas con `/`, abiertas en azul y cerradas atenuadas) |
+| Buffers | Varios archivos abiertos (`:e ruta`, el explorador); si ya está abierto se reutiliza con su cursor y scroll; `Space b n/p/d` o `:bn :bp :bd`; `n/m` en la statusline; cerrar o salir pregunta por cada buffer modificado |
+| Cambios externos | Se detectan al activar un buffer, al volver el foco a la terminal y al guardar: sin modificar se recarga con aviso; modificado pide confirmación antes de sobrescribir |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: explorador y varios buffers, resaltado de sintaxis, buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Todavía **no** hay: resaltado de sintaxis, buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -101,7 +106,7 @@ cuadrícula de terminal de 120×36 celdas.
 ## Atajos previstos
 
 Los atajos quedan fijados por las specs (`openspec/specs/`). **Ya funcionan** todos los de «Modos», «Movimiento y edición» y «Línea de comandos»,
-salvo `:bn` `:bp` `:bd` (llegan con los buffers). La tecla líder `Space` llega en el cambio `picker-and-palette`.
+(incluidos `:bn` `:bp` `:bd`). De la tecla líder `Space` ya funcionan `Space e` y `Space b n/p/d`; el panel de ayuda y el resto llegan con `picker-and-palette`.
 En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan de línea.
 
 ### Modos
@@ -135,7 +140,7 @@ En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan
 | --- | --- |
 | `:w` `:w ruta` | Guardar / guardar como |
 | `:q` `:q!` `:wq` `:x` | Salir / salir sin guardar / guardar y salir |
-| `:e ruta` | Abrir archivo |
+| `:e ruta` | Abrir archivo en un buffer (`:e` recarga el actual) |
 | `:42` | Ir a la línea 42 |
 | `:bn` `:bp` `:bd` | Siguiente buffer, anterior, cerrar |
 
@@ -173,7 +178,7 @@ abierta). Cada archivo lleva el icono de su tipo (Go, Markdown, JSON, Makefile, 
 - **Los iconos son caracteres de una Nerd Font**, así que la terminal necesita una. Basta con instalar una Nerd Font completa o
   solo la fuente de símbolos («Symbols Nerd Font»), que las terminales usan como respaldo sin cambiar tu fuente actual
   (el paquete oficial incluye un archivo de `fontconfig` para ello en Linux). Descargas: <https://www.nerdfonts.com>.
-- **Sin Nerd Font**, pon `icons = "none"` en la configuración: las carpetas se muestran con `/` al final y todo sigue funcionando.
+- **Sin Nerd Font**, ejecuta `fos --icons=none` (más adelante será el ajuste `icons = "none"` de la configuración): las carpetas se muestran con `/` al final y todo sigue funcionando.
 - No se puede detectar automáticamente qué fuente usa la terminal, por eso es un ajuste y no una detección.
 
 ## Stack y arquitectura

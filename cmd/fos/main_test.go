@@ -210,14 +210,25 @@ func TestOpenMissingPathCreatesOnSave(t *testing.T) {
 	}
 }
 
-func TestOpenDirectoryExitsWithError(t *testing.T) {
+func TestOpenDirectoryShowsExplorer(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "visible.txt"), []byte("x\n"), 0o644)
+	os.Mkdir(filepath.Join(dir, "carpeta"), 0o755)
 	pty := termtest.New(t)
-	_, done := start(t, pty, t.TempDir())
-	if code := exitCode(t, done); code != 1 {
-		t.Fatalf("código = %d, quería 1", code)
+	_, done := start(t, pty, dir)
+	pty.WaitFor(t, "visible.txt", 5*time.Second)
+	pty.WaitFor(t, "EXPLORER", 5*time.Second)
+	pty.Write(":q\r")
+	if code := exitCode(t, done); code != 0 {
+		t.Fatalf("código = %d", code)
 	}
-	pty.WaitFor(t, "directorio", 3*time.Second)
-	if strings.Contains(pty.Output(), termtest.EnterAltScreen) {
-		t.Error("no debe abrirse la pantalla alternativa si el archivo no se puede abrir")
-	}
+}
+
+func TestOpenMissingDirectoryExitsWithError(t *testing.T) {
+	pty := termtest.New(t)
+	_, done := start(t, pty, filepath.Join(t.TempDir(), "no", "existe", "f.txt"))
+	// un archivo en una carpeta que no existe se abre vacío y se puede cerrar
+	pty.WaitFor(t, "NORMAL", 5*time.Second)
+	pty.Write(":q\r")
+	exitCode(t, done)
 }

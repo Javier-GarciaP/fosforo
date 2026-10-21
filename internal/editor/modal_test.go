@@ -851,16 +851,22 @@ func TestExOpenFile(t *testing.T) {
 	e := &ed{t: t, m: m}
 	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).ex("e " + b)
 	e.wantText("bbb\nccc\n")
-	if !strings.Contains(e.screen(), "b.txt") || e.m.Buffer().Modified() {
+	if !strings.Contains(e.screen(), "b.txt") || !strings.Contains(e.screen(), "2/2") || e.m.Buffer().Modified() {
 		t.Errorf("tras abrir:\n%s", e.screen())
 	}
-	e.typ("x").ex("e " + a) // con cambios: no abre
+	e.typ("x").ex("e " + a) // con cambios en b: no se descartan, se abre en otro buffer
+	e.wantText("aaa\n")
+	e.ex("bn")
+	e.wantText("bb\nccc\n")
+	e.ex("e") // sin ruta recarga, pero hay cambios
 	if !strings.HasPrefix(e.m.Message(), "E37") {
 		t.Errorf("mensaje = %q", e.m.Message())
 	}
-	e.wantText("bb\nccc\n")
-	e.ex("e! " + a)
-	e.wantText("aaa\n")
+	e.ex("e!")
+	e.wantText("bbb\nccc\n")
+	if e.m.Buffer().Modified() {
+		t.Error("recargar deja el buffer sin modificar")
+	}
 	e.ex("e " + filepath.Join(dir, "nuevo.txt"))
 	e.wantText("") // un archivo que no existe se abre vacío
 	e.ex("e " + dir)

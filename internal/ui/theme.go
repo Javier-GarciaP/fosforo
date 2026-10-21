@@ -29,7 +29,7 @@ func (t Theme) modeColor(mode string) string {
 		return t.Mauve
 	case "COMMAND":
 		return t.Peach
-	case "PREVIEW":
+	case "PREVIEW", "EXPLORER":
 		return t.Teal
 	}
 	return t.Blue

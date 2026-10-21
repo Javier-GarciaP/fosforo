@@ -497,9 +497,23 @@ func TestReadOnlyBlocksEditing(t *testing.T) {
 	}
 }
 
-func TestOpenDirectoryFails(t *testing.T) {
-	if _, err := editor.Open(t.TempDir()); err == nil {
-		t.Fatal("abrir un directorio debía fallar")
+func TestOpenDirectoryShowsExplorer(t *testing.T) {
+	dir := t.TempDir()
+	os.WriteFile(filepath.Join(dir, "a.txt"), []byte("hola\n"), 0o644)
+	m, err := editor.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := &ed{t: t, m: m}
+	e.send(tea.WindowSizeMsg{Width: 100, Height: 24})
+	if !e.m.ExplorerVisible() || e.m.Focus() != editor.FocusExplorer {
+		t.Fatal("una carpeta abre el explorador con el foco")
+	}
+	if e.m.Buffer().Path() != "" || e.text() != "" {
+		t.Error("el buffer inicial es un buffer vacío sin nombre")
+	}
+	if !strings.Contains(e.screen(), "a.txt") {
+		t.Errorf("el archivo debe verse en el árbol:\n%s", e.screen())
 	}
 }
 

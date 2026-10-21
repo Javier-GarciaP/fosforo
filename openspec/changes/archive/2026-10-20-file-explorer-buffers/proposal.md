@@ -23,9 +23,11 @@ fuente de buffers nuevos.
 - `buffer-management`: varios buffers abiertos, cambio entre ellos, cierre y detección de cambios externos.
 
 ### Modified Capabilities
+- `app-startup`: `fos <carpeta>` abre el explorador y se añade `--icons=nerd|none` (el ajuste de configuración equivalente llega con `config-search-release`).
+- `ex-commands`: `:e <ruta>` abre en un buffer nuevo en lugar de sustituir el único buffer, y se añaden `:bn`, `:bp`, `:bd`.
 
-Ninguna en `openspec/specs/`. Amplía `editor-view` (anchura del panel y barra de estado con nº de buffers); ese cambio se documenta en el diseño
-y en los requisitos nuevos, sin alterar los requisitos de `editor-view`.
+Amplía además `editor-view` (anchura del panel y `n/m` en la statusline); ese cambio se documenta en el diseño y en los requisitos nuevos,
+sin alterar los requisitos de `editor-view`.
 
 ## Non-goals
 
