@@ -6,8 +6,15 @@ import (
 	"github.com/rivo/uniseg"
 )
 
-// TabWidth es el ancho de un tabulador: avanza hasta la siguiente parada múltiplo de este valor.
-const TabWidth = 4
+// TabWidth es el ancho de un tabulador: avanza hasta la siguiente parada múltiplo de este valor. Se cambia con SetTabWidth.
+var TabWidth = 4
+
+// SetTabWidth fija el ancho de un tabulador (1..16; fuera de ese rango se ignora).
+func SetTabWidth(n int) {
+	if n >= 1 && n <= 16 {
+		TabWidth = n
+	}
+}
 
 // Pos es una posición en el texto: línea y grafema (carácter percibido) dentro de la línea, ambos desde 0.
 // Col puede valer hasta el número de grafemas de la línea (justo después del último).

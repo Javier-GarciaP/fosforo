@@ -16,6 +16,7 @@ var leaderGroups = map[string]string{
 	"space b": "buffers",
 	"space m": "markdown",
 	"space s": "buscar",
+	"space c": "configuración",
 }
 
 // keyLabel es cómo se muestra una tecla en el panel.
@@ -78,7 +79,7 @@ func (m *Model) leaderView() (*ui.LeaderView, string) {
 			title += "  " + name
 		}
 	}
-	entries := leaderEntries(defaultKeymap, registry, mode, m.pending, leaderGroups)
+	entries := leaderEntries(m.keys, registry, mode, m.pending, leaderGroups)
 	if len(entries) == 0 {
 		return nil, ""
 	}

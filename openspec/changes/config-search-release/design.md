@@ -19,11 +19,13 @@ Con las funciones de v1 completas, falta personalización, búsqueda en el proye
 - **Formato: TOML** (legible, comentarios, sin ambigüedades de YAML). Biblioteca `pelletier/go-toml/v2`; alternativa JSON descartada por no admitir comentarios.
 - **Capas:** valores embebidos → archivo de usuario → opciones en tiempo de ejecución (`Space t`). La validación acumula errores por clave y nunca aborta.
 - **Remapeo:** los atajos del usuario se aplican sobre el trie por defecto por contexto; un comando inexistente se rechaza con su nombre.
-- **Tema automático:** consulta OSC 11 del fondo de la terminal con tiempo máximo corto; si no hay respuesta, tema oscuro.
+- **Tema automático:** Bubble Tea pide el fondo (OSC 11) al arrancar y entrega `BackgroundColorMsg`; como la petición es asíncrona nunca bloquea el arranque y, si la terminal no responde, se queda el tema oscuro.
 - **Búsqueda:** `rg --json` por `os/exec` con lectura en streaming y cancelación por contexto; respaldo con `fs.Walk` y lectura por líneas con las mismas exclusiones.
 - **Release:** GoReleaser (matriz Linux/macOS, amd64/arm64, checksums) lanzado por GitHub Actions al crear una etiqueta; una comprobación inicial exige que el commit
   etiquetado sea ancestro de `main`. Alternativa: script propio (más control, más mantenimiento).
-- **Versión:** `-ldflags` inyecta versión y commit; `go install` sin etiqueta muestra `dev`.
+- **Versión:** `-ldflags` inyecta versión y commit; con `go install ...@vX.Y.Z` la versión sale de los metadatos de compilación; un binario de desarrollo muestra `dev`.
+- **Recarga:** `config.reload` (y guardar el propio archivo de configuración) vuelve a aplicar todos los ajustes; los atajos se reconstruyen sobre una copia del trie de fábrica, así que un atajo rechazado nunca deja el trie a medias.
+- **Búsqueda en la interfaz:** reutiliza la ventana de selección con un tipo de ventana de altura fija; lo escrito es la consulta (no un filtro difuso), se lanza 150 ms después de la última tecla y cada consulta nueva cancela la anterior. La consulta es literal con *smart-case*.
 
 ## Risks / Trade-offs
 
@@ -34,4 +36,4 @@ Con las funciones de v1 completas, falta personalización, búsqueda en el proye
 
 ## Open Questions
 
-- Alias corto del comando (p. ej. `fos`) y ruta del módulo: pendientes de crear el repositorio.
+- Ninguna: el comando es `fos` y el módulo es `github.com/Javier-GarciaP/fosforo`.

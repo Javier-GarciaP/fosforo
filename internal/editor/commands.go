@@ -100,7 +100,7 @@ func buildRegistry() *command.Registry[*Model] {
 	}))
 	reg("edit.tab", "Insertar un tabulador", []string{"Tab"}, none(func(m *Model, _ command.Args) {
 		if m.mode == ModeInsert {
-			m.insertText("\t")
+			m.insertText(m.tabText())
 		}
 	}))
 	reg("edit.backspace", "Borrar el carácter anterior", []string{"Backspace"}, none(func(m *Model, _ command.Args) {
@@ -171,6 +171,10 @@ func buildRegistry() *command.Registry[*Model] {
 			m.requestQuit(false)
 		}
 	}))
+	reg("search.project", "Buscar texto en el proyecto", []string{"Space s g"}, func(m *Model, _ command.Args) tea.Cmd { return m.openGrepPicker("Buscar en el proyecto", "") })
+	reg("search.word", "Buscar en el proyecto la palabra bajo el cursor", []string{"Space s w"}, func(m *Model, _ command.Args) tea.Cmd { return m.grepWordUnderCursor() })
+	reg("config.open", "Abrir el archivo de configuración", []string{"Space c o"}, none(func(m *Model, _ command.Args) { m.openConfig() }))
+	reg("config.reload", "Recargar la configuración", []string{"Space c r"}, none(func(m *Model, _ command.Args) { m.reloadConfig() }))
 	reg("theme.toggle", "Alternar entre el tema oscuro y el claro", []string{"Space t"}, none(func(m *Model, _ command.Args) { m.toggleTheme() }))
 	reg("file.find", "Buscar archivos del proyecto", []string{"Space f f"}, func(m *Model, _ command.Args) tea.Cmd { return m.openFilePicker() })
 	reg("file.recent", "Abrir un archivo reciente", []string{"Space f r"}, func(m *Model, _ command.Args) tea.Cmd { return m.openRecentPicker() })
@@ -234,7 +238,7 @@ func buildKeymap() *keymap.Keymap {
 		"space space": "palette.open", "space f f": "file.find", "space f r": "file.recent", "space f n": "file.new",
 		"space e": "explorer.toggle", "space b b": "buffer.pick", "space b n": "buffer.next", "space b p": "buffer.prev",
 		"space b d": "buffer.close", "space w": "file.save", "space q": "buffer.close", "space Q": "app.quit",
-		"space t": "theme.toggle", "space /": "mode.search", "space :": "mode.command", "space h": "help.keys", "space ?": "help.keys",
+		"space t": "theme.toggle", "space s g": "search.project", "space s w": "search.word", "space c o": "config.open", "space c r": "config.reload", "space /": "mode.search", "space :": "mode.command", "space h": "help.keys", "space ?": "help.keys",
 		"space m p": "markdown.toggle", "space m s": "markdown.split",
 	} {
 		bind([]string{"normal", modeExplorer, modePreview}, key, cmd)
@@ -398,6 +402,9 @@ func (m *Model) writeBuffer(path string) bool {
 	}
 	m.refreshExplorer()
 	m.msg, m.msgErr = fmt.Sprintf("%q %dL escritas", m.label, m.buf.LineCount()), false
+	if m.isConfigFile(m.buf.Path()) {
+		m.reloadConfig()
+	}
 	return true
 }
 

@@ -25,7 +25,11 @@ func TestMain(m *testing.M) {
 		os.Stderr.Write(out)
 		os.Exit(1)
 	}
+	// la configuración real del usuario no debe influir en las pruebas
+	cfgDir, _ := os.MkdirTemp("", "fos-cfg")
+	os.Setenv("XDG_CONFIG_HOME", cfgDir)
 	code := m.Run()
+	os.RemoveAll(cfgDir)
 	os.RemoveAll(dir)
 	os.Exit(code)
 }
@@ -137,6 +141,21 @@ func TestVersionDoesNotUseAltScreen(t *testing.T) {
 	}
 	if !strings.HasPrefix(out, "fos ") {
 		t.Errorf("salida inesperada: %q", out)
+	}
+}
+
+func TestVersionFromLdflags(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "fos")
+	flags := "-X github.com/Javier-GarciaP/fosforo/internal/version.Version=9.8.7 -X github.com/Javier-GarciaP/fosforo/internal/version.Commit=abc1234"
+	if out, err := exec.Command("go", "build", "-ldflags", flags, "-o", bin, ".").CombinedOutput(); err != nil {
+		t.Fatalf("%v\n%s", err, out)
+	}
+	out, err := exec.Command(bin, "--version").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.TrimSpace(string(out)); got != "fos 9.8.7 (abc1234)" {
+		t.Errorf("--version = %q", got)
 	}
 }
 

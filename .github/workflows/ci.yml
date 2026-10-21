@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: ripgrep (las pruebas de búsqueda comprueban también el motor rg)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ripgrep
       - run: make vet
       - run: make test
       - run: make build
