@@ -1,14 +1,18 @@
-// Package editor contiene el estado y la lógica del editor.
+// Package editor contiene el estado y la lógica del editor: modos, teclas, comandos y vista.
 package editor
 
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/Javier-GarciaP/fosforo/internal/buffer"
+	"github.com/Javier-GarciaP/fosforo/internal/command"
+	"github.com/Javier-GarciaP/fosforo/internal/keymap"
 	"github.com/Javier-GarciaP/fosforo/internal/ui"
 	"github.com/Javier-GarciaP/fosforo/internal/version"
 )
@@ -22,8 +26,12 @@ const (
 // scrollMargin son las líneas que se mantienen visibles entre el cursor y el borde al desplazarse.
 const scrollMargin = 3
 
-// ModeInsert es la etiqueta del único modo por ahora: se escribe directamente (modal-editing añade el resto).
-const ModeInsert = "INSERT"
+// DefaultTimeout es lo que se espera la siguiente tecla de una secuencia incompleta (p. ej. «g» antes de «gg»).
+const DefaultTimeout = 1000 * time.Millisecond
+
+// TimeoutMsg lo envía el temporizador de una secuencia incompleta. Seq identifica la secuencia: si ya pasó otra
+// tecla, el mensaje es viejo y se ignora.
+type TimeoutMsg struct{ Seq int }
 
 // Model es el modelo de Bubble Tea del editor.
 type Model struct {
@@ -36,6 +44,24 @@ type Model struct {
 	msgErr        bool
 	dialog        *dialog
 	theme         ui.Theme
+	quit          bool
+
+	mode    Mode
+	anchor  buffer.Pos // origen de la selección en Visual
+	prompt  *prompt
+	pending []string // teclas de una secuencia incompleta
+	count   int      // conteo escrito (0 = ninguno)
+	op      string   // operador pendiente: "d", "c" o "y"
+	opCount int      // conteo escrito antes del operador
+	seq     int      // se incrementa con cada tecla; invalida temporizadores viejos
+	timeout time.Duration
+
+	reg           register
+	clipboard     Clipboard
+	exHistory     []string
+	searchHistory []string
+	lastSearch    string
+	lastForward   bool
 }
 
 // dialog es el estado del diálogo «Cambios sin guardar».
@@ -43,9 +69,24 @@ type dialog struct{ selected int }
 
 var dialogButtons = []string{"Guardar (y)", "Descartar (n)", "Cancelar (Esc)"}
 
-// New crea un modelo sobre un buffer ya cargado; label es el nombre que se muestra.
-func New(b *buffer.Buffer, label string) Model {
-	m := Model{buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, theme: ui.Dark()}
+// Option configura el modelo.
+type Option func(*Model)
+
+// WithTimeout cambia la espera de las secuencias incompletas.
+func WithTimeout(d time.Duration) Option { return func(m *Model) { m.timeout = d } }
+
+// WithClipboard cambia cómo se copia al portapapeles (por defecto OSC 52 y la utilidad del sistema).
+func WithClipboard(c Clipboard) Option { return func(m *Model) { m.clipboard = c } }
+
+// New crea un modelo sobre un buffer ya cargado; label es el nombre que se muestra. Empieza en modo Normal.
+func New(b *buffer.Buffer, label string, opts ...Option) Model {
+	m := Model{
+		buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, theme: ui.Dark(),
+		timeout: DefaultTimeout, clipboard: defaultClipboard, lastForward: true,
+	}
+	for _, o := range opts {
+		o(&m)
+	}
 	if ro, why := b.ReadOnly(); ro {
 		m.msg, m.msgErr = "Solo lectura: "+why, true
 	}
@@ -54,138 +95,205 @@ func New(b *buffer.Buffer, label string) Model {
 
 // Open abre path en un modelo nuevo. Sin ruta, empieza con un buffer vacío sin nombre.
 // Si el archivo no existe se muestra vacío y se crea al guardar.
-func Open(path string) (Model, error) {
+func Open(path string, opts ...Option) (Model, error) {
 	if path == "" {
-		return New(buffer.New(""), ""), nil
+		return New(buffer.New(""), "", opts...), nil
 	}
 	b, err := buffer.Open(path)
 	if err != nil {
 		return Model{}, err
 	}
-	return New(b, path), nil
+	return New(b, path, opts...), nil
 }
 
-// Buffer devuelve el buffer en edición.
+// Accesores para la interfaz y las pruebas.
 func (m Model) Buffer() *buffer.Buffer { return m.buf }
+func (m Model) Cursor() buffer.Pos     { return m.cur.Pos }
+func (m Model) Top() int               { return m.top }
+func (m Model) Left() int              { return m.left }
+func (m Model) Mode() Mode             { return m.mode }
+func (m Model) Message() string        { return m.msg }
+func (m Model) DialogOpen() bool       { return m.dialog != nil }
+func (m Model) Quitting() bool         { return m.quit }
+func (m Model) Seq() int               { return m.seq }
 
-// Cursor devuelve la posición del cursor.
-func (m Model) Cursor() buffer.Pos { return m.cur.Pos }
-
-// Top devuelve la primera línea visible y Left la primera columna visual visible.
-func (m Model) Top() int  { return m.top }
-func (m Model) Left() int { return m.left }
-
-// Message devuelve el mensaje de la línea de comandos.
-func (m Model) Message() string { return m.msg }
-
-// DialogOpen indica si el diálogo de cambios sin guardar está abierto.
-func (m Model) DialogOpen() bool { return m.dialog != nil }
+// Pending devuelve las teclas pendientes tal como se muestran en la línea de comandos (p. ej. «3d», «g»).
+func (m Model) Pending() string {
+	var sb strings.Builder
+	if m.opCount > 0 {
+		sb.WriteString(strconv.Itoa(m.opCount))
+	}
+	sb.WriteString(m.op)
+	if m.count > 0 {
+		sb.WriteString(strconv.Itoa(m.count))
+	}
+	sb.WriteString(strings.Join(m.pending, ""))
+	return sb.String()
+}
 
 // Init no lanza comandos iniciales.
 func (m Model) Init() tea.Cmd { return nil }
 
-// Update procesa mensajes: redimensionado, teclas y pegado.
+// Update procesa mensajes: redimensionado, teclas, pegado y temporizador.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 	case tea.KeyPressMsg:
-		return m.key(msg)
+		cmd = m.handleKey(msg)
 	case tea.PasteMsg:
-		m.msg, m.msgErr = "", false
-		m.insert(msg.Content)
+		switch {
+		case m.dialog != nil:
+		case m.mode == ModeCommand:
+			m.prompt.insert(msg.Content)
+		case m.mode == ModeInsert:
+			m.msg, m.msgErr = "", false
+			m.withUndo(func() { m.insertText(msg.Content) })
+		}
+	case TimeoutMsg:
+		if msg.Seq == m.seq && len(m.pending) > 0 {
+			m.resetPending() // la secuencia incompleta se descarta sin cambiar el texto
+		}
 	}
+	m.clampCursor()
 	m.scroll()
-	return m, nil
+	if m.quit {
+		cmd = tea.Sequence(cmd, tea.Quit)
+	}
+	return m, cmd
 }
 
-func (m Model) key(k tea.KeyPressMsg) (tea.Model, tea.Cmd) {
-	m.msg, m.msgErr = "", false
+// handleKey envía una tecla al diálogo, a la línea de comandos o al modo actual.
+func (m *Model) handleKey(k tea.KeyPressMsg) tea.Cmd {
 	if m.dialog != nil {
 		return m.dialogKey(k)
 	}
-	switch k.String() {
-	case "ctrl+s":
-		m.save()
-	case "ctrl+q", "ctrl+c":
-		if m.buf.Modified() {
-			m.dialog = &dialog{}
-		} else {
-			return m, tea.Quit
-		}
-	case "left":
-		m.cur.Left(m.buf)
-	case "right":
-		m.cur.Right(m.buf)
-	case "up":
-		m.cur.Up(m.buf)
-	case "down":
-		m.cur.Down(m.buf)
-	case "home":
-		m.cur.Home(m.buf)
-	case "end":
-		m.cur.End(m.buf)
-	case "pgup":
-		m.cur.PageUp(m.buf, m.pageSize())
-	case "pgdown":
-		m.cur.PageDown(m.buf, m.pageSize())
-	case "enter":
-		m.insert("\n" + m.indentBeforeCursor())
-	case "tab":
-		m.insert("\t")
-	case "backspace":
-		m.backspace()
-	case "delete":
-		m.deleteForward()
-	default:
-		if k.Text != "" && k.Mod&(tea.ModCtrl|tea.ModAlt) == 0 {
-			m.insert(k.Text)
-		}
+	m.seq++
+	m.msg, m.msgErr = "", false
+	if m.mode == ModeCommand {
+		m.promptKey(k)
+		return nil
 	}
-	m.scroll()
-	return m, nil
+	return m.modalKey(k)
 }
 
-func (m Model) dialogKey(k tea.KeyPressMsg) (tea.Model, tea.Cmd) {
-	switch k.String() {
-	case "left", "shift+tab":
-		m.dialog.selected = (m.dialog.selected + len(dialogButtons) - 1) % len(dialogButtons)
-	case "right", "tab":
-		m.dialog.selected = (m.dialog.selected + 1) % len(dialogButtons)
-	case "y":
-		return m.saveAndQuit()
-	case "n":
-		return m, tea.Quit
-	case "esc", "ctrl+c":
-		m.dialog = nil
-	case "enter":
-		switch m.dialog.selected {
-		case 0:
-			return m.saveAndQuit()
-		case 1:
-			return m, tea.Quit
-		default:
-			m.dialog = nil
+func keyName(k tea.KeyPressMsg) string {
+	if s := k.String(); s != " " {
+		return s
+	}
+	return "space"
+}
+
+func isCountKey(key string, count int) bool {
+	return len(key) == 1 && key[0] >= '0' && key[0] <= '9' && (key != "0" || count > 0)
+}
+
+// modalKey resuelve una tecla según el modo: conteos, operadores pendientes y secuencias del keymap.
+func (m *Model) modalKey(k tea.KeyPressMsg) tea.Cmd {
+	key := keyName(k)
+	if key == "esc" || key == "ctrl+c" { // Esc actúa de inmediato, sin esperar ni resolver secuencias
+		return m.dispatchByName("mode.normal", command.Args{})
+	}
+	mode := m.mode.keymapName()
+	if m.op != "" {
+		mode = modeOperator
+	}
+	if m.mode != ModeInsert && len(m.pending) == 0 && isCountKey(key, m.count) {
+		m.count = m.count*10 + int(key[0]-'0')
+		return nil
+	}
+	if m.op != "" && len(m.pending) == 0 && key == m.op { // dd, cc, yy
+		op, total := m.op, max(1, m.opCount)*max(1, m.count)
+		m.resetPending()
+		var cmd tea.Cmd
+		m.withUndo(func() { cmd = m.operatorLines(op, total) })
+		return cmd
+	}
+	res := defaultKeymap.Resolve(mode, m.pending, key)
+	switch res.Status {
+	case keymap.Pending:
+		m.pending = append(m.pending[:len(m.pending):len(m.pending)], key)
+		return m.armTimeout()
+	case keymap.Complete:
+		args := command.Args{Count: m.count, HasCount: m.count > 0}
+		m.pending, m.count = nil, 0
+		return m.dispatchResolved(res.Command, args)
+	}
+	if m.mode == ModeInsert && k.Text != "" && k.Mod&(tea.ModCtrl|tea.ModAlt) == 0 {
+		m.insertText(k.Text) // en Insert, lo que no es un atajo se escribe
+		return nil
+	}
+	m.resetPending() // tecla sin función: se ignora y no escribe nada
+	return nil
+}
+
+// armTimeout programa el descarte de una secuencia incompleta.
+func (m *Model) armTimeout() tea.Cmd {
+	seq := m.seq
+	return tea.Tick(m.timeout, func(time.Time) tea.Msg { return TimeoutMsg{Seq: seq} })
+}
+
+func (m *Model) resetPending() {
+	m.pending, m.count, m.op, m.opCount = nil, 0, "", 0
+}
+
+// dispatchResolved ejecuta el comando al que llevó una secuencia; con un operador pendiente solo valen los movimientos.
+func (m *Model) dispatchResolved(name string, a command.Args) tea.Cmd {
+	if m.op == "" {
+		return m.dispatchByName(name, a)
+	}
+	op, opCount := m.op, m.opCount
+	def, ok := motionByCommand(name)
+	var cmd tea.Cmd
+	if ok {
+		total := max(1, opCount) * max(1, a.Count)
+		m.withUndo(func() { cmd = m.operatorWithMotion(op, def, total, opCount > 0 || a.HasCount) })
+	}
+	m.op, m.opCount = "", 0
+	return cmd
+}
+
+// dispatchByName ejecuta un comando del registro; es el único camino de las teclas, de «:» y (más adelante) de la paleta.
+func (m *Model) dispatchByName(name string, a command.Args) tea.Cmd {
+	var cmd tea.Cmd
+	var err error
+	m.withUndo(func() { cmd, err = registry.Exec(m, name, a) })
+	if err != nil {
+		m.fail(err)
+	}
+	return cmd
+}
+
+// withUndo agrupa en un solo paso de deshacer todo lo que haga fn. Si fn deja el editor en Insert, el grupo sigue
+// abierto hasta salir de Insert: una sesión de escritura entera es un único paso.
+func (m *Model) withUndo(fn func()) {
+	if m.mode != ModeInsert {
+		m.buf.BeginGroup(m.cur.Pos)
+	}
+	fn()
+	if m.mode != ModeInsert {
+		m.buf.EndGroup()
+	}
+}
+
+// setMode cambia de modo; fuera de Insert el cursor no puede quedar después del último carácter.
+func (m *Model) setMode(mode Mode) {
+	m.mode = mode
+	m.clampCursor()
+}
+
+func (m *Model) clampCursor() {
+	m.cur.Pos = m.buf.Clamp(m.cur.Pos)
+	if m.mode == ModeNormal || m.mode.isVisual() {
+		if last := max(0, m.buf.LineLen(m.cur.Line)-1); m.cur.Col > last {
+			m.cur.Pos.Col = last
 		}
 	}
-	return m, nil
 }
 
-func (m Model) saveAndQuit() (tea.Model, tea.Cmd) {
-	if !m.save() {
-		m.dialog = nil // el error se muestra en la línea de comandos y no se sale
-		return m, nil
-	}
-	return m, tea.Quit
-}
-
-// save guarda el buffer y deja el resultado en la línea de comandos. Devuelve si se guardó.
-func (m *Model) save() bool {
-	err := m.buf.Save()
+func (m *Model) reportSaveError(err error) {
 	switch {
-	case err == nil:
-		m.msg = fmt.Sprintf("%q %dL escritas", m.label, m.buf.LineCount())
-		return true
 	case errors.Is(err, buffer.ErrNoPath):
 		m.msg, m.msgErr = "E32: sin nombre de archivo", true
 	case errors.Is(err, buffer.ErrReadOnly):
@@ -193,7 +301,6 @@ func (m *Model) save() bool {
 	default:
 		m.msg, m.msgErr = "E212: no se puede guardar: "+err.Error(), true
 	}
-	return false
 }
 
 func (m *Model) readOnlyMessage() string {
@@ -201,7 +308,7 @@ func (m *Model) readOnlyMessage() string {
 	return "Solo lectura (" + why + "): no se puede modificar"
 }
 
-// edit ejecuta una modificación del buffer y atiende el caso de solo lectura. Devuelve si se aplicó.
+// edit atiende el resultado de una modificación del buffer (aviso de solo lectura o error). Devuelve si se aplicó.
 func (m *Model) edit(err error) bool {
 	if err == nil {
 		return true
@@ -214,7 +321,7 @@ func (m *Model) edit(err error) bool {
 	return false
 }
 
-func (m *Model) insert(text string) {
+func (m *Model) insertText(text string) {
 	_, end, err := m.buf.Insert(m.cur.Pos, text)
 	if m.edit(err) {
 		m.cur.Set(m.buf, end)
@@ -254,6 +361,48 @@ func (m Model) indentBeforeCursor() string {
 
 func (m Model) pageSize() int { return max(1, ui.TextRows(m.height)-1) }
 
+// ---- diálogo «Cambios sin guardar» ----
+
+func (m *Model) dialogKey(k tea.KeyPressMsg) tea.Cmd {
+	switch k.String() {
+	case "left", "shift+tab":
+		m.dialog.selected = (m.dialog.selected + len(dialogButtons) - 1) % len(dialogButtons)
+	case "right", "tab":
+		m.dialog.selected = (m.dialog.selected + 1) % len(dialogButtons)
+	case "y":
+		m.saveAndQuit()
+	case "n":
+		m.quit = true
+	case "esc", "ctrl+c":
+		m.closeDialog()
+	case "enter":
+		switch m.dialog.selected {
+		case 0:
+			m.saveAndQuit()
+		case 1:
+			m.quit = true
+		default:
+			m.closeDialog()
+		}
+	}
+	return nil
+}
+
+func (m *Model) closeDialog() {
+	m.dialog = nil
+	m.msg, m.msgErr = "", false
+}
+
+func (m *Model) saveAndQuit() {
+	if !m.save("") {
+		m.dialog = nil // el error se muestra en la línea de comandos y no se sale
+		return
+	}
+	m.quit = true
+}
+
+// ---- vista ----
+
 // scroll ajusta la vista para que el cursor quede visible, con margen vertical y sin partir líneas.
 func (m *Model) scroll() {
 	if m.width == 0 || m.height == 0 {
@@ -292,16 +441,28 @@ func (m Model) TooSmall() bool {
 func (m Model) view() ui.EditorView {
 	v := ui.EditorView{
 		Buf: m.buf, Cursor: m.cur.Pos, Top: m.top, Left: m.left,
-		Mode: ModeInsert, PathLabel: m.label, Message: m.msg, IsError: m.msgErr,
+		Mode: m.mode.Label(), PathLabel: m.label, Message: m.msg, IsError: m.msgErr, Pending: m.Pending(),
+	}
+	if m.mode.isVisual() {
+		r := m.visualRange()
+		end := r.end
+		if !r.linewise && end.Col > 0 {
+			end.Col--
+		}
+		v.Selection = &ui.Selection{Start: r.start, End: end, Linewise: r.linewise}
+		if lines := r.end.Line - r.start.Line + 1; lines > 1 {
+			v.Info = fmt.Sprintf("%d líneas", lines)
+		} else {
+			v.Info = fmt.Sprintf("%d car.", max(1, buffer.Count(m.buf.Range(r.start, r.end))))
+		}
+	}
+	if m.prompt != nil {
+		v.Prompt = &ui.Prompt{Prefix: m.prompt.prefix, Text: m.prompt.String(), Cursor: m.prompt.cur}
 	}
 	if m.dialog != nil {
-		name := m.label
-		if name == "" {
-			name = "[Sin nombre]"
-		}
 		v.Dialog = &ui.Dialog{
 			Title:    "Cambios sin guardar",
-			Lines:    []string{fmt.Sprintf("%q tiene cambios sin guardar.", name), "¿Qué quieres hacer?"},
+			Lines:    []string{fmt.Sprintf("%q tiene cambios sin guardar.", m.label0()), "¿Qué quieres hacer?"},
 			Buttons:  dialogButtons,
 			Selected: m.dialog.selected,
 			Hint:     "←→ elegir   ⏎ confirmar",
@@ -323,15 +484,14 @@ func (m Model) View() tea.View {
 		v = tea.NewView(ui.RenderEditor(ev, m.width, m.height, m.theme))
 		if x, y, ok := ui.CursorCell(ev, m.width, m.height); ok {
 			c := tea.NewCursor(x, y)
-			c.Shape = tea.CursorBar
+			c.Shape = tea.CursorBlock
+			if m.mode == ModeInsert || m.mode == ModeCommand {
+				c.Shape = tea.CursorBar
+			}
 			v.Cursor = c
 		}
 	}
 	v.AltScreen = true
-	name := m.label
-	if name == "" {
-		name = "[Sin nombre]"
-	}
-	v.WindowTitle = name + " - " + version.Name
+	v.WindowTitle = m.label0() + " - " + version.Name
 	return v
 }

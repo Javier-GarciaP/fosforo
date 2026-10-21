@@ -25,7 +25,8 @@ func (b *Buffer) SaveAs(path string) error {
 	if err := writeFileAtomic(path, data); err != nil {
 		return err
 	}
-	b.path, b.modified, b.origEmpty = path, false, len(data) == 0
+	b.path, b.origEmpty = path, len(data) == 0
+	b.savedVersion = b.version
 	return nil
 }
 

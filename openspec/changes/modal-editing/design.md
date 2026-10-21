@@ -27,6 +27,21 @@ introduce la capa de intención (comandos, modos, teclas) entre la entrada de Bu
 - **Portapapeles:** secuencia OSC 52 (funciona por SSH/tmux) con respaldo a la utilidad del sistema si existe.
 - **Búsqueda:** `regexp` de Go sobre el buffer; sin resaltado persistente en v1.
 
+- **Decisiones tomadas al implementar:**
+  - `command.Registry` es genérico en el estado (`Registry[*editor.Model]`) para que `command` no dependa de `editor`; los comandos de `editor` solo
+    devuelven un `tea.Cmd` cuando hace falta (portapapeles, temporizador): salir es un indicador del modelo (`Quitting()`), lo que simplifica las pruebas.
+  - Las motions son una tabla (`motionDefs`) de la que salen a la vez el comando, las teclas de Normal/Visual/operador y el rango de los operadores.
+    El árbol de teclas «operator» solo contiene motions; `dd`/`cc`/`yy` se detectan repitiendo la tecla del operador.
+  - Reglas de Vim aplicadas: motion exclusiva que acaba en la columna 0 termina en la línea anterior (así `dw` no une líneas), `cw` actúa como `ce`
+    y el cursor en Normal nunca queda después del último carácter.
+  - Deshacer: `buffer` guarda grupos de `Edit`; `editor.withUndo` abre un grupo por orden y lo mantiene abierto mientras el modo es Insert. «Modificado»
+    se calcula por versión (ediciones aplicadas) frente a la versión guardada, así deshacer hasta lo guardado quita `[+]`.
+  - Temporizador: cada tecla incrementa un contador y el `tea.Tick` lleva el valor; un `TimeoutMsg` viejo se ignora.
+  - `Ctrl+C` actúa como `Esc` (no sale) y `Ctrl+Q` queda sin asignar. En Insert las flechas cruzan de línea (como en VS Code).
+  - Portapapeles: se envía OSC 52 y, si existe, `wl-copy`/`xclip`/`xsel`/`pbcopy`; solo `y` copia (borrar no toca el portapapeles).
+  - La búsqueda es por línea (no hay coincidencias entre líneas); `:e` sustituye el único buffer hasta que lleguen los buffers múltiples.
+  - Fuera de la lista cerrada se dejó a propósito: `X`, `s`, `?`, `.`, objetos de texto y `p` en Visual.
+
 ## Risks / Trade-offs
 
 - [Teclados en español: teclas muertas (`~`, `` ` ``, `^`) y `<`/`>` en posiciones distintas] → probar con distribución española desde el inicio; no depender de combinaciones raras.

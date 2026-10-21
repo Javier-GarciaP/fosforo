@@ -24,10 +24,10 @@ construye justo después del núcleo de edición y antes de explorador, paleta o
 - `ex-commands`: línea de comandos `:` y sus comandos.
 
 ### Modified Capabilities
+- `insert-typing`: se retira el requisito transitorio «Transitional save and quit» (`Ctrl+Q` ya no existe; `Ctrl+S` pasa a `modal-input`).
+- `app-startup`: la salida normal pasa a ser `:q` (antes `Ctrl+Q`/`Ctrl+C`).
 
-Ninguna en `openspec/specs/`. Este cambio sustituye el requisito transitorio "Transitional save and quit" de `core-text-editing`
-(`Ctrl+Q` pasa a ser `:q`/`:wq`; `Ctrl+S` se conserva, ver `modal-input`). Esa spec aún no está archivada, por lo que
-`core-text-editing` debe archivarse antes de implementar este cambio.
+`core-text-editing` ya está archivado, así que este cambio lo modifica con deltas normales.
 
 ## Non-goals
 

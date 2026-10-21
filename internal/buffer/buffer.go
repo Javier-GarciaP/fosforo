@@ -42,9 +42,14 @@ type Buffer struct {
 	crlf      bool // terminador CRLF en lugar de LF
 	finalNL   bool // el archivo termina con salto de línea
 	origEmpty bool // el archivo en disco estaba vacío (o no existía)
-	modified  bool
 	readOnly  bool
 	roReason  string
+
+	// Historial de deshacer (ver history.go). La versión cuenta las ediciones aplicadas; el buffer está
+	// modificado cuando su versión difiere de la que se guardó.
+	hist         history
+	version      int
+	savedVersion int // versión guardada en disco; -1 si ya no se puede volver a ella
 }
 
 // New crea un buffer vacío con nombre opcional. No toca el disco.
@@ -125,8 +130,8 @@ func (b *Buffer) Text() string {
 // Path devuelve el nombre del archivo ("" si no tiene).
 func (b *Buffer) Path() string { return b.path }
 
-// Modified indica si hay cambios sin guardar.
-func (b *Buffer) Modified() bool { return b.modified }
+// Modified indica si hay cambios sin guardar. Deshacer hasta el punto guardado deja el buffer sin modificar.
+func (b *Buffer) Modified() bool { return b.version != b.savedVersion }
 
 // ReadOnly indica si el buffer no se puede editar y por qué.
 func (b *Buffer) ReadOnly() (bool, string) { return b.readOnly, b.roReason }
@@ -183,9 +188,18 @@ func (b *Buffer) Range(start, end Pos) string {
 	return sb.String()
 }
 
-// Apply aplica una edición y devuelve la posición justo después del texto insertado.
+// Apply aplica una edición, la anota en el historial de deshacer y devuelve la posición justo después del texto insertado.
 // Falla sin modificar nada si el buffer es de solo lectura, la posición no existe o el texto a eliminar no coincide.
 func (b *Buffer) Apply(e Edit) (Pos, error) {
+	end, err := b.apply(e)
+	if err == nil {
+		b.record(e)
+	}
+	return end, err
+}
+
+// apply aplica una edición sin tocar el historial.
+func (b *Buffer) apply(e Edit) (Pos, error) {
 	if b.readOnly {
 		return e.Start, ErrReadOnly
 	}
@@ -207,7 +221,6 @@ func (b *Buffer) Apply(e Edit) (Pos, error) {
 	lines = append(lines, repl...)
 	lines = append(lines, b.lines[end.Line+1:]...)
 	b.lines = lines
-	b.modified = true
 	return endOf(e.Start, strings.ReplaceAll(e.Inserted, "\r\n", "\n")), nil
 }
 
