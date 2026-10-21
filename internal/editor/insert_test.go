@@ -33,8 +33,10 @@ var (
 	keyEsc       = tea.KeyPressMsg{Code: tea.KeyEscape}
 	keyTab       = tea.KeyPressMsg{Code: tea.KeyTab}
 	keyCtrlS     = tea.KeyPressMsg{Code: 's', Mod: tea.ModCtrl}
-	keyCtrlQ     = tea.KeyPressMsg{Code: 'q', Mod: tea.ModCtrl}
 	keyCtrlC     = tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
+	keyCtrlR     = tea.KeyPressMsg{Code: 'r', Mod: tea.ModCtrl}
+	keyCtrlD     = tea.KeyPressMsg{Code: 'd', Mod: tea.ModCtrl}
+	keyCtrlU     = tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 )
 
 // ed envuelve un modelo para encadenar mensajes en las pruebas sin ejecutar el bucle de Bubble Tea.
@@ -44,22 +46,25 @@ type ed struct {
 	quit bool
 }
 
-func newEd(t *testing.T, content string) *ed {
+// newEd crea un editor de 80x24 en modo Normal sobre content.
+func newEd(t *testing.T, content string, opts ...editor.Option) *ed {
 	t.Helper()
-	e := &ed{t: t, m: editor.New(buffer.FromString("", content), "")}
+	e := &ed{t: t, m: editor.New(buffer.FromString("", content), "", opts...)}
 	e.send(tea.WindowSizeMsg{Width: 80, Height: 24})
 	return e
 }
 
+// newIns crea un editor ya en modo Insert (las pruebas de escritura).
+func newIns(t *testing.T, content string) *ed {
+	t.Helper()
+	return newEd(t, content).typ("i")
+}
+
 func (e *ed) send(msgs ...tea.Msg) *ed {
 	for _, msg := range msgs {
-		nm, cmd := e.m.Update(msg)
+		nm, _ := e.m.Update(msg)
 		e.m = nm.(editor.Model)
-		if cmd != nil {
-			if _, ok := cmd().(tea.QuitMsg); ok {
-				e.quit = true
-			}
-		}
+		e.quit = e.m.Quitting()
 	}
 	return e
 }
@@ -71,6 +76,9 @@ func (e *ed) typ(s string) *ed {
 	return e
 }
 
+// ex ejecuta una línea de la línea de comandos: ex("wq") escribe «:wq» y Enter.
+func (e *ed) ex(line string) *ed { return e.typ(":" + line).send(keyEnter) }
+
 func (e *ed) text() string { return e.m.Buffer().Text() }
 
 func (e *ed) at(line, col int) {
@@ -81,7 +89,7 @@ func (e *ed) at(line, col int) {
 }
 
 func TestTypeAndNewline(t *testing.T) {
-	e := newEd(t, "").typ("ab").send(keyEnter).typ("c")
+	e := newIns(t, "").typ("ab").send(keyEnter).typ("c")
 	if e.m.Buffer().LineCount() != 2 || e.m.Buffer().Line(0) != "ab" || e.m.Buffer().Line(1) != "c" {
 		t.Fatalf("líneas: %q %q", e.m.Buffer().Line(0), e.m.Buffer().Line(1))
 	}
@@ -105,7 +113,7 @@ func TestEnterKeepsIndentation(t *testing.T) {
 		{"parte media", "  abcd", 4, "  ab", "  cd", 2},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			e := newEd(t, tc.content)
+			e := newIns(t, tc.content)
 			for i := 0; i < tc.col; i++ {
 				e.send(keyRight)
 			}
@@ -124,7 +132,7 @@ func TestEnterKeepsIndentation(t *testing.T) {
 }
 
 func TestBackspaceJoinsLines(t *testing.T) {
-	e := newEd(t, "ab\ncd\n").send(keyDown, keyHome, keyBackspace)
+	e := newIns(t, "ab\ncd\n").send(keyDown, keyHome, keyBackspace)
 	if e.m.Buffer().LineCount() != 1 || e.m.Buffer().Line(0) != "abcd" {
 		t.Fatalf("buffer: %q", e.text())
 	}
@@ -132,7 +140,7 @@ func TestBackspaceJoinsLines(t *testing.T) {
 }
 
 func TestDeleteJoinsLines(t *testing.T) {
-	e := newEd(t, "ab\ncd\n").send(keyEnd, keyDelete)
+	e := newIns(t, "ab\ncd\n").send(keyEnd, keyDelete)
 	if e.m.Buffer().Line(0) != "abcd" || e.m.Buffer().LineCount() != 1 {
 		t.Fatalf("buffer: %q", e.text())
 	}
@@ -144,7 +152,7 @@ func TestDeleteJoinsLines(t *testing.T) {
 }
 
 func TestBackspaceDeleteAtLimitsDoNothing(t *testing.T) {
-	e := newEd(t, "ab\n")
+	e := newIns(t, "ab\n")
 	e.send(keyBackspace)
 	if e.m.Buffer().Modified() {
 		t.Error("Backspace al inicio del texto no debe modificar")
@@ -156,7 +164,7 @@ func TestBackspaceDeleteAtLimitsDoNothing(t *testing.T) {
 }
 
 func TestBackspaceRemovesWholeEmoji(t *testing.T) {
-	e := newEd(t, "").typ("a👨‍👩‍👧b")
+	e := newIns(t, "").typ("a👨‍👩‍👧b")
 	e.send(keyBackspace).send(keyBackspace)
 	if got := e.m.Buffer().Line(0); got != "a" {
 		t.Errorf("tras dos Backspace: %q, quería %q", got, "a")
@@ -164,14 +172,14 @@ func TestBackspaceRemovesWholeEmoji(t *testing.T) {
 }
 
 func TestTabInsertsTab(t *testing.T) {
-	e := newEd(t, "").send(keyTab).typ("x")
+	e := newIns(t, "").send(keyTab).typ("x")
 	if got := e.m.Buffer().Line(0); got != "\tx" {
 		t.Errorf("línea = %q", got)
 	}
 }
 
 func TestPasteInsertsText(t *testing.T) {
-	e := newEd(t, "").send(tea.PasteMsg{Content: "uno\r\ndos\ntres"})
+	e := newIns(t, "").send(tea.PasteMsg{Content: "uno\r\ndos\ntres"})
 	if e.m.Buffer().LineCount() != 3 || e.m.Buffer().Line(2) != "tres" {
 		t.Errorf("buffer: %q", e.text())
 	}
@@ -179,14 +187,14 @@ func TestPasteInsertsText(t *testing.T) {
 }
 
 func TestControlKeysDoNotInsertText(t *testing.T) {
-	e := newEd(t, "").send(tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl}, tea.KeyPressMsg{Code: 'x', Mod: tea.ModAlt}, keyEsc)
+	e := newIns(t, "").send(tea.KeyPressMsg{Code: 'a', Mod: tea.ModCtrl}, tea.KeyPressMsg{Code: 'x', Mod: tea.ModAlt}, keyEsc)
 	if e.m.Buffer().Modified() {
 		t.Errorf("las teclas con Ctrl/Alt no deben escribir: %q", e.text())
 	}
 }
 
 func TestArrowsHomeEnd(t *testing.T) {
-	e := newEd(t, "abc\n日本\n")
+	e := newIns(t, "abc\n日本\n")
 	e.send(keyRight, keyRight)
 	e.at(0, 2)
 	e.send(keyEnd)
@@ -202,7 +210,7 @@ func TestArrowsHomeEnd(t *testing.T) {
 }
 
 func TestVerticalKeepsDesiredColumn(t *testing.T) {
-	e := newEd(t, "01234567890123456789012\nabcde\n01234567890123456789012\n")
+	e := newIns(t, "01234567890123456789012\nabcde\n01234567890123456789012\n")
 	for i := 0; i < 20; i++ {
 		e.send(keyRight)
 	}
@@ -267,7 +275,7 @@ func TestScrollStopsAtEndOfFile(t *testing.T) {
 
 func TestHorizontalScroll(t *testing.T) {
 	long := strings.Repeat("0123456789", 20) // 200 columnas
-	e := newEd(t, long+"\ncorta\n")
+	e := newIns(t, long+"\ncorta\n")
 	e.send(keyEnd)
 	// ancho de texto = 80 - 4 de gutter = 76
 	if e.m.Left() != 200-76+1 {
@@ -284,7 +292,7 @@ func TestHorizontalScroll(t *testing.T) {
 }
 
 func TestResizeKeepsCursorVisible(t *testing.T) {
-	e := newEd(t, strings.Repeat("a", 70)+"\n")
+	e := newIns(t, strings.Repeat("a", 70)+"\n")
 	e.send(keyEnd)
 	if e.m.Left() != 0 {
 		t.Fatalf("con 80 columnas la línea cabe: left = %d", e.m.Left())
@@ -312,7 +320,7 @@ func TestSaveWithCtrlS(t *testing.T) {
 		t.Fatal(err)
 	}
 	e := &ed{t: t, m: m}
-	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}, keyEnd).typ("!").send(keyCtrlS)
+	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("i").send(keyEnd).typ("!").send(keyCtrlS)
 	if got, _ := os.ReadFile(p); string(got) != "uno!\n" {
 		t.Errorf("archivo = %q", got)
 	}
@@ -328,7 +336,7 @@ func TestSaveWithCtrlS(t *testing.T) {
 }
 
 func TestSaveWithoutNameShowsError(t *testing.T) {
-	e := newEd(t, "").typ("x").send(keyCtrlS)
+	e := newIns(t, "").typ("x").send(keyCtrlS)
 	if !strings.HasPrefix(e.m.Message(), "E32") {
 		t.Errorf("mensaje = %q", e.m.Message())
 	}
@@ -343,7 +351,7 @@ func TestSaveFailureShowsErrorAndKeepsModified(t *testing.T) {
 	os.WriteFile(p, []byte("a\n"), 0o644)
 	m, _ := editor.Open(p)
 	e := &ed{t: t, m: m}
-	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("x")
+	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("ix")
 	os.Chmod(dir, 0o555)
 	defer os.Chmod(dir, 0o755)
 	e.send(keyCtrlS)
@@ -356,18 +364,34 @@ func TestSaveFailureShowsErrorAndKeepsModified(t *testing.T) {
 }
 
 func TestQuitWithoutChanges(t *testing.T) {
-	for _, k := range []tea.KeyPressMsg{keyCtrlQ, keyCtrlC} {
-		e := newEd(t, "hola\n").send(k)
-		if !e.quit || e.m.DialogOpen() {
-			t.Errorf("%v sin cambios debe salir directamente", k)
-		}
+	e := newEd(t, "hola\n").ex("q")
+	if !e.quit || e.m.DialogOpen() {
+		t.Error(":q sin cambios debe salir directamente")
+	}
+	e = newEd(t, "hola\n").send(keyCtrlC)
+	if e.quit {
+		t.Error("Ctrl+C no sale: cancela, como Esc")
+	}
+}
+
+func TestCtrlQIsNoLongerBound(t *testing.T) {
+	e := newEd(t, "hola\n").send(tea.KeyPressMsg{Code: 'q', Mod: tea.ModCtrl})
+	if e.quit || e.m.DialogOpen() {
+		t.Error("Ctrl+Q ya no está asignada")
+	}
+	e = newIns(t, "").send(tea.KeyPressMsg{Code: 'q', Mod: tea.ModCtrl})
+	if e.quit || e.m.Buffer().Modified() {
+		t.Error("Ctrl+Q no sale ni escribe en Insert")
 	}
 }
 
 func TestQuitWithChangesAsksFirst(t *testing.T) {
-	e := newEd(t, "hola\n").typ("x").send(keyCtrlQ)
+	e := newIns(t, "hola\n").typ("x").send(keyEsc).ex("q")
 	if e.quit || !e.m.DialogOpen() {
 		t.Fatalf("con cambios debe abrir el diálogo y no salir (quit=%v)", e.quit)
+	}
+	if got := e.m.Message(); got != "E37: cambios sin guardar (usa :q! para descartarlos)" {
+		t.Errorf("mensaje = %q", got)
 	}
 	e.send(keyEsc)
 	if e.quit || e.m.DialogOpen() {
@@ -377,13 +401,20 @@ func TestQuitWithChangesAsksFirst(t *testing.T) {
 		t.Errorf("el texto no debe cambiar: %q", got)
 	}
 
-	e.send(keyCtrlQ).typ("zzz") // el diálogo ignora el texto
+	e.ex("q").typ("zzz") // el diálogo ignora el texto
 	if got := e.m.Buffer().Line(0); got != "xhola" {
 		t.Errorf("el diálogo no debe dejar escribir: %q", got)
 	}
 	e.send(tea.KeyPressMsg{Code: 'n', Text: "n"})
 	if !e.quit {
 		t.Fatal("«Descartar» debe salir")
+	}
+}
+
+func TestQuitBangDiscards(t *testing.T) {
+	e := newIns(t, "hola\n").typ("x").send(keyEsc).ex("q!")
+	if !e.quit || e.m.DialogOpen() {
+		t.Error(":q! sale sin preguntar")
 	}
 }
 
@@ -394,7 +425,7 @@ func TestDialogSaveAndQuit(t *testing.T) {
 			os.WriteFile(p, []byte("a\n"), 0o644)
 			m, _ := editor.Open(p)
 			e := &ed{t: t, m: m}
-			e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("b").send(keyCtrlQ)
+			e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("ib").send(keyEsc).ex("q")
 			if how == "y" {
 				e.typ("y")
 			} else {
@@ -411,27 +442,23 @@ func TestDialogSaveAndQuit(t *testing.T) {
 }
 
 func TestDialogNavigation(t *testing.T) {
-	e := newEd(t, "").typ("x").send(keyCtrlQ)
-	e.send(keyRight, keyEnter) // «Descartar»
+	open := func() *ed { return newIns(t, "").typ("x").send(keyEsc).ex("q") }
+	e := open().send(keyRight, keyEnter) // «Descartar»
 	if !e.quit {
 		t.Fatal("Descartar con Enter debe salir")
 	}
-
-	e = newEd(t, "").typ("x").send(keyCtrlQ)
-	e.send(keyRight, keyRight, keyEnter) // «Cancelar»
+	e = open().send(keyRight, keyRight, keyEnter) // «Cancelar»
 	if e.quit || e.m.DialogOpen() {
 		t.Fatal("Cancelar con Enter cierra el diálogo")
 	}
-
-	e = newEd(t, "").typ("x").send(keyCtrlQ)
-	e.send(keyLeft, keyEnter) // vuelta circular a «Cancelar»
+	e = open().send(keyLeft, keyEnter) // vuelta circular a «Cancelar»
 	if e.quit || e.m.DialogOpen() {
 		t.Fatal("Left desde «Guardar» pasa a «Cancelar»")
 	}
 }
 
 func TestDialogSaveFailureStaysOpenEditor(t *testing.T) {
-	e := newEd(t, "").typ("x").send(keyCtrlQ, tea.KeyPressMsg{Code: 'y', Text: "y"}) // sin nombre: no se puede guardar
+	e := newIns(t, "").typ("x").send(keyEsc).ex("q").typ("y") // sin nombre: no se puede guardar
 	if e.quit {
 		t.Fatal("si falla el guardado no se sale")
 	}
@@ -451,7 +478,7 @@ func TestReadOnlyBlocksEditing(t *testing.T) {
 		t.Errorf("al abrir debe avisar: %q", m.Message())
 	}
 	e := &ed{t: t, m: m}
-	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("x")
+	e.send(tea.WindowSizeMsg{Width: 80, Height: 24}).typ("ix")
 	if e.m.Buffer().Modified() || e.text() != "ab\x00cd" {
 		t.Fatalf("el texto cambió: %q", e.text())
 	}
@@ -464,7 +491,7 @@ func TestReadOnlyBlocksEditing(t *testing.T) {
 	if e.m.Buffer().Modified() || e.text() != "ab\x00cd" {
 		t.Fatalf("el texto cambió: %q", e.text())
 	}
-	e.send(keyCtrlQ)
+	e.send(keyEsc).ex("q")
 	if !e.quit {
 		t.Error("un buffer de solo lectura sale sin diálogo")
 	}
@@ -518,7 +545,7 @@ func TestViewBeforeFirstSizeDoesNotPanic(t *testing.T) {
 }
 
 func TestViewCursorFollowsText(t *testing.T) {
-	e := newEd(t, "").typ("ab")
+	e := newIns(t, "").typ("ab")
 	v := e.m.View()
 	if v.Cursor == nil {
 		t.Fatal("la vista debe incluir el cursor")
@@ -527,8 +554,7 @@ func TestViewCursorFollowsText(t *testing.T) {
 	if v.Cursor.X != 6 || v.Cursor.Y != 0 {
 		t.Errorf("cursor en (%d,%d), quería (6,0)", v.Cursor.X, v.Cursor.Y)
 	}
-	e.send(keyCtrlQ)
-	e.typ("")
+	e.send(keyEsc).ex("q")
 	if e.m.DialogOpen() && e.m.View().Cursor != nil {
 		t.Error("con el diálogo abierto no se muestra el cursor de edición")
 	}
@@ -544,13 +570,15 @@ func TestTeatestTypeSaveQuit(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "doc.txt")
 	m, _ := editor.Open(p)
 	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(80, 24))
-	teatest.WaitFor(t, tm.Output(), contains("INSERT"), teatest.WithDuration(wait))
-	tm.Type("hola")
+	teatest.WaitFor(t, tm.Output(), contains("NORMAL"), teatest.WithDuration(wait))
+	tm.Type("ihola")
 	tm.Send(keyEnter)
 	tm.Type("mundo")
 	tm.Send(keyCtrlS)
 	teatest.WaitFor(t, tm.Output(), contains("escritas"), teatest.WithDuration(wait))
-	tm.Send(keyCtrlQ)
+	tm.Send(keyEsc)
+	tm.Type(":q")
+	tm.Send(keyEnter)
 	tm.WaitFinished(t, teatest.WithFinalTimeout(wait))
 	if got, _ := os.ReadFile(p); string(got) != "hola\nmundo\n" {
 		t.Errorf("archivo = %q", got)
@@ -560,8 +588,10 @@ func TestTeatestTypeSaveQuit(t *testing.T) {
 func TestTeatestUnsavedDialog(t *testing.T) {
 	m, _ := editor.Open("")
 	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(80, 24))
-	tm.Type("x")
-	tm.Send(keyCtrlQ)
+	tm.Type("ix")
+	tm.Send(keyEsc)
+	tm.Type(":q")
+	tm.Send(keyEnter)
 	teatest.WaitFor(t, tm.Output(), contains("Cambios sin guardar"), teatest.WithDuration(wait))
 	tm.Type("n")
 	tm.WaitFinished(t, teatest.WithFinalTimeout(wait))
@@ -572,8 +602,9 @@ func TestTeatestResize(t *testing.T) {
 	tm := teatest.NewTestModel(t, m, teatest.WithInitialTermSize(30, 8))
 	teatest.WaitFor(t, tm.Output(), contains("demasiado pequeña"), teatest.WithDuration(wait))
 	tm.Send(tea.WindowSizeMsg{Width: 80, Height: 24})
-	teatest.WaitFor(t, tm.Output(), contains("INSERT"), teatest.WithDuration(wait))
-	tm.Send(keyCtrlQ)
+	teatest.WaitFor(t, tm.Output(), contains("NORMAL"), teatest.WithDuration(wait))
+	tm.Type(":q")
+	tm.Send(keyEnter)
 	tm.WaitFinished(t, teatest.WithFinalTimeout(wait))
 }
 

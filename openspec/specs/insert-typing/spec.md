@@ -22,10 +22,3 @@ The system SHALL support the arrow keys, Home, End, PageUp and PageDown to move 
 #### Scenario: Flecha abajo en línea más corta
 - **WHEN** el cursor está en la columna 20 y la línea siguiente tiene 5 caracteres
 - **THEN** el cursor baja a la columna 5 y al volver a bajar a una línea larga recupera la columna 20
-
-### Requirement: Transitional save and quit
-Until modal editing exists, the system SHALL save with `Ctrl+S` and quit with `Ctrl+Q`, and MUST ask for confirmation before quitting with unsaved changes.
-
-#### Scenario: Salir con cambios
-- **WHEN** se pulsa `Ctrl+Q` con cambios sin guardar
-- **THEN** se muestra el diálogo de cambios sin guardar (ver `docs/design/exports/10-dialogo-cambios-sin-guardar.png`) y no se sale hasta confirmar

@@ -17,6 +17,19 @@ type Dialog struct {
 	Hint     string
 }
 
+// Selection es el rango seleccionado en modo Visual: de Start a End, ambos incluidos y ya ordenados.
+type Selection struct {
+	Start, End buffer.Pos
+	Linewise   bool
+}
+
+// Prompt es la línea de comandos en edición («:wq», «/patrón»).
+type Prompt struct {
+	Prefix string
+	Text   string
+	Cursor int // posición del cursor dentro de Text, en grafemas
+}
+
 // EditorView es todo lo que hace falta para dibujar el editor; el dibujo no tiene efectos secundarios.
 type EditorView struct {
 	Buf       *buffer.Buffer
@@ -26,6 +39,10 @@ type EditorView struct {
 	PathLabel string // nombre mostrado; si está vacío se muestra [Sin nombre]
 	Message   string // mensaje de la línea de comandos
 	IsError   bool
+	Pending   string     // teclas pendientes de completar (p. ej. «3d»)
+	Info      string     // texto de la statusline en lugar de «utf-8  LF» (p. ej. «3 líneas» en Visual)
+	Selection *Selection // selección de Visual, o nil
+	Prompt    *Prompt    // línea de comandos en edición, o nil
 	Dialog    *Dialog
 }
 
@@ -40,6 +57,10 @@ func TextCols(w, lines int) int { return max(1, w-GutterWidth(lines)) }
 
 // CursorCell devuelve la celda de pantalla donde debe mostrarse el cursor, y false si no es visible.
 func CursorCell(v EditorView, w, h int) (x, y int, ok bool) {
+	if v.Prompt != nil && v.Dialog == nil {
+		x = textWidth(v.Prompt.Prefix) + buffer.VisualCol(v.Prompt.Text, v.Prompt.Cursor)
+		return x, h - 1, x < w
+	}
 	x = GutterWidth(v.Buf.LineCount()) + buffer.VisualCol(v.Buf.Line(v.Cursor.Line), v.Cursor.Col) - v.Left
 	y = v.Cursor.Line - v.Top
 	ok = v.Dialog == nil && y >= 0 && y < TextRows(h) && x >= GutterWidth(v.Buf.LineCount()) && x < w
@@ -66,7 +87,13 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 		}
 		num := strconv.Itoa(i + 1)
 		g.put(gw-1-len(num), r, num, numStyle)
-		drawLine(g, gw, r, v.Buf.Line(i), v.Left, tw, rowStyle)
+		from, to := v.Selection.cols(i, v.Buf.LineLen(i))
+		drawLine(g, gw, r, v.Buf.Line(i), v.Left, tw, rowStyle, th.Visual, from, to)
+		if to > v.Buf.LineLen(i) { // la selección incluye el salto de línea: se marca una celda tras el texto
+			if x := buffer.VisualCol(v.Buf.Line(i), v.Buf.LineLen(i)) - v.Left; x >= 0 && x < tw {
+				g.put(gw+x, r, " ", style{fg: th.FG, bg: th.Visual})
+			}
+		}
 	}
 
 	drawStatusline(g, rows, v, th)
@@ -78,14 +105,18 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 }
 
 // drawLine dibuja la parte de line visible entre las columnas visuales left y left+width.
-func drawLine(g *grid, x0, y int, line string, left, width int, st style) {
+// Los grafemas de selFrom a selTo (sin incluir) se pintan con el fondo selBG.
+func drawLine(g *grid, x0, y int, line string, left, width int, st style, selBG string, selFrom, selTo int) {
 	vc := 0
-	for _, c := range buffer.Clusters(line) {
+	for idx, c := range buffer.Clusters(line) {
 		s, cw := displayCluster(c, vc)
 		if vc >= left+width {
 			return
 		}
 		cst := st
+		if idx >= selFrom && idx < selTo {
+			cst.bg = selBG
+		}
 		if buffer.IsControl(c) {
 			cst.fg = ""
 			cst.bold = false
@@ -96,11 +127,30 @@ func drawLine(g *grid, x0, y int, line string, left, width int, st style) {
 			g.put(x0+vc-left, y, s, cst)
 		case vc+cw > left: // carácter cortado por un borde: se muestra como espacio
 			for i := max(vc, left); i < min(vc+cw, left+width); i++ {
-				g.put(x0+i-left, y, " ", st)
+				g.put(x0+i-left, y, " ", cst)
 			}
 		}
 		vc += cw
 	}
+}
+
+// cols devuelve el rango de grafemas [from,to) de la línea que cubre la selección; to supera la longitud
+// de la línea cuando la selección incluye su salto de línea. Sin selección devuelve (0,0).
+func (s *Selection) cols(line, lineLen int) (from, to int) {
+	if s == nil || line < s.Start.Line || line > s.End.Line {
+		return 0, 0
+	}
+	if s.Linewise {
+		return 0, lineLen + 1
+	}
+	from, to = 0, lineLen+1
+	if line == s.Start.Line {
+		from = s.Start.Col
+	}
+	if line == s.End.Line {
+		to = s.End.Col + 1
+	}
+	return from, to
 }
 
 func percent(line, total int) int { return line * 100 / max(1, total) }
@@ -115,7 +165,10 @@ func drawStatusline(g *grid, y int, v EditorView, th Theme) {
 	// Información de la derecha; en terminales estrechas se reduce a posición y porcentaje.
 	pos := fmt.Sprintf("%d:%d  %d%%", v.Cursor.Line+1, v.Cursor.Col+1, percent(v.Cursor.Line+1, v.Buf.LineCount()))
 	info := pos
-	if g.w >= 60 {
+	switch {
+	case v.Info != "":
+		info = v.Info + "  " + pos
+	case g.w >= 60:
 		eol := "LF"
 		if v.Buf.CRLF() {
 			eol = "CRLF"
@@ -194,13 +247,31 @@ func truncateLeft(s string, max int) string {
 
 func drawCommandLine(g *grid, y int, v EditorView, th Theme) {
 	switch {
+	case v.Prompt != nil:
+		x := g.put(0, y, v.Prompt.Prefix, style{fg: th.Peach, bg: th.BG, bold: true})
+		g.put(x, y, v.Prompt.Text, style{fg: th.FG, bg: th.BG})
 	case v.Message != "" && v.IsError:
 		g.put(0, y, v.Message, style{fg: th.Red, bg: th.BG, bold: true})
 	case v.Message != "":
 		g.put(0, y, v.Message, style{fg: th.FG, bg: th.BG})
-	case v.Mode != "":
-		g.put(0, y, "-- "+v.Mode+" --", style{fg: th.modeColor(v.Mode), bg: th.BG, bold: true})
+	case v.Pending != "":
+		g.put(0, y, v.Pending, style{fg: th.Dim, bg: th.BG})
+	default:
+		if banner := modeBanner(v.Mode); banner != "" {
+			g.put(0, y, banner, style{fg: th.modeColor(v.Mode), bg: th.BG, bold: true})
+		}
 	}
+}
+
+// modeBanner es el texto «-- MODO --» de la línea de comandos; Normal no muestra ninguno.
+func modeBanner(mode string) string {
+	switch mode {
+	case "INSERT", "VISUAL":
+		return "-- " + mode + " --"
+	case "V-LINE":
+		return "-- VISUAL LINE --"
+	}
+	return ""
 }
 
 // drawDialog superpone el cuadro modal, centrado y con borde (ver docs/design/exports/10-dialogo-cambios-sin-guardar.png).

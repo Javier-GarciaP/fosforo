@@ -299,3 +299,104 @@ func TestStatuslineLongPathKeepsMarksVisible(t *testing.T) {
 		}
 	}
 }
+
+func TestGoldenVisualSelection(t *testing.T) {
+	// Maqueta 03: selección por líneas de 3 líneas; la statusline muestra su tamaño.
+	b := buffer.FromString("", trieGo)
+	sel := &ui.Selection{Start: buffer.Pos{Line: 9}, End: buffer.Pos{Line: 11}, Linewise: true}
+	v := ui.EditorView{Buf: b, Cursor: buffer.Pos{Line: 11, Col: 34}, Mode: "VISUAL", PathLabel: "internal/keymap/trie.go",
+		Info: "3 líneas", Selection: sel}
+	golden(t, "visual", plain(v, 100, 20))
+
+	raw := ui.RenderEditor(v, 100, 20, ui.Dark())
+	rows := strings.Split(raw, "\n")
+	const visualBG = "48;2;50;61;92" // #323d5c
+	for i, want := range map[int]bool{8: false, 9: true, 10: true, 11: true, 12: false} {
+		if got := strings.Contains(rows[i], visualBG); got != want {
+			t.Errorf("fila %d: fondo de selección = %v, quería %v", i, got, want)
+		}
+	}
+}
+
+func TestVisualCharSelectionHighlightsOnlySelectedCells(t *testing.T) {
+	b := buffer.FromString("", "abcdef\nghijkl\n")
+	sel := &ui.Selection{Start: buffer.Pos{Line: 0, Col: 2}, End: buffer.Pos{Line: 1, Col: 1}}
+	raw := ui.RenderEditor(ui.EditorView{Buf: b, Mode: "VISUAL", Selection: sel}, 40, 10, ui.Dark())
+	rows := strings.Split(raw, "\n")
+	// fila 0: «ab» sin selección, «cdef» y el salto de línea con selección
+	if !strings.Contains(rows[0], "ab") {
+		t.Fatal(rows[0])
+	}
+	idxAB := strings.Index(rows[0], "ab")
+	idxCD := strings.Index(rows[0], "cdef")
+	if strings.Contains(rows[0][:idxAB], "48;2;50;61;92") {
+		t.Error("antes de la selección no debe haber fondo de selección")
+	}
+	if !strings.Contains(rows[0][idxAB:idxCD+1], "48;2;50;61;92") {
+		t.Error("«cdef» debe estar seleccionado")
+	}
+	// fila 1: «gh» seleccionados (cols 0..1), «ijkl» no
+	plainRow := ansi.Strip(rows[1])
+	if !strings.Contains(plainRow, "ghijkl") {
+		t.Fatal(plainRow)
+	}
+	idxGH := strings.Index(rows[1], "gh")
+	idxIJ := strings.Index(rows[1], "ijkl")
+	if !strings.Contains(rows[1][idxGH-30:idxIJ], "48;2;50;61;92") {
+		t.Error("«gh» debe estar seleccionado")
+	}
+	if strings.Contains(rows[1][idxIJ:], "48;2;50;61;92") {
+		t.Error("«ijkl» no debe estar seleccionado")
+	}
+}
+
+func TestSelectionOnEmptyLineShowsOneCell(t *testing.T) {
+	b := buffer.FromString("", "a\n\nb\n")
+	sel := &ui.Selection{Start: buffer.Pos{Line: 0}, End: buffer.Pos{Line: 2}, Linewise: true}
+	raw := ui.RenderEditor(ui.EditorView{Buf: b, Mode: "V-LINE", Selection: sel}, 40, 10, ui.Dark())
+	rows := strings.Split(raw, "\n")
+	if !strings.Contains(rows[1], "48;2;50;61;92") {
+		t.Errorf("una línea vacía seleccionada se marca con una celda: %q", rows[1])
+	}
+}
+
+func TestPromptAndPendingInCommandLine(t *testing.T) {
+	b := buffer.FromString("", "x\n")
+	last := func(v ui.EditorView) string {
+		rows := strings.Split(strings.TrimSuffix(plain(v, 60, 12), "\n"), "\n")
+		return rows[len(rows)-1]
+	}
+	if got := last(ui.EditorView{Buf: b, Mode: "COMMAND", Prompt: &ui.Prompt{Prefix: ":", Text: "wq", Cursor: 2}}); got != ":wq" {
+		t.Errorf("prompt: %q", got)
+	}
+	if got := last(ui.EditorView{Buf: b, Mode: "NORMAL", Pending: "3d"}); got != "3d" {
+		t.Errorf("pendiente: %q", got)
+	}
+	if got := last(ui.EditorView{Buf: b, Mode: "NORMAL"}); got != "" {
+		t.Errorf("Normal no muestra banner: %q", got)
+	}
+	if got := last(ui.EditorView{Buf: b, Mode: "VISUAL"}); got != "-- VISUAL --" {
+		t.Errorf("Visual: %q", got)
+	}
+	x, y, ok := ui.CursorCell(ui.EditorView{Buf: b, Prompt: &ui.Prompt{Prefix: ":", Text: "日本", Cursor: 1}}, 60, 12)
+	if !ok || x != 3 || y != 11 {
+		t.Errorf("cursor del prompt en (%d,%d,%v), quería (3,11)", x, y, ok)
+	}
+}
+
+func TestModeColors(t *testing.T) {
+	b := buffer.FromString("", "x\n")
+	for mode, want := range map[string]string{
+		"NORMAL":  "48;2;127;193;254", // azul
+		"INSERT":  "48;2;127;208;150", // verde
+		"VISUAL":  "48;2;204;168;246", // malva
+		"V-LINE":  "48;2;204;168;246",
+		"COMMAND": "48;2;245;165;116", // melocotón
+	} {
+		raw := ui.RenderEditor(ui.EditorView{Buf: b, Mode: mode}, 60, 12, ui.Dark())
+		status := strings.Split(raw, "\n")[10]
+		if !strings.Contains(status, want) {
+			t.Errorf("%s: la etiqueta debe usar su color (%s): %q", mode, want, status[:60])
+		}
+	}
+}

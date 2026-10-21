@@ -1,0 +1,20 @@
+  1 package keymap
+  2
+  3 type Node struct {
+  4     children map[rune]*Node
+  5     command  string
+  6 }
+  7
+  8 // Lookup resuelve una secuencia de teclas.
+  9 func (n *Node) Lookup(seq []rune) (string, bool) {
+ 10     cur := n
+ 11     for _, r := range seq {
+ 12         next, ok := cur.children[r]
+ 13         if !ok { return "", false }
+ 14         cur = next
+ 15     }
+ 16     return cur.command, cur.command != ""
+ 17 }
+  ~
+ VISUAL  internal/keymap/trie.go                                               3 líneas  12:35  70%
+-- VISUAL --

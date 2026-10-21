@@ -11,7 +11,7 @@
 >
 > Documentación técnica del proyecto. Para una presentación general, mira el [README](../README.md).
 >
-> **Estado del proyecto: beta en desarrollo (última versión publicada `0.0.1`).** Ya hay código: abrir, editar y guardar texto con Unicode correcto. Ver «Qué funciona hoy».
+> **Estado del proyecto: beta en desarrollo (última versión publicada `0.0.1`).** Ya hay código: edición modal tipo Vim, Unicode correcto y guardado seguro. Ver «Qué funciona hoy».
 
 ## Qué queremos lograr
 
@@ -45,14 +45,21 @@ Implementado en la rama `dev` (aún sin publicar):
 | --- | --- |
 | Arranque | `fos [ruta]`, `--version`, `--help`; pantalla alternativa y terminal restaurada tras salida, pánico y señales |
 | Abrir | Archivos UTF-8 conservando LF/CRLF y salto final; ruta inexistente = archivo nuevo; binarios, UTF-8 inválido y >10 MiB en solo lectura con aviso |
-| Escribir | Insertar, Enter con sangría, Backspace/Delete (unen líneas), Tab, pegado; `Ctrl+Z`/modos llegan en `modal-editing` |
-| Moverse | Flechas, Home, End, PageUp/PageDown, columna deseada en líneas de distinta longitud |
+| Modos | Normal (por defecto), Insert, Visual (`v`/`V`) y línea de comandos, con su etiqueta y color en la statusline; `Esc` actúa al instante |
+| Escribir (Insert) | `i a I A o O`; Enter con sangría, Backspace/Delete (unen líneas), Tab, pegado |
+| Moverse | `h j k l w b e 0 ^ $ gg G {n}G`, `Ctrl+d`/`Ctrl+u`, flechas, Home/End, PageUp/PageDown; conteos (`5j`, `3w`); columna deseada en líneas de distinta longitud |
+| Editar | Operadores `d c y` con cualquier movimiento (`dw`, `c$`, `dgg`), por línea (`dd cc yy`) y con conteo (`3dd`, `2d3w`); `x D C p P`; selección Visual con `d c y x o` |
+| Deshacer | `u` / `Ctrl+r`; una sesión de Insert o una orden completa es un solo paso; deshacer hasta lo guardado deja el archivo sin `[+]` |
+| Portapapeles | Lo copiado con `y` va al registro y al portapapeles del sistema (OSC 52 y, si existen, `wl-copy`/`xclip`/`xsel`/`pbcopy`) |
+| Buscar | `/patrón`, `n`, `N` con expresiones regulares de Go (por línea); `E486` si no hay coincidencias |
+| Línea de comandos | `:w [ruta]`, `:q`, `:q!`, `:wq`, `:x`, `:e [ruta]`, `:{n}`, con historial (`↑`/`↓`); `E492` si el comando no existe |
+| Comandos | Registro único de comandos con nombre (`file.save`, `cursor.down`...): teclas y `:` ejecutan los mismos |
 | Unicode | Cursor por caracteres percibidos (emoji compuestos, combinantes), ancho doble (CJK) y tabuladores de 4 |
-| Guardar | `Ctrl+S` guardado atómico (archivo temporal + `rename`) que conserva permisos; fallos sin perder el original |
-| Salir | `Ctrl+Q`/`Ctrl+C`; con cambios sin guardar aparece el diálogo Guardar / Descartar / Cancelar |
+| Guardar | `Ctrl+S` o `:w`: guardado atómico (archivo temporal + `rename`) que conserva permisos; fallos sin perder el original |
+| Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: modos Normal/Visual, deshacer, explorador, resaltado, buscador, paleta ni Markdown (ver la hoja de ruta).
+Todavía **no** hay: explorador y varios buffers, resaltado de sintaxis, buscador de archivos y paleta, menú líder `Space`, Markdown, ratón ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -93,7 +100,9 @@ cuadrícula de terminal de 120×36 celdas.
 
 ## Atajos previstos
 
-Los atajos definitivos quedan fijados por las specs de `openspec/changes/`. Esta tabla es el resumen de intención.
+Los atajos quedan fijados por las specs (`openspec/specs/`). **Ya funcionan** todos los de «Modos», «Movimiento y edición» y «Línea de comandos»,
+salvo `:bn` `:bp` `:bd` (llegan con los buffers). La tecla líder `Space` llega en el cambio `picker-and-palette`.
+En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan de línea.
 
 ### Modos
 
@@ -108,7 +117,7 @@ Los atajos definitivos quedan fijados por las specs de `openspec/changes/`. Esta
 
 | Tecla | Acción |
 | --- | --- |
-| `h` `j` `k` `l` | Izquierda, abajo, arriba, derecha |
+| `h` `j` `k` `l` (o flechas) | Izquierda, abajo, arriba, derecha |
 | `w` `b` `e` | Siguiente palabra, palabra anterior, fin de palabra |
 | `0` `^` `$` | Inicio de línea, primer carácter, fin de línea |
 | `gg` `G` `12G` | Primera línea, última línea, ir a la línea 12 |
@@ -117,6 +126,7 @@ Los atajos definitivos quedan fijados por las specs de `openspec/changes/`. Esta
 | `u` / `Ctrl+r` | Deshacer / rehacer |
 | `/texto` `n` `N` | Buscar en el archivo, siguiente, anterior |
 | `3dd`, `5j` | Un número antes repite la acción |
+| `Ctrl+d` / `Ctrl+u` | Media pantalla abajo / arriba |
 | `Ctrl+s` | Guardar (en cualquier modo) |
 
 ### Línea de comandos
