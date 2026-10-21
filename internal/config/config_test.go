@@ -12,7 +12,7 @@ import (
 
 func TestDefaults(t *testing.T) {
 	d := config.Defaults()
-	if d.Theme != "dark" || d.Icons != "nerd" || d.TabWidth != 4 || d.Indent != "tabs" || d.ScrollOff != 3 || !d.Mouse || d.Keys == nil {
+	if d.Theme != "dark" || d.Icons != "none" || d.TabWidth != 4 || d.Indent != "tabs" || d.ScrollOff != 3 || !d.Mouse || d.Keys == nil {
 		t.Errorf("%+v", d)
 	}
 }
@@ -86,7 +86,7 @@ func TestInvalidValuesFallBackWithKeyNamedInProblem(t *testing.T) {
 		{"scrolloff negativo", `scrolloff = -1`, "scrolloff", "entre 0 y 20", func(c config.Config) bool { return c.ScrollOff == 3 }},
 		{"theme inválido", `theme = "azul"`, "theme", `"dark", "light" o "auto"`, func(c config.Config) bool { return c.Theme == "dark" }},
 		{"theme número", `theme = 3`, "theme", "debe ser", func(c config.Config) bool { return c.Theme == "dark" }},
-		{"icons inválido", `icons = "emoji"`, "icons", `"nerd" o "none"`, func(c config.Config) bool { return c.Icons == "nerd" }},
+		{"icons inválido", `icons = "emoji"`, "icons", `"none" o "nerd"`, func(c config.Config) bool { return c.Icons == "none" }},
 		{"indent inválido", `indent = "mixto"`, "indent", `"tabs" o "spaces"`, func(c config.Config) bool { return c.Indent == "tabs" }},
 		{"mouse texto", `mouse = "si"`, "mouse", "true o false", func(c config.Config) bool { return c.Mouse }},
 		{"clave desconocida", `colorcito = 1`, "colorcito", "desconocido", func(c config.Config) bool { return c.TabWidth == 4 }},

@@ -24,6 +24,7 @@ Será la **0.8.0**, la primera versión con programa: todo lo anterior a esta en
 
 ### Cambiado
 
+- **Iconos desactivados por defecto:** sin Nerd Font se veían cuadros vacíos que pisaban los nombres; se activan con `--icons=nerd` o `icons = "nerd"`.
 - **Comando `fos`:** el programa se ejecuta con `fos`; *fosforo* se mantiene como nombre del producto y de la marca.
 
 ## [0.0.1] - 2026-10-20

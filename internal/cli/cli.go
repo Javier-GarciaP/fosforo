@@ -28,7 +28,7 @@ type Options struct {
 	ShowVersion bool
 	ShowHelp    bool
 	Path        string // archivo o carpeta opcional para abrir
-	Icons       string // «nerd» (por defecto) o «none»: iconos del explorador
+	Icons       string // «none» (por defecto) o «nerd»: iconos del explorador
 	IconsSet    bool   // --icons se indicó en la línea de comandos (manda sobre la configuración)
 }
 
@@ -44,7 +44,7 @@ func newFlagSet(opts *Options, out io.Writer) *flag.FlagSet {
 	fs.SetOutput(out)
 	fs.BoolVar(&opts.ShowVersion, "version", false, "muestra la versión y termina")
 	fs.BoolVar(&opts.ShowHelp, "help", false, "muestra esta ayuda y termina")
-	fs.StringVar(&opts.Icons, "icons", "nerd", "iconos del explorador: nerd (necesita una Nerd Font) o none")
+	fs.StringVar(&opts.Icons, "icons", "none", "iconos del explorador: none (por defecto) o nerd (necesita una Nerd Font)")
 	return fs
 }
 

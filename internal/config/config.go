@@ -16,7 +16,7 @@ import (
 // Config son los ajustes del editor.
 type Config struct {
 	Theme     string // "dark", "light" o "auto"
-	Icons     string // "nerd" o "none"
+	Icons     string // "none" (por defecto) o "nerd" (necesita una Nerd Font)
 	TabWidth  int    // ancho de un tabulador, 1..16
 	Indent    string // "tabs" o "spaces": qué inserta la tecla Tab
 	ScrollOff int    // líneas de margen al desplazarse, 0..20
@@ -29,7 +29,7 @@ type Config struct {
 
 // Defaults devuelve los valores por defecto.
 func Defaults() Config {
-	return Config{Theme: "dark", Icons: "nerd", TabWidth: 4, Indent: "tabs", ScrollOff: 3, Mouse: true, Keys: map[string]map[string]string{}}
+	return Config{Theme: "dark", Icons: "none", TabWidth: 4, Indent: "tabs", ScrollOff: 3, Mouse: true, Keys: map[string]map[string]string{}}
 }
 
 // Contexts son los contextos de teclas que se pueden remapear.
@@ -135,7 +135,7 @@ func Parse(data []byte) (Config, []Problem) {
 	}
 
 	cfg.Theme = choice("theme", cfg.Theme, "dark", "light", "auto")
-	cfg.Icons = choice("icons", cfg.Icons, "nerd", "none")
+	cfg.Icons = choice("icons", cfg.Icons, "none", "nerd")
 	cfg.Indent = choice("indent", cfg.Indent, "tabs", "spaces")
 	cfg.TabWidth = integer("tabwidth", cfg.TabWidth, 1, 16)
 	cfg.ScrollOff = integer("scrolloff", cfg.ScrollOff, 0, 20)
@@ -235,7 +235,7 @@ const Template = `# Configuración de fos. Todo es opcional: lo que no pongas us
 # Después de guardar este archivo se aplica solo; también puedes ejecutar :reload.
 
 # theme = "dark"       # "dark", "light" o "auto" (según el fondo del terminal)
-# icons = "nerd"       # "nerd" (necesita una Nerd Font) o "none"
+# icons = "none"       # "none" o "nerd" (necesita una Nerd Font en la terminal)
 # tabwidth = 4         # ancho de un tabulador (1-16)
 # indent = "tabs"      # "tabs" o "spaces": qué inserta la tecla Tab
 # scrolloff = 3        # líneas de margen al desplazarse (0-20)

@@ -121,7 +121,7 @@ Cada versión se publica como *pre-release* mientras sea `0.x`, y todo lo que ca
 
 **Próximamente.** Cuando llegue la versión `0.1.0` podrás descargar un único programa y ejecutarlo, sin instalar nada más. Se abrirá escribiendo **`fos`** en la terminal (`fos archivo.md`, `fos carpeta/`).
 
-Para ver los iconos del explorador necesitarás una fuente [Nerd Font](https://www.nerdfonts.com) en tu terminal; si no la tienes, fosforo funciona igual con un modo sin iconos.
+El explorador no muestra iconos por defecto. Si tienes una fuente [Nerd Font](https://www.nerdfonts.com) en tu terminal, actívalos con `fos --icons=nerd` o `icons = "nerd"` en la configuración.
 
 ## 📚 Más información
 

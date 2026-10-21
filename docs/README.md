@@ -58,7 +58,7 @@ Implementado en la rama `dev` (aún sin publicar):
 | Guardar | `Ctrl+S` o `:w`: guardado atómico (archivo temporal + `rename`) que conserva permisos; fallos sin perder el original |
 | Explorador | `Space e` lo muestra/oculta (24 columnas; se oculta solo bajo 80); `Tab`/`Ctrl+w` cambian el foco; `j k l h Enter gg G`; `a` crea (con `/` final, carpeta), `r` renombra, `d` borra con confirmación, `R` refresca; `fos carpeta/` lo abre con foco |
 | Árbol | Sangría de 2 columnas sin flechas ni líneas guía; carpetas primero y por orden alfabético; oculta `.git` y `node_modules`; carga carpetas al expandirlas; no sigue enlaces simbólicos |
-| Iconos | Un icono por tipo (nombre exacto → extensión → por defecto) y carpeta cerrada/abierta, con los colores de la paleta; `--icons=none` los quita (carpetas con `/`, abiertas en azul y cerradas atenuadas) |
+| Iconos | Un icono por tipo (nombre exacto → extensión → por defecto) y carpeta cerrada/abierta, con los colores de la paleta; vienen desactivados por defecto; `--icons=nerd` o `icons = "nerd"` los activan (sin ellos, carpetas con `/`, abiertas en azul y cerradas atenuadas) |
 | Buffers | Varios archivos abiertos (`:e ruta`, el explorador); si ya está abierto se reutiliza con su cursor y scroll; `Space b n/p/d` o `:bn :bp :bd`; `n/m` en la statusline; cerrar o salir pregunta por cada buffer modificado |
 | Cambios externos | Se detectan al activar un buffer, al volver el foco a la terminal y al guardar: sin modificar se recarga con aviso; modificado pide confirmación antes de sobrescribir |
 | Sintaxis | Colores por lenguaje según el nombre o la extensión (Chroma): palabras clave, tipos, funciones, cadenas, números y comentarios con la paleta del tema; construcciones de varias líneas correctas tras editar |
@@ -199,7 +199,7 @@ go install github.com/Javier-GarciaP/fosforo/cmd/fos@latest
 ```
 
 Después: `fos --version`, `fos archivo.go`, `fos carpeta/`. Para ver los iconos del explorador hace falta una
-[Nerd Font](https://www.nerdfonts.com/) (o usa `--icons=none`). **Opcional:** instala [`rg`](https://github.com/BurntSushi/ripgrep)
+[Nerd Font](https://www.nerdfonts.com/) y `--icons=nerd` (o `icons = "nerd"`); por defecto no se muestran. **Opcional:** instala [`rg`](https://github.com/BurntSushi/ripgrep)
 (ripgrep) para que `Space s g` sea más rápido y respete `.gitignore`; sin él funciona igual con el buscador propio.
 
 Las versiones se publican solo desde `main` con una etiqueta `vX.Y.Z` (el workflow de release falla si la etiqueta no está en `main`).
@@ -211,7 +211,7 @@ con una plantilla comentada.
 
 ```toml
 theme = "auto"      # dark | light | auto (auto lee el fondo de la terminal; si no responde, oscuro)
-icons = "nerd"      # nerd | none  (--icons en la línea de comandos manda sobre esto)
+icons = "none"      # none | nerd  (--icons en la línea de comandos manda sobre esto)
 tabwidth = 4        # 1..16
 indent = "tabs"     # tabs | spaces: qué inserta la tecla Tab
 scrolloff = 3       # 0..20 líneas de margen
@@ -245,10 +245,9 @@ El explorador no usa flechas: la estructura se lee por la **sangría** y el esta
 abierta). Cada archivo lleva el icono de su tipo (Go, Markdown, JSON, Makefile, LICENSE, `.gitignore`…; ver la pantalla
 [`11`](design/exports/11-iconos-y-explorador.png)).
 
-- **Los iconos son caracteres de una Nerd Font**, así que la terminal necesita una. Basta con instalar una Nerd Font completa o
+- **Los iconos vienen desactivados por defecto** (`icons = "none"`): las carpetas se muestran con `/` al final y todo funciona igual. Actívalos con `fos --icons=nerd` o `icons = "nerd"`; son caracteres de una Nerd Font, así que la terminal necesita una. Basta con instalar una Nerd Font completa o
   solo la fuente de símbolos («Symbols Nerd Font»), que las terminales usan como respaldo sin cambiar tu fuente actual
   (el paquete oficial incluye un archivo de `fontconfig` para ello en Linux). Descargas: <https://www.nerdfonts.com>.
-- **Sin Nerd Font**, ejecuta `fos --icons=none` (más adelante será el ajuste `icons = "none"` de la configuración): las carpetas se muestran con `/` al final y todo sigue funcionando.
 - No se puede detectar automáticamente qué fuente usa la terminal, por eso es un ajuste y no una detección.
 
 ## Stack y arquitectura
