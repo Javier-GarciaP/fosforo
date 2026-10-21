@@ -8,7 +8,7 @@
 
 ## 2. Esqueleto y arranque
 
-- [ ] 2.1 Crear `cmd/fosforo/` y los paquetes vacíos de `internal/` con `doc.go`; verificar con `go build ./...`
+- [ ] 2.1 Crear `cmd/fos/` y los paquetes vacíos de `internal/` con `doc.go`; verificar con `go build ./...`
 - [ ] 2.2 Implementar el modelo Bubble Tea mínimo (marcador + salir con `q`/`Ctrl+C`); verificar con un test `teatest` que `q` termina el programa
 - [ ] 2.3 Implementar `--version`, `--help` y el argumento `<ruta>`; verificar con pruebas de tabla (versión → código 0, flag desconocido → código 2)
 - [ ] 2.4 Restaurar la terminal ante pánico y señales; verificar con una prueba que fuerza un pánico y comprueba el estado de la terminal en un pseudo-terminal

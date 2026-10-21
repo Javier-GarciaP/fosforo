@@ -6,7 +6,7 @@ Define cómo el usuario personaliza el editor mediante un archivo de configuraci
 ## ADDED Requirements
 
 ### Requirement: Configuration file
-The system SHALL read an optional TOML file at `$XDG_CONFIG_HOME/fosforo/config.toml` (or `~/.config/fosforo/config.toml`) over embedded defaults, and MUST start normally when the file does not exist.
+The system SHALL read an optional TOML file at `$XDG_CONFIG_HOME/fos/config.toml` (or `~/.config/fos/config.toml`) over embedded defaults, and MUST start normally when the file does not exist.
 
 #### Scenario: Sin archivo
 - **WHEN** no existe el archivo de configuración

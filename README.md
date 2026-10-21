@@ -16,7 +16,7 @@
   <img alt="versión 0.0.1" src="https://img.shields.io/badge/versi%C3%B3n-0.0.1-orange">
   <img alt="estado: beta, en diseño" src="https://img.shields.io/badge/estado-beta%20en%20dise%C3%B1o-yellow">
   <img alt="hecho con Go" src="https://img.shields.io/badge/hecho%20con-Go-00ADD8">
-  <img alt="licencia por definir" src="https://img.shields.io/badge/licencia-por%20definir-lightgrey">
+  <img alt="licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
 > [!NOTE]
@@ -119,7 +119,7 @@ Cada versión se publica como *pre-release* mientras sea `0.x`, y todo lo que ca
 
 ## 📦 Instalación
 
-**Próximamente.** Cuando llegue la versión `0.1.0` podrás descargar un único programa y ejecutarlo, sin instalar nada más.
+**Próximamente.** Cuando llegue la versión `0.1.0` podrás descargar un único programa y ejecutarlo, sin instalar nada más. Se abrirá escribiendo **`fos`** en la terminal (`fos archivo.md`, `fos carpeta/`).
 
 Para ver los iconos del explorador necesitarás una fuente [Nerd Font](https://www.nerdfonts.com) en tu terminal; si no la tienes, fosforo funciona igual con un modo sin iconos.
 
@@ -138,6 +138,6 @@ Para ver los iconos del explorador necesitarás una fuente [Nerd Font](https://w
 
 ## 📄 Licencia
 
-Todavía no se ha elegido una licencia. Hasta entonces, todos los derechos están reservados.
+fosforo es software libre bajo la [licencia MIT](LICENSE): puedes usarlo, copiarlo y modificarlo libremente.
 
 <p align="center"><sub>🔥 fosforo · código que enciende ideas</sub></p>

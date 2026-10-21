@@ -156,7 +156,7 @@ abierta). Cada archivo lleva el icono de su tipo (Go, Markdown, JSON, Makefile, 
 - **Un solo binario**, sin dependencias en tiempo de ejecución (`rg` es opcional para buscar más rápido).
 
 ```
-cmd/fosforo/            arranque y flags
+cmd/fos/            arranque y flags
 internal/buffer/    texto, cursor, undo/redo, cargar y guardar (sin UI)
 internal/editor/    modos, estado global (buffers, foco), despacho de comandos
 internal/command/   registro de comandos con nombre

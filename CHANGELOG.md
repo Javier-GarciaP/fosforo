@@ -7,6 +7,14 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+### Añadido
+
+- **Licencia MIT** (`LICENSE`).
+
+### Cambiado
+
+- **Comando `fos`:** el programa se ejecutará con `fos`; *fosforo* se mantiene como nombre del producto y de la marca.
+
 ## [0.0.1] - 2026-10-20
 
 **Fundación.** Todavía no hay programa que instalar: esta versión deja listo el diseño, la planificación y el proceso de trabajo.
