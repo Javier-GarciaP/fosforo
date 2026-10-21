@@ -9,6 +9,7 @@ import (
 	"github.com/Javier-GarciaP/fosforo/internal/buffer"
 	"github.com/Javier-GarciaP/fosforo/internal/command"
 	"github.com/Javier-GarciaP/fosforo/internal/keymap"
+	"github.com/Javier-GarciaP/fosforo/internal/syntax"
 )
 
 // registry y defaultKeymap se construyen una vez: toda acción del editor es un comando con nombre en el registro,
@@ -135,6 +136,7 @@ func buildRegistry() *command.Registry[*Model] {
 			m.requestQuit(false)
 		}
 	}))
+	reg("theme.toggle", "Alternar entre el tema oscuro y el claro", []string{"Space t"}, none(func(m *Model, _ command.Args) { m.toggleTheme() }))
 	reg("file.open", "Abrir un archivo (:e ruta); sin ruta, recargar el actual", []string{":e"}, none(func(m *Model, a command.Args) { m.openFile(a) }))
 	reg("app.quit", "Salir (:q, :q! descarta los cambios)", []string{":q"}, none(func(m *Model, a command.Args) { m.requestQuit(a.Bang) }))
 	return r
@@ -184,7 +186,7 @@ func buildKeymap() *keymap.Keymap {
 		bind(both, key, cmd)
 	}
 	for key, cmd := range map[string]string{
-		"space e": "explorer.toggle", "space b n": "buffer.next", "space b p": "buffer.prev", "space b d": "buffer.close",
+		"space t": "theme.toggle", "space e": "explorer.toggle", "space b n": "buffer.next", "space b p": "buffer.prev", "space b d": "buffer.close",
 		"tab": "focus.toggle", "ctrl+w": "focus.toggle",
 	} {
 		bind(normal, key, cmd)
@@ -194,7 +196,7 @@ func buildKeymap() *keymap.Keymap {
 		"g g": "explorer.top", "G": "explorer.bottom",
 		"enter": "explorer.open", "l": "explorer.open", "right": "explorer.open", "h": "explorer.collapse", "left": "explorer.collapse",
 		"a": "explorer.create", "r": "explorer.rename", "d": "explorer.delete", "R": "explorer.refresh",
-		"space e": "explorer.toggle", "tab": "focus.toggle", "ctrl+w": "focus.toggle",
+		"space e": "explorer.toggle", "space t": "theme.toggle", "tab": "focus.toggle", "ctrl+w": "focus.toggle",
 		":": "mode.command", "ctrl+s": "file.save",
 	} {
 		bind([]string{modeExplorer}, key, cmd)
@@ -331,6 +333,9 @@ func (m *Model) writeBuffer(path string) bool {
 	}
 	m.stash()
 	m.bufs[m.active].snapshot()
+	if lang := syntax.Detect(m.buf.Path()); lang != m.bufs[m.active].hl.lang {
+		m.bufs[m.active].detectLanguage() // «guardar como» con otra extensión cambia el lenguaje
+	}
 	m.refreshExplorer()
 	m.msg, m.msgErr = fmt.Sprintf("%q %dL escritas", m.label, m.buf.LineCount()), false
 	return true

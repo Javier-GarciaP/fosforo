@@ -48,6 +48,8 @@ type Buffer struct {
 	// Historial de deshacer (ver history.go). La versión cuenta las ediciones aplicadas; el buffer está
 	// modificado cuando su versión difiere de la que se guardó.
 	hist         history
+	rev          int        // contador de cambios del texto; solo crece (también al deshacer y rehacer)
+	onChange     func(Edit) // se llama tras cada cambio del texto (p. ej. para mantener el resaltado)
 	version      int
 	savedVersion int // versión guardada en disco; -1 si ya no se puede volver a ella
 }
@@ -221,6 +223,10 @@ func (b *Buffer) apply(e Edit) (Pos, error) {
 	lines = append(lines, repl...)
 	lines = append(lines, b.lines[end.Line+1:]...)
 	b.lines = lines
+	b.rev++
+	if b.onChange != nil {
+		b.onChange(Edit{Start: e.Start, Deleted: e.Deleted, Inserted: strings.ReplaceAll(e.Inserted, "\r\n", "\n")})
+	}
 	return endOf(e.Start, strings.ReplaceAll(e.Inserted, "\r\n", "\n")), nil
 }
 
@@ -265,3 +271,11 @@ func (b *Buffer) Next(p Pos) (Pos, bool) {
 
 // SetPath cambia el nombre del archivo sin tocar el texto ni el estado de modificado (p. ej. tras renombrarlo en disco).
 func (b *Buffer) SetPath(path string) { b.path = path }
+
+// Rev devuelve el contador de cambios del texto. Distinto de Modified: crece con cada edición, deshacer y rehacer,
+// de modo que dos lecturas con el mismo valor garantizan que el texto no cambió entre ellas.
+func (b *Buffer) Rev() int { return b.rev }
+
+// OnChange registra una función que se ejecuta tras cada cambio del texto con la edición aplicada.
+// Solo hay una; registrar otra sustituye a la anterior (nil la quita).
+func (b *Buffer) OnChange(fn func(Edit)) { b.onChange = fn }

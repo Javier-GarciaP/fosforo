@@ -292,6 +292,7 @@ func (m *Model) finishRename(oldPath, newName string) {
 		}
 		bs.buf.SetPath(np)
 		bs.label = m.displayName(np)
+		bs.detectLanguage() // el nuevo nombre puede ser de otro lenguaje
 	}
 	m.load(m.active)
 	m.explorer.tree.Refresh()
