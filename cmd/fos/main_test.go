@@ -232,3 +232,27 @@ func TestOpenMissingDirectoryExitsWithError(t *testing.T) {
 	pty.Write(":q\r")
 	exitCode(t, done)
 }
+
+func TestOpenMarkdownShowsPreview(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "LEEME.md")
+	if err := os.WriteFile(p, []byte("# Título grande\n\n- uno\n- [x] hecho\n\nTexto con **negrita**.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	pty := termtest.New(t)
+	_, done := start(t, pty, p)
+	pty.WaitFor(t, "PREVIEW", 5*time.Second)
+	pty.WaitFor(t, "Título grande", 5*time.Second)
+	pty.WaitFor(t, "hecho", 5*time.Second)
+	if strings.Contains(pty.Output(), "**negrita**") || strings.Contains(pty.Output(), "# Título") {
+		t.Error("se ve el fuente en lugar del documento renderizado")
+	}
+	pty.Write("e") // pasa al fuente
+	pty.WaitFor(t, "NORMAL", 5*time.Second)
+	pty.Write(":q\r")
+	if code := exitCode(t, done); code != 0 {
+		t.Fatalf("código = %d", code)
+	}
+	if got, _ := os.ReadFile(p); !strings.HasPrefix(string(got), "# Título grande") {
+		t.Errorf("abrir no modifica el archivo: %q", got)
+	}
+}

@@ -1,0 +1,34 @@
+  1 # fosforo — editor de código en la terminal             │  fosforo — editor de código en la
+  2                                                         │  terminal
+  3 Un editor ligero con la fluidez de [Neovim](https://neov│  ────────────────────────────────────────
+  4                                                         │
+  5 ## Características                                      │  Un editor ligero con la fluidez de
+  6                                                         │  Neovim y la comodidad de VS Code, hecho
+  7 - Teclado modal con tecla líder `Space`                 │  en Go.
+  8 - Explorador de archivos y paleta de comandos           │
+  9 - [x] Vista previa de Markdown                          │  Características
+ 10 - [ ] Búsqueda en proyecto                              │  ────────────────────────────────────────
+ 11                                                         │
+ 12 ## Instalación                                          │  • Teclado modal con tecla líder Space
+ 13                                                         │  • Explorador de archivos y paleta de
+ 14 ```sh                                                   │    comandos
+ 15 go install github.com/usuario/fosforo@latest            │  ☑ Vista previa de Markdown
+ 16 fosforo README.md                                       │  ☐ Búsqueda en proyecto
+ 17 ```                                                     │
+ 18                                                         │  Instalación
+ 19 > Nota: los .md se abren en vista previa.               │  ────────────────────────────────────────
+ 20                                                         │
+ 21 | Tecla | Acción |                                      │   go install github.com/usuario/fosforo…
+ 22 | ------- | -------- |                                  │   fosforo README.md
+ 23 | `Space f f` | Buscar archivo |                        │
+ 24 | `Space m p` | Alternar vista previa |                 │  ┃ Nota: los .md se abren en vista
+ 25                                                         │  ┃ previa.
+ 26 Más información en [docs/README.md](docs/README.md)     │
+  ~                                                         │  ┌───────────┬───────────────────────┐
+  ~                                                         │  │ Tecla     │ Acción                │
+  ~                                                         │  ├───────────┼───────────────────────┤
+  ~                                                         │  │ Space f f │ Buscar archivo        │
+  ~                                                         │  │ Space m p │ Alternar vista previa │
+  ~                                                         │  └───────────┴───────────────────────┘
+ NORMAL  README.md | vista previa sincronizada                                                     utf-8  LF  10:7  38%
+

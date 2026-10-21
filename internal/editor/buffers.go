@@ -21,6 +21,7 @@ type bufState struct {
 	mtime     time.Time
 	size      int64
 	onDisk    bool
+	md        *mdState // estado de Markdown (solo en archivos .md y .markdown)
 	id        int64    // identificador estable (los resultados asíncronos del resaltado lo usan para encontrar su buffer)
 	hl        *hlState // resaltado de sintaxis
 }
@@ -52,6 +53,7 @@ func newBufState(b *buffer.Buffer, label string) *bufState {
 	bs := &bufState{buf: b, cur: buffer.NewCursor(buffer.Pos{}), label: label, id: nextBufID.Add(1)}
 	bs.snapshot()
 	bs.initHighlight()
+	bs.initMarkdown(true)
 	return bs
 }
 
@@ -153,6 +155,7 @@ func (m *Model) openPath(path, label string) bool {
 	if ro, why := b.ReadOnly(); ro {
 		m.msg, m.msgErr = "Solo lectura: "+why, true
 	}
+	m.noticeMarkdown()
 	return true
 }
 
@@ -197,6 +200,10 @@ func (m *Model) reloadActive(notice string) {
 	m.bufs[m.active].buf = b
 	m.bufs[m.active].snapshot()
 	m.bufs[m.active].initHighlight()
+	m.bufs[m.active].initMarkdown(false)
+	if md := m.bufs[m.active].md; md != nil {
+		md.doc, md.docRev = nil, -1 // el texto recargado se vuelve a renderizar
+	}
 	m.cur.Set(m.buf, m.cur.Pos)
 	m.clampCursor()
 	if notice != "" {

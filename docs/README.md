@@ -70,10 +70,13 @@ Implementado en la rama `dev` (aún sin publicar):
 | Paleta de comandos | `Space Space` lista todos los comandos por su descripción con sus atajos a la derecha; `Enter` lo ejecuta igual que su atajo; `Space ?`/`Space h` muestran la lista de atajos |
 | Sugerencias en `:` | Al escribir en `:` aparecen las mismas sugerencias; `Enter` ejecuta lo escrito, o la sugerencia si se eligió con `↑`/`↓` |
 | Menú líder | Tras `Space` y 300 ms aparece el panel de ayuda generado desde las teclas reales (grupos `+`, `Esc` cancela) |
+| Markdown | Los `.md` y `.markdown` se abren en **vista previa** (solo lectura, `PREVIEW`): encabezados con regla, listas, tareas `☑ ☐`, citas, tablas con bordes, código con colores, enlaces, imágenes como `[imagen: alt]`; se ajusta al ancho y se vuelve a ajustar al redimensionar |
+| Editar Markdown | `e` (en la vista previa) o `Space m p` alterna con el fuente, dejando el cursor en el encabezado de la sección que veías; `Space m s` divide fuente \| vista previa con scroll sincronizado y actualización 150 ms después de editar |
+| Límites de Markdown | Documentos de más de 2 MiB se abren como fuente con aviso; HTML crudo y diagramas se omiten con un aviso; las tablas anchas se recortan con `…` |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: Markdown, ratón, búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Todavía **no** hay: ratón, búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -115,7 +118,7 @@ cuadrícula de terminal de 120×36 celdas.
 ## Atajos previstos
 
 Los atajos quedan fijados por las specs (`openspec/specs/`). **Ya funcionan** todos los de «Modos», «Movimiento y edición» y «Línea de comandos»,
-(incluidos `:bn` `:bp` `:bd`). La tecla líder `Space` ya funciona entera salvo los grupos `m` (Markdown) y `s` (buscar), que llegan con sus cambios y aparecerán solos en el panel.
+(incluidos `:bn` `:bp` `:bd`). La tecla líder `Space` ya funciona entera salvo el grupo `s` (buscar), que llega con su cambio y aparecerá solo en el panel.
 En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan de línea.
 
 ### Modos
@@ -168,7 +171,7 @@ En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan
 | `Space ?` / `Space h` | Lista de atajos |
 | `Space b n` `Space b p` `Space b d` | Buffer siguiente, anterior, cerrar |
 | `Space s g` / `Space s w` | Buscar en el proyecto / la palabra bajo el cursor *(llega con `config-search-release`)* |
-| `Space m p` / `Space m s` | Markdown: alternar vista previa / dividir *(llega con `markdown-preview`)* |
+| `Space m p` / `Space m s` | Markdown: alternar vista previa y fuente (en la vista previa también `e`) / dividir |
 
 Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`), generado desde las teclas reales.
 
