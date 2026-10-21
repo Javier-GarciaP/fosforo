@@ -83,3 +83,14 @@ func TestVersionIsOneLine(t *testing.T) {
 		t.Errorf("la versión debe ser una sola línea: %q", stdout)
 	}
 }
+
+func TestIconsFlagTakesPrecedenceOnlyWhenGiven(t *testing.T) {
+	o, err := cli.Parse([]string{"x"})
+	if err != nil || o.IconsSet {
+		t.Fatalf("sin --icons no debe pisar la configuración: %+v %v", o, err)
+	}
+	o, err = cli.Parse([]string{"--icons=nerd", "x"})
+	if err != nil || !o.IconsSet || o.Icons != "nerd" {
+		t.Fatalf("--icons indicado: %+v %v", o, err)
+	}
+}

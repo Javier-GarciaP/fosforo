@@ -173,3 +173,55 @@ func (k *Keymap) Children(mode string, prefix []string) []Child {
 	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
 	return out
 }
+
+// Clone devuelve una copia independiente del keymap (para aplicar los atajos del usuario sin tocar los de fábrica).
+func (k *Keymap) Clone() *Keymap {
+	var cp func(n *node) *node
+	cp = func(n *node) *node {
+		c := &node{command: n.command}
+		if len(n.children) > 0 {
+			c.children = make(map[string]*node, len(n.children))
+			for key, ch := range n.children {
+				c.children[key] = cp(ch)
+			}
+		}
+		return c
+	}
+	out := New()
+	for mode, root := range k.modes {
+		out.modes[mode] = cp(root)
+	}
+	return out
+}
+
+// Unbind quita la secuencia de un modo (y los grupos que quedan vacíos). Devuelve si existía como comando.
+func (k *Keymap) Unbind(mode, seq string) bool {
+	keys := Keys(seq)
+	root := k.modes[mode]
+	if root == nil || len(keys) == 0 {
+		return false
+	}
+	var rm func(n *node, i int) (found, empty bool)
+	rm = func(n *node, i int) (bool, bool) {
+		child := n.children[keys[i]]
+		if child == nil {
+			return false, false
+		}
+		var found bool
+		if i == len(keys)-1 {
+			if child.command == "" {
+				return false, false // es un grupo, no un comando
+			}
+			found = true
+			delete(n.children, keys[i])
+		} else {
+			var empty bool
+			if found, empty = rm(child, i+1); empty {
+				delete(n.children, keys[i])
+			}
+		}
+		return found, len(n.children) == 0 && n.command == ""
+	}
+	found, _ := rm(root, 0)
+	return found
+}

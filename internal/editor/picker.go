@@ -63,6 +63,7 @@ type picker struct {
 	files    <-chan []string // lotes del recorrido de archivos
 	keep     bool            // sin texto escrito se conserva el orden de la lista (recientes, buffers, comandos)
 	accept   func(m *Model, it pickItem)
+	grep     *grepState // búsqueda de texto en el proyecto: lo escrito es la consulta, no un filtro difuso
 }
 
 // filesMsg lleva un lote de archivos del recorrido del proyecto (done indica que no habrá más).
@@ -147,11 +148,17 @@ func (m *Model) closePicker() {
 	if m.picker != nil && m.picker.cancel != nil {
 		m.picker.cancel()
 	}
+	if m.picker != nil && m.picker.grep != nil && m.picker.grep.cancel != nil {
+		m.picker.grep.cancel()
+	}
 	m.picker = nil
 }
 
 // refilter recalcula los resultados. Con pocos elementos se hace al momento; con muchos, en segundo plano.
 func (m *Model) refilter(p *picker) tea.Cmd {
+	if p.grep != nil {
+		return m.grepSchedule(p, false)
+	}
 	if len(p.items) <= syncScoreLimit {
 		p.results = p.filter(p.queryString(), p.texts)
 		p.sel, p.scroll = 0, 0
@@ -460,6 +467,12 @@ func (m *Model) pickerView() *ui.PickerView {
 		pv.Empty = "Sin resultados"
 		if p.loading {
 			pv.Empty = "Cargando…"
+		}
+	}
+	if p.grep != nil {
+		pv.Counter = p.grepCounter()
+		if p.queryString() == "" {
+			pv.Empty = "Escribe para buscar en el proyecto"
 		}
 	}
 	for _, r := range p.results[p.scroll:end] {

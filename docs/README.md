@@ -75,10 +75,14 @@ Implementado en la rama `dev` (aún sin publicar):
 | Límites de Markdown | Documentos de más de 2 MiB se abren como fuente con aviso; HTML crudo y diagramas se omiten con un aviso; las tablas anchas se recortan con `…` |
 | Ratón | Clic: coloca el cursor (con números de línea, tabuladores y caracteres anchos); arrastrar: selección Visual; doble clic: la palabra; rueda: 3 líneas por muesca en el panel bajo el puntero (editor, explorador, vista previa, listas) sin cambiar el foco; clic en el explorador abre archivos y alterna carpetas; clic y doble clic en picker, paleta y botones de diálogos; clic fuera cierra el picker |
 | Ratón y selección nativa | `:mouse` (o `mouse.toggle` en la paleta) suelta el ratón para usar la selección de texto del terminal; con el ratón activado, `Shift`+arrastrar sigue seleccionando de forma nativa en la mayoría de terminales y en `tmux` |
+| Buscar en el proyecto | `Space s g` abre una búsqueda de texto: los resultados (`ruta:línea  texto`) aparecen mientras escribes (150 ms tras la última tecla), se cancelan al seguir escribiendo y `Enter` abre el archivo en esa línea. `Space s w` busca la palabra bajo el cursor. Distingue mayúsculas solo si escribes alguna; hasta 1000 resultados |
+| Motor de búsqueda | Usa `rg` (ripgrep) si está instalado, respetando `.gitignore`; si no, un buscador propio que omite `.git`, `node_modules`, binarios y archivos de más de 5 MiB |
+| Configuración | Archivo TOML opcional (`~/.config/fos/config.toml`): `theme` (`dark`/`light`/`auto`), `icons`, `tabwidth`, `indent`, `scrolloff`, `mouse` y atajos por contexto; un valor inválido avisa con el nombre de la clave y usa el valor por defecto, nunca impide arrancar. Ver «Configuración» |
+| Recargar | `Space c r` (`config.reload`) vuelve a leer el archivo; guardar el propio archivo de configuración en el editor lo recarga solo. `Space c o` lo abre (creándolo con una plantilla comentada si no existe) |
 | Salir | `:q`; con cambios sin guardar aparece `E37` y el diálogo Guardar / Descartar / Cancelar (`:q!` descarta). `Ctrl+C` solo cancela, como `Esc` |
 | Vista | Números de línea, `~`, statusline (modo, ruta, `[+]`, solo lectura, `línea:columna`, porcentaje), scroll con margen de 3 líneas y horizontal, aviso por debajo de 40x10 |
 
-Todavía **no** hay: búsqueda de texto en el proyecto ni configuración (ver la hoja de ruta). Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
+Sin implementar a propósito: repetir con `.`, objetos de texto (`iw`), macros y marcas.
 
 ## Alcance de la versión 1
 
@@ -172,10 +176,53 @@ En Insert: `Esc`/`Ctrl+C` vuelven a Normal, `Ctrl+S` guarda y las flechas cruzan
 | `Space /` / `Space :` | Buscar en el archivo / línea de comandos |
 | `Space ?` / `Space h` | Lista de atajos |
 | `Space b n` `Space b p` `Space b d` | Buffer siguiente, anterior, cerrar |
-| `Space s g` / `Space s w` | Buscar en el proyecto / la palabra bajo el cursor *(llega con `config-search-release`)* |
+| `Space s g` / `Space s w` | Buscar texto en el proyecto / la palabra bajo el cursor |
+| `Space c o` / `Space c r` | Abrir / recargar la configuración |
 | `Space m p` / `Space m s` | Markdown: alternar vista previa y fuente (en la vista previa también `e`) / dividir |
 
 Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`), generado desde las teclas reales.
+
+## Instalación
+
+`fos` es un único programa sin dependencias. Hay binarios para Linux y macOS (amd64 y arm64).
+
+```bash
+# 1) Script de instalación (verifica la suma SHA256; instala en ~/.local/bin)
+curl -fsSL https://raw.githubusercontent.com/Javier-GarciaP/fosforo/main/scripts/install.sh | sh
+#    FOS_VERSION=0.8.0 fija la versión; INSTALL_DIR=/usr/local/bin cambia la carpeta
+
+# 2) Con Go 1.27 o superior
+go install github.com/Javier-GarciaP/fosforo/cmd/fos@latest
+
+# 3) A mano: descarga fos_<versión>_<sistema>_<arquitectura>.tar.gz de la página de releases,
+#    comprueba checksums.txt y copia `fos` a una carpeta de tu PATH
+```
+
+Después: `fos --version`, `fos archivo.go`, `fos carpeta/`. Para ver los iconos del explorador hace falta una
+[Nerd Font](https://www.nerdfonts.com/) (o usa `--icons=none`). **Opcional:** instala [`rg`](https://github.com/BurntSushi/ripgrep)
+(ripgrep) para que `Space s g` sea más rápido y respete `.gitignore`; sin él funciona igual con el buscador propio.
+
+Las versiones se publican solo desde `main` con una etiqueta `vX.Y.Z` (el workflow de release falla si la etiqueta no está en `main`).
+
+## Configuración
+
+Todo es opcional. El archivo es `$XDG_CONFIG_HOME/fos/config.toml` (por defecto `~/.config/fos/config.toml`); `Space c o` lo crea
+con una plantilla comentada.
+
+```toml
+theme = "auto"      # dark | light | auto (auto lee el fondo de la terminal; si no responde, oscuro)
+icons = "nerd"      # nerd | none  (--icons en la línea de comandos manda sobre esto)
+tabwidth = 4        # 1..16
+indent = "tabs"     # tabs | spaces: qué inserta la tecla Tab
+scrolloff = 3       # 0..20 líneas de margen
+mouse = true
+
+[keys.normal]       # contextos: normal, insert, visual, explorer, preview
+"space g" = "search.project"   # secuencia = comando (los nombres salen de la paleta)
+"space t" = ""                 # un comando vacío quita el atajo
+```
+
+Un comando inexistente o una secuencia que choca con otra se rechazan con un aviso (el atajo de fábrica se conserva).
 
 ## Lenguajes con resaltado
 
@@ -240,6 +287,8 @@ Cada hito es un **cambio de OpenSpec** en [`openspec/changes/`](../openspec/chan
 | 7 | 0.6.0 | `markdown-preview` | Vista previa y dividido estilo GitHub | 2, 4, 5 |
 | 8 | 0.7.0 | `mouse-support` | Clic, arrastrar, rueda | 3, 4, 6 |
 | 9 | 0.8.0 | `config-search-release` | Configuración, búsqueda en proyecto, releases | todos |
+
+Los nueve cambios están implementados en `dev`; la `0.8.0` es la primera versión publicada con binarios.
 
 Después de `0.8.0` vienen `0.9.x` (pulido y errores) y `1.0.0` (primera versión estable). La numeración sigue el
 [Versionado Semántico](https://semver.org/lang/es/): ver [`CONTRIBUTING.md`](../CONTRIBUTING.md) y el [`CHANGELOG`](../CHANGELOG.md).

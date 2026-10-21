@@ -9,6 +9,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/Javier-GarciaP/fosforo/internal/config"
 	"github.com/Javier-GarciaP/fosforo/internal/editor"
 	"github.com/Javier-GarciaP/fosforo/internal/ui"
 	"github.com/Javier-GarciaP/fosforo/internal/version"
@@ -28,6 +29,7 @@ type Options struct {
 	ShowHelp    bool
 	Path        string // archivo o carpeta opcional para abrir
 	Icons       string // «nerd» (por defecto) o «none»: iconos del explorador
+	IconsSet    bool   // --icons se indicó en la línea de comandos (manda sobre la configuración)
 }
 
 const usageText = `Uso: %s [opciones] [ruta]
@@ -68,6 +70,7 @@ func Parse(args []string) (Options, error) {
 	if opts.Icons != "nerd" && opts.Icons != "none" {
 		return opts, fmt.Errorf("valor no válido para -icons: %q (usa nerd o none)", opts.Icons)
 	}
+	fs.Visit(func(f *flag.Flag) { opts.IconsSet = opts.IconsSet || f.Name == "icons" })
 	opts.Path = fs.Arg(0)
 	return opts, nil
 }
@@ -99,11 +102,20 @@ func Run(args []string, stdout, stderr io.Writer, runUI func(opts Options) error
 
 // RunEditor abre el editor en la terminal real.
 func RunEditor(opts Options) error {
-	icons := ui.IconsNerd
-	if opts.Icons == "none" {
-		icons = ui.IconsNone
+	path := config.Path()
+	cfg, problems, err := config.Load(path)
+	if err != nil {
+		problems = append(problems, config.Problem{Key: path, Reason: err.Error()})
 	}
-	m, err := editor.Open(opts.Path, editor.WithIcons(icons))
+	eo := []editor.Option{editor.WithConfig(cfg, path, problems)}
+	if opts.IconsSet { // la opción de la línea de comandos manda sobre la configuración
+		icons := ui.IconsNerd
+		if opts.Icons == "none" {
+			icons = ui.IconsNone
+		}
+		eo = append(eo, editor.WithIcons(icons))
+	}
+	m, err := editor.Open(opts.Path, eo...)
 	if err != nil {
 		return err
 	}

@@ -266,7 +266,7 @@ func (m *Model) previewToSource() {
 	m.setMode(ModeNormal)
 	line = max(0, min(line, m.buf.LineCount()-1))
 	m.cur.Set(m.buf, buffer.Pos{Line: line, Col: firstNonBlank(m.buf.Line(line))})
-	m.top = max(0, line-scrollMargin)
+	m.top = max(0, line-m.scrollOff)
 }
 
 // sourceToPreview pasa a la vista previa a pantalla completa mostrando el bloque donde estaba el cursor.

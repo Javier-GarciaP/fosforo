@@ -18,6 +18,8 @@ const (
 	PickerList
 	// PickerPalette es la lista ancha anclada arriba, con los atajos a la derecha (maqueta 06).
 	PickerPalette
+	// PickerSearch es la lista ancha de altura fija para la búsqueda de texto en el proyecto (los resultados llegan poco a poco).
+	PickerSearch
 )
 
 // PickerRow es una fila de la lista. Match son los índices de runa de Text que coincidieron con lo escrito.
@@ -71,6 +73,10 @@ func pickerRect(kind PickerKind, w, h, rows int) rect {
 		bw := min(w-2, max(50, w*58/100))
 		bh := min(h-4, rows+4) // título, aire, entrada, filas y pie
 		return rect{(w - bw) / 2, max(1, h/12), bw, bh}
+	case PickerSearch:
+		bw := min(w-2, max(60, w*80/100))
+		bh := min(h-4, max(12, h*60/100))
+		return rect{(w - bw) / 2, max(1, h/10), bw, bh}
 	case PickerList:
 		bw := min(w-2, max(44, w*50/100))
 		bh := min(h-4, rows+4)

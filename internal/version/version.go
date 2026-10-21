@@ -18,6 +18,11 @@ var (
 // String devuelve la versión en una línea, p. ej. "fos 0.8.0 (abc1234)".
 func String() string {
 	commit := Commit
+	if Version == "dev" { // sin -ldflags: con «go install ...@vX.Y.Z» la versión viene de los metadatos de compilación
+		if v := moduleVersion(); v != "" {
+			return Name + " " + v
+		}
+	}
 	if commit == "" {
 		commit = vcsRevision()
 	}
@@ -25,6 +30,15 @@ func String() string {
 		return Name + " " + Version
 	}
 	return Name + " " + Version + " (" + commit + ")"
+}
+
+// moduleVersion devuelve la versión del módulo si el binario se instaló con «go install» desde una etiqueta (sin la «v»).
+func moduleVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok || info.Main.Version == "" || info.Main.Version == "(devel)" || strings.Contains(info.Main.Version, "+dirty") {
+		return ""
+	}
+	return strings.TrimPrefix(info.Main.Version, "v")
 }
 
 func vcsRevision() string {

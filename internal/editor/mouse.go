@@ -219,7 +219,7 @@ func (m *Model) scrollEditor(delta int) {
 	rows, lines := ui.TextRows(m.height), m.buf.LineCount()
 	maxTop := max(0, lines-rows)
 	m.top = max(0, min(m.top+delta, maxTop))
-	margin := min(scrollMargin, (rows-1)/2)
+	margin := min(m.scrollOff, (rows-1)/2)
 	lo, hi := m.top, m.top+rows-1
 	if m.top > 0 {
 		lo = m.top + margin

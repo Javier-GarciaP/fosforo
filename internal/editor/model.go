@@ -26,7 +26,7 @@ const (
 )
 
 // scrollMargin son las líneas que se mantienen visibles entre el cursor y el borde al desplazarse.
-const scrollMargin = 3
+const scrollMargin = 3 // valor por defecto de scrolloff
 
 // DefaultTimeout es lo que se espera la siguiente tecla de una secuencia incompleta (p. ej. «g» antes de «gg»).
 const DefaultTimeout = 1000 * time.Millisecond
@@ -77,6 +77,7 @@ type Model struct {
 	hlJobs      *atomic.Int64
 	mdDelay     time.Duration
 	mdJobs      *atomic.Int64
+	grepWait    time.Duration
 
 	mouseOn    bool // el editor captura el ratón
 	now        func() time.Time
@@ -85,6 +86,12 @@ type Model struct {
 	dragAnchor buffer.Pos // dónde empezó el arrastre
 	dragCell   [2]int     // última celda del arrastre
 	light      bool       // tema claro
+
+	keys       *keymap.Keymap // atajos activos (los de fábrica más los del usuario)
+	scrollOff  int            // líneas de margen al desplazarse
+	spaces     bool           // la tecla Tab inserta espacios en lugar de un tabulador
+	themeAuto  bool           // el tema se toma del fondo de la terminal
+	configPath string         // archivo de configuración (vacío: sin configuración)
 
 	picker      *picker   // ventana de selección abierta (archivos, buffers, paleta...)
 	recent      []string  // archivos abiertos en esta sesión, el más reciente primero
@@ -118,7 +125,7 @@ func New(b *buffer.Buffer, label string, opts ...Option) Model {
 		timeout: DefaultTimeout, leaderDelay: LeaderDelay, clipboard: defaultClipboard, lastForward: true,
 		hlDelay: DefaultHighlightDelay, hlJobs: new(atomic.Int64),
 		mdDelay: DefaultMarkdownDelay, mdJobs: new(atomic.Int64),
-		mouseOn: true, now: time.Now,
+		mouseOn: true, now: time.Now, keys: defaultKeymap, grepWait: DefaultGrepDelay, scrollOff: scrollMargin,
 	}
 	m.bufs = []*bufState{newBufState(b, label)}
 	for _, o := range opts {
@@ -183,7 +190,12 @@ func (m Model) Pending() string {
 }
 
 // Init no lanza comandos iniciales.
-func (m Model) Init() tea.Cmd { return nil }
+func (m Model) Init() tea.Cmd {
+	if m.themeAuto {
+		return tea.RequestBackgroundColor // si la terminal no responde, se queda el tema oscuro
+	}
+	return nil
+}
 
 // Update procesa mensajes: redimensionado, teclas, pegado y temporizador.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -205,6 +217,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.msg, m.msgErr = "", false
 			m.withUndo(func() { m.insertText(msg.Content) })
 		}
+	case tea.BackgroundColorMsg:
+		if m.themeAuto {
+			m.light = !msg.IsDark()
+		}
 	case TimeoutMsg:
 		if msg.Seq == m.seq && len(m.pending) > 0 && !m.leaderShown {
 			m.resetPending() // la secuencia incompleta se descarta sin cambiar el texto (el panel del líder espera sin caducar)
@@ -215,6 +231,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case filesMsg:
 		cmd = m.filesArrived(msg)
+	case grepStartMsg:
+		cmd = m.grepStart(msg)
+	case grepMsg:
+		cmd = m.grepArrived(msg)
 	case scoredMsg:
 		cmd = m.pickerScored(msg)
 	case tea.FocusMsg: // la terminal recupera el foco: se revisan el disco y el explorador
@@ -306,7 +326,7 @@ func (m *Model) modalKey(k tea.KeyPressMsg) tea.Cmd {
 		m.withUndo(func() { cmd = m.operatorLines(op, total) })
 		return cmd
 	}
-	res := defaultKeymap.Resolve(mode, m.pending, key)
+	res := m.keys.Resolve(mode, m.pending, key)
 	switch res.Status {
 	case keymap.Pending:
 		m.pending = append(m.pending[:len(m.pending):len(m.pending)], key)
@@ -475,7 +495,7 @@ func (m *Model) scroll() {
 	}
 	lines := m.buf.LineCount()
 	rows := ui.TextRows(m.height)
-	margin := min(scrollMargin, (rows-1)/2)
+	margin := min(m.scrollOff, (rows-1)/2)
 	if m.cur.Line < m.top+margin {
 		m.top = m.cur.Line - margin
 	}
