@@ -13,15 +13,17 @@ docs/design/
 │   ├── 00-guia-de-estilo.png
 │   ├── 01-layout-principal-normal.png
 │   └── ... (hasta 12-marca-fosforo.png)
-├── brand/             ← marca: icono vectorial (SVG) y PNG del icono y los lockups
+├── brand/             ← marca: logo vectorial unicolor (SVG) y PNG negro/blanco
 ├── src/               ← scripts que GENERAN el diseño (fuente de verdad de las maquetas)
 │   ├── palette.js     ← GENERADO: paleta Tinta (oscuro y claro)
 │   ├── icons.js       ← GENERADO: iconos de archivo como trazados vectoriales
+│   ├── logo.js        ← GENERADO: geometría del logo
 │   ├── lib.js         ← piezas compartidas: líneas, explorador, statusline, popups, tabla...
 │   └── 00-… a 12-….js ← una pantalla por archivo
-└── tools/             ← generadores de palette.js e icons.js (Python)
+└── tools/             ← generadores de palette.js, icons.js y del logo (Python)
     ├── make-palette.py
-    └── make-icons.py
+    ├── make-icons.py
+    └── make-logo.py
 ```
 
 > **Regla:** `src/` es la fuente de verdad. `editor.op` y `exports/` son resultados generados. Si cambias una
@@ -152,36 +154,31 @@ cerradas atenuadas (ver pantalla `11`).
 
 ## Marca
 
-**fosforo** = la cerilla y el fósforo de los monitores CRT. El icono es un **cursor de bloque verde fósforo coronado por la cabeza
-de una cerilla**: el cursor que enciende ideas. La pantalla [`12`](exports/12-marca-fosforo.png) muestra el icono, sus versiones
-(oscura, clara y monocroma), los tamaños desde 128 hasta 16 px y los colores de marca.
+**fosforo** = la cerilla y el fósforo de los monitores CRT. El logo es **`< >` (el símbolo universal de código) con una llama sutil
+dentro**: código que enciende ideas. Es **unicolor y sin fondo**: toma el color del contexto (texto negro, blanco o el que toque).
+La pantalla [`12`](exports/12-marca-fosforo.png) lo muestra sobre fondo oscuro y claro y a tamaños de 128 a 16 px (a 16 px la
+llama se reduce a un punto, pero `< >` sigue claro).
 
 | Archivo | Qué es |
 | --- | --- |
-| `brand/fosforo-icon.svg` | Icono vectorial (fuente de verdad del icono) |
-| `brand/fosforo-icon.png` | Icono 512 px (generado desde el SVG) |
-| `brand/fosforo-lockup.png` / `fosforo-lockup-light.png` | Icono + nombre sobre fondo oscuro / claro |
+| `brand/fosforo-logo.svg` | Logo vectorial unicolor (usa `currentColor`; generado por `tools/make-logo.py`) |
+| `brand/fosforo-logo-black.png` | PNG 512 px, negro sobre transparente |
+| `brand/fosforo-logo-white.png` | PNG 512 px, blanco sobre transparente |
 
-Colores: **verde fósforo** `#69f19a` (oscuro) / `#067e42` (claro), **ember** `#ff8f4e` (la cabeza), tinta `#0d111d`, papel `#fbf8ef`.
-El verde de marca está en la paleta como `brand` (ver *Paleta e iconos*).
-
-El SVG y el dibujo de `src/12-marca.js` usan **la misma geometría** (cuadrado de 512 unidades): si cambias uno, cambia el otro.
-El SVG se valida con un renderizador independiente (librsvg, el de ImageMagick), porque el importador de SVG de OpenPencil
-**no admite degradados**. Para regenerar los PNG de la marca, desde la raíz del repositorio y con el diseño ya generado:
+La geometría vive en **un solo sitio**, `tools/make-logo.py`, que genera a la vez el SVG y `src/logo.js` (los datos con los que
+`src/12-marca.js` dibuja el logo en OpenPencil). Si cambias el logo, edita el script, ejecútalo (`python3 docs/design/tools/make-logo.py`)
+y regenera el diseño. Para regenerar los PNG a partir del SVG (ImageMagick con librsvg), desde la raíz del repositorio:
 
 ```bash
 mkdir -p docs/design/brand
-magick -background none docs/design/brand/fosforo-icon.svg -resize 512x512 docs/design/brand/fosforo-icon.png
-
-op start --headless --file docs/design/editor.op &
-sleep 4
-for pair in "logo lockup oscuro:fosforo-lockup" "logo lockup claro:fosforo-lockup-light"; do
-  name=${pair%%:*}; out=${pair##*:}
-  id=$(op find_node_by_name name="$name" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
-  op export --item "$id" --output "docs/design/brand/$out.png" --format png --scale 2
+for c in "black:#000000" "white:#ffffff"; do
+  name=${c%%:*}; col=${c##*:}
+  sed "s/currentColor/$col/g" docs/design/brand/fosforo-logo.svg \
+    | magick -background none -density 384 svg:- -resize 512x512 "docs/design/brand/fosforo-logo-$name.png"
 done
-op stop
 ```
+
+El verde fósforo (`brand` en la paleta) es el **acento de marca de la interfaz**; el logo no lo usa.
 
 ## Modificar el diseño
 
@@ -199,11 +196,11 @@ rm -f docs/design/editor.op
 op start --headless --file docs/design/editor.op &
 sleep 4
 
-# Aplicar cada pantalla: palette.js + icons.js + lib.js + pantalla, concatenados en un archivo temporal .js
+# Aplicar cada pantalla: palette.js + icons.js + logo.js + lib.js + pantalla, concatenados en un archivo temporal .js
 mkdir -p /tmp/op-build
 for f in docs/design/src/[0-9]*.js; do
   n=$(basename "$f")
-  cat docs/design/src/palette.js docs/design/src/icons.js docs/design/src/lib.js "$f" > "/tmp/op-build/$n"
+  cat docs/design/src/palette.js docs/design/src/icons.js docs/design/src/logo.js docs/design/src/lib.js "$f" > "/tmp/op-build/$n"
   op design "@/tmp/op-build/$n" > /dev/null
 done
 
@@ -234,8 +231,7 @@ mismas herramientas (`op tools` lista las 166 disponibles: `batch_design`, `inse
 ## Trampas conocidas (aprendidas al construir estas maquetas)
 
 - **El primer hijo queda encima.** En un frame, el orden de dibujo es inverso al de creación: lo primero que se crea se
-  pinta *encima*. Los popups y el fondo atenuado deben crearse **antes** que la aplicación (ver `src/05-picker-archivos.js`);
-  en el icono, el reflejo y la cabeza antes que el palo y los brillos (ver `src/12-marca.js`).
+  pinta *encima*. Los popups y el fondo atenuado deben crearse **antes** que la aplicación (ver `src/05-picker-archivos.js`).
 - **Los glifos de caja (`┌ │ ┬ …`) se renderizan con otra altura de línea** y desalinean las filas. Las tablas del diseño
   se dibujan con bordes (`tableGrid` en `lib.js`); en el editor real sí se usarán caracteres de caja.
 - **No uses el carácter backtick dentro de un script**: el preprocesador del DSL lo confunde con una plantilla. Constrúyelo

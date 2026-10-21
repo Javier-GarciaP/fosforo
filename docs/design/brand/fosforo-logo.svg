@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="fosforo">
+  <title>fosforo</title>
+  <!-- GENERADO por docs/design/tools/make-logo.py: no editar a mano. Unicolor y sin fondo: toma el color de currentColor. -->
+  <g fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M72 84 L24 128 L72 172"/>
+    <path d="M184 84 L232 128 L184 172"/>
+  </g>
+  <path d="M128,66.96 C134.56,91.56 155.88,107.96 155.88,140.76 C155.88,165.36 143.58,185.04 128,185.04 C112.42,185.04 100.12,167 100.12,144.04 C100.12,126 109.14,115.34 116.52,104.68 C118.16,116.16 122.26,123.54 127.18,126.82 C122.26,107.14 122.26,86.64 128,66.96 Z M128,139.12 C122.26,148.14 116.52,154.7 116.52,163.72 C116.52,170.28 121.44,175.2 128,175.2 C134.56,175.2 139.48,170.28 139.48,163.72 C139.48,154.7 133.74,148.14 128,139.12 Z" fill="currentColor" fill-rule="evenodd"/>
+</svg>
