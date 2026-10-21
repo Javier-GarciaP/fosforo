@@ -159,13 +159,13 @@ func TestConfigOpenCreatesTemplateAndReloadsOnSave(t *testing.T) {
 
 func TestConfigReloadSwitchesIcons(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "c.toml")
-	os.WriteFile(path, []byte("icons = \"none\"\n"), 0o644)
+	os.WriteFile(path, []byte("icons = \"nerd\"\n"), 0o644)
 	e := newEd(t, "x\n", editor.WithConfig(config.Defaults(), path, nil))
-	if !e.m.IconsOn() {
-		t.Fatal("empieza con iconos")
+	if e.m.IconsOn() {
+		t.Fatal("por defecto, sin iconos")
 	}
 	e.space("cr")
-	if e.m.IconsOn() {
-		t.Error("tras recargar, sin iconos")
+	if !e.m.IconsOn() {
+		t.Error("tras recargar con icons = nerd, con iconos")
 	}
 }

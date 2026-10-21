@@ -65,12 +65,8 @@ func TestRun(t *testing.T) {
 				t.Errorf("ruta = %q, quería %q", gotPath, tc.wantPath)
 			}
 			if tc.wantCode == 0 && tc.ui != nil && gotPath != "" || tc.name == "sin ruta" {
-				want := "nerd"
-				if tc.name == "iconos none" {
-					want = "none"
-				}
-				if gotIcons != want {
-					t.Errorf("iconos = %q, quería %q", gotIcons, want)
+				if gotIcons != "none" { // por defecto y con --icons=none
+					t.Errorf("iconos = %q, quería none", gotIcons)
 				}
 			}
 		})

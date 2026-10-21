@@ -32,7 +32,7 @@ type explorerState struct {
 // WithRoot fija la carpeta raíz del explorador (por defecto, la carpeta de trabajo).
 func WithRoot(dir string) Option { return func(m *Model) { m.root = absPath(dir) } }
 
-// WithIcons elige si el explorador muestra iconos de Nerd Font (por defecto) o ninguno.
+// WithIcons elige si el explorador muestra iconos de Nerd Font o ninguno.
 func WithIcons(mode ui.IconMode) Option { return func(m *Model) { m.icons = mode } }
 
 // ExplorerVisible indica si el panel está a la vista (oculto si la terminal es demasiado estrecha).
