@@ -94,5 +94,9 @@ func Run(args []string, stdout, stderr io.Writer, runUI func(path string) error)
 
 // RunEditor abre el editor en la terminal real.
 func RunEditor(path string) error {
-	return ui.Run(editor.New(path))
+	m, err := editor.Open(path)
+	if err != nil {
+		return err
+	}
+	return ui.Run(m)
 }

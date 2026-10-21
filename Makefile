@@ -9,8 +9,9 @@ LDFLAGS := -X github.com/Javier-GarciaP/fosforo/internal/version.Version=$(VERSI
 build: ## Compila el binario en bin/fos
 	go build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/fos
 
-test: ## Ejecuta todas las pruebas
+test: ## Ejecuta todas las pruebas (la del pánico, sin -race: ver internal/ui/run_test.go)
 	go test -race ./...
+	go test -count=1 -run TestRunRestoresTerminalAfterPanic ./internal/ui
 
 vet: ## Análisis estático y comprobación de formato
 	go vet ./...
