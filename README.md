@@ -13,14 +13,14 @@
 </p>
 
 <p align="center">
-  <img alt="versión 0.8.0" src="https://img.shields.io/badge/versi%C3%B3n-0.8.0-orange">
+  <img alt="versión 0.8.0" src="https://img.shields.io/badge/versi%C3%B3n-0.9.0-orange">
   <img alt="estado: beta" src="https://img.shields.io/badge/estado-beta-yellow">
   <img alt="hecho con Go" src="https://img.shields.io/badge/hecho%20con-Go-00ADD8">
   <img alt="licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
 > [!NOTE]
-> **fosforo está en beta (`0.8.0`).** Ya puedes instalarlo y usarlo a diario; entre versiones `0.x` pueden cambiar cosas. Mira [cómo instalarlo](#-instalación).
+> **fosforo está en beta (`0.9.0`).** Ya puedes instalarlo y usarlo a diario; entre versiones `0.x` pueden cambiar cosas. Mira [cómo instalarlo](#-instalación).
 
 <p align="center">
   <img src="docs/design/exports/01-layout-principal-normal.png" width="820" alt="fosforo: explorador de archivos, editor con colores y barra de estado">
@@ -97,6 +97,7 @@ fosforo se publica por versiones. Mientras el proyecto está en beta, los númer
 | ↳ 0.6.0 | ✅ En la 0.8.0 | **Markdown como en GitHub**, con vista previa. |
 | ↳ 0.7.0 | ✅ En la 0.8.0 | **Ratón:** clic, arrastrar y rueda. |
 | ↳ 0.8.0 | ✅ En la 0.8.0 | **Configuración, búsqueda en el proyecto** y programa descargable. |
+| **0.9.0** | ✅ Hecha | **Pantalla de inicio:** logo y atajos cuando no hay ningún archivo abierto. |
 | 0.9.x | ⏳ Prevista | **Pulido** y corrección de errores. |
 | **1.0.0** | 🎯 Meta | **Primera versión estable.** |
 
@@ -140,7 +141,7 @@ fos                # buffer vacío; dentro: Space Space abre la paleta de comand
 ```
 
 - **Si `fos` no se encuentra**, añade `~/.local/bin` a tu `PATH` (el instalador te lo avisa) o instala en otra carpeta: `curl … | INSTALL_DIR=/usr/local/bin sh` (puede requerir `sudo`).
-- **Otra versión:** `curl … | FOS_VERSION=0.8.0 sh`. **Actualizar:** repite el mismo comando. **Desinstalar:** `rm ~/.local/bin/fos` (la configuración, si existe, está en `~/.config/fos/`).
+- **Otra versión:** `curl … | FOS_VERSION=0.9.0 sh`. **Actualizar:** repite el mismo comando. **Desinstalar:** `rm ~/.local/bin/fos` (la configuración, si existe, está en `~/.config/fos/`).
 - **A mano:** descarga `fos_<versión>_<sistema>_<arquitectura>.tar.gz` de la [página de releases](https://github.com/Javier-GarciaP/fosforo/releases), comprueba `checksums.txt` y copia `fos` a una carpeta de tu `PATH`.
 - **Opcionales:** [`rg`](https://github.com/BurntSushi/ripgrep) para una búsqueda en el proyecto más rápida, y una fuente [Nerd Font](https://www.nerdfonts.com) si quieres iconos en el explorador (`fos --icons=nerd` o `icons = "nerd"` en la [configuración](docs/README.md#configuración)); por defecto no se muestran.
 

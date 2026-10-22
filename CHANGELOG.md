@@ -7,6 +7,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 
 ## [Sin publicar]
 
+## [0.9.0] - 2026-10-21
+
 ### Añadido
 
 - **Start screen:** when no file is open, the editor area shows the FOSFORO logo and the main leader shortcuts; it hides on small windows and is informational only (keys and mouse work as before).
