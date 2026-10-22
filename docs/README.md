@@ -11,7 +11,7 @@
 >
 > Documentación técnica del proyecto. Para una presentación general, mira el [README](../README.md).
 >
-> **Estado del proyecto: beta (`0.8.0`, la primera versión con programa).** Edición modal tipo Vim, explorador, colores, búsqueda, Markdown, ratón y configuración. Ver «Instalación» y «Qué funciona hoy».
+> **Estado del proyecto: beta (`0.9.0`).** Edición modal tipo Vim, explorador, colores, búsqueda, Markdown, ratón y configuración. Ver «Instalación» y «Qué funciona hoy».
 
 ## Qué queremos lograr
 
@@ -39,7 +39,7 @@ sin salir del editor.
 
 ## Qué funciona hoy
 
-Incluido en la `0.8.0`:
+Incluido hasta la `0.9.0`:
 
 | Función | Detalle |
 | --- | --- |
@@ -65,7 +65,7 @@ Incluido en la `0.8.0`:
 | Resaltado asíncrono | Escribir nunca espera: los colores anteriores se desplazan con cada edición y se actualizan 50 ms después de la última; los textos de hasta 100 KiB se colorean al abrirlos |
 | Límites | Archivos de más de 2 MiB y líneas de más de 2000 caracteres se muestran sin color |
 | Temas | `Space t` alterna oscuro/claro y recolorea al instante sin volver a analizar el código |
-| Pantalla de inicio | (not released yet) Shown when no file is open: FOSFORO logo plus the main leader shortcuts on the right; hides the logo (or everything) on small windows; informational only, keys and mouse are unchanged |
+| Pantalla de inicio | Shown when no file is open: FOSFORO logo plus the main leader shortcuts on the right; hides the logo (or everything) on small windows; informational only, keys and mouse are unchanged |
 | Buscar archivos | `Space f f`: ventana difusa con vista previa coloreada, contador `coincidencias/total` y carga progresiva en proyectos grandes (no bloquea la entrada); `Space f r` recientes; `Space f n` nuevo |
 | Buffers (picker) | `Space b b` lista los buffers abiertos marcando los modificados |
 | Paleta de comandos | `Space Space` lista todos los comandos por su descripción con sus atajos a la derecha; `Enter` lo ejecuta igual que su atajo; `Space ?`/`Space h` muestran la lista de atajos |
@@ -190,7 +190,7 @@ Con `Space` pulsado y 300 ms de espera aparece el panel de ayuda (maqueta `04`),
 ```bash
 # 1) Script de instalación (verifica la suma SHA256; instala en ~/.local/bin)
 curl -fsSL https://raw.githubusercontent.com/Javier-GarciaP/fosforo/main/scripts/install.sh | sh
-#    FOS_VERSION=0.8.0 fija la versión; INSTALL_DIR=/usr/local/bin cambia la carpeta
+#    FOS_VERSION=0.9.0 fija la versión; INSTALL_DIR=/usr/local/bin cambia la carpeta
 
 # 2) Con Go 1.27 o superior
 go install github.com/Javier-GarciaP/fosforo/cmd/fos@latest
@@ -291,7 +291,7 @@ Cada hito es un **cambio de OpenSpec** en [`openspec/changes/`](../openspec/chan
 
 Los diez cambios se publican juntos en la **`0.8.0`** (los hitos `0.1.0`–`0.7.0` del plan original quedaron incluidos en ella), con binarios para Linux y macOS.
 
-Después de `0.8.0` vienen `0.9.x` (pulido y errores) y `1.0.0` (primera versión estable). La numeración sigue el
+Después de `0.9.0` vienen `0.9.x` (pulido y errores) y `1.0.0` (primera versión estable). La numeración sigue el
 [Versionado Semántico](https://semver.org/lang/es/): ver [`CONTRIBUTING.md`](../CONTRIBUTING.md) y el [`CHANGELOG`](../CHANGELOG.md).
 
 ## Cómo se construyó
