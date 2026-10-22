@@ -87,6 +87,7 @@ type EditorView struct {
 	BufCount  int
 	Prompt    *Prompt // línea de comandos en edición, o nil
 	Dialog    *Dialog
+	Start     bool // pantalla de inicio (logo y atajos) en lugar del texto vacío; solo se dibuja si cabe
 }
 
 // GutterWidth es el ancho de la columna de números (números alineados a la derecha más un espacio).
@@ -110,6 +111,9 @@ func CursorCell(v EditorView, w, h int) (x, y int, ok bool) {
 	}
 	px, ew, _, _ := Areas(w, v.Explorer != nil, v.Markdown)
 	if ew == 0 { // vista previa a pantalla completa: no hay cursor de edición
+		return 0, 0, false
+	}
+	if v.Start && startFits(ew, TextRows(h)) { // la pantalla de inicio no tiene cursor
 		return 0, 0, false
 	}
 	gw := GutterWidth(v.Buf.LineCount())
@@ -139,7 +143,8 @@ func RenderEditor(v EditorView, w, h int, th Theme) string {
 		drawMarkdown(g, mx, mw, rows, v.Markdown, th)
 	}
 
-	for r := 0; r < rows && ew > 0; r++ {
+	start := v.Start && ew > 0 && drawStart(g, px, 0, ew, rows, th)
+	for r := 0; r < rows && ew > 0 && !start; r++ {
 		i := v.Top + r
 		if i >= lines {
 			g.put(px+gw-2, r, "~", style{fg: th.Dim, bg: th.BG})
