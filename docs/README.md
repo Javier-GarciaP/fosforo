@@ -65,6 +65,7 @@ Incluido en la `0.8.0`:
 | Resaltado asíncrono | Escribir nunca espera: los colores anteriores se desplazan con cada edición y se actualizan 50 ms después de la última; los textos de hasta 100 KiB se colorean al abrirlos |
 | Límites | Archivos de más de 2 MiB y líneas de más de 2000 caracteres se muestran sin color |
 | Temas | `Space t` alterna oscuro/claro y recolorea al instante sin volver a analizar el código |
+| Pantalla de inicio | (not released yet) Shown when no file is open: FOSFORO logo plus the main leader shortcuts on the right; hides the logo (or everything) on small windows; informational only, keys and mouse are unchanged |
 | Buscar archivos | `Space f f`: ventana difusa con vista previa coloreada, contador `coincidencias/total` y carga progresiva en proyectos grandes (no bloquea la entrada); `Space f r` recientes; `Space f n` nuevo |
 | Buffers (picker) | `Space b b` lista los buffers abiertos marcando los modificados |
 | Paleta de comandos | `Space Space` lista todos los comandos por su descripción con sus atajos a la derecha; `Enter` lo ejecuta igual que su atajo; `Space ?`/`Space h` muestran la lista de atajos |

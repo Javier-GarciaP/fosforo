@@ -14,5 +14,5 @@
 
 ## 3. Documentación y cierre
 
-- [ ] 3.1 Actualizar `docs/README.md` (tabla de funciones) y `CHANGELOG.md` en inglés sencillo.
+- [x] 3.1 Actualizar `docs/README.md` (tabla de funciones) y `CHANGELOG.md` en inglés sencillo.
 - [ ] 3.2 Ejecutar `go vet ./...` y `go test ./...`, y revisar visualmente con `fos .` en tema oscuro y claro y en una terminal pequeña.
