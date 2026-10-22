@@ -52,6 +52,9 @@ func startListWidth() int {
 	return labels + startGap + keys
 }
 
+// startFits indica si la lista de acciones cabe en un área de w×h celdas (el mínimo para mostrar la pantalla de inicio).
+func startFits(w, h int) bool { return w >= startListWidth() && h >= len(StartEntries) }
+
 // drawStart pinta la pantalla de inicio centrada en el rectángulo (x, y, w, h) del editor.
 // Tres niveles (decisión 4): si caben logo, hueco y lista se dibuja todo; si no, solo la
 // lista; y si la lista no cabe (en filas o en columnas) no se dibuja nada y devuelve false,
@@ -59,7 +62,7 @@ func startListWidth() int {
 func drawStart(g *grid, x, y, w, h int, th Theme) bool {
 	n := len(StartEntries)
 	listW := startListWidth()
-	if w < listW || h < n {
+	if !startFits(w, h) {
 		return false
 	}
 	full := h >= len(startLogo)+1+n && w >= startLogoWidth()

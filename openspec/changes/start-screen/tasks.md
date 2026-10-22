@@ -3,8 +3,8 @@
 ## 1. Dibujo (paquete `ui`)
 
 - [x] 1.1 Crear `internal/ui/start_view.go` con el logo "FOSFORO" (letras de bloque), `StartEntries` y `drawStart`, centrando en el área del editor y con los tres niveles de tamaño. Prueba primero (explicada): con un área grande el resultado contiene el logo y las ocho acciones; con un área baja solo la lista; con un área mínima nada.
-- [ ] 1.2 Añadir el campo `Start bool` a `EditorView` y usarlo en `RenderEditor` en lugar de los `~`/líneas cuando la pantalla cabe. Prueba (explicada): con `Start` el texto "FOSFORO" aparece y con `Start` falso no; el logo usa el color `Brand` del tema oscuro y del claro.
-- [ ] 1.3 Hacer que `CursorCell` no muestre cursor mientras la pantalla de inicio está dibujada. Prueba (explicada): devuelve `ok=false`.
+- [x] 1.2 Añadir el campo `Start bool` a `EditorView` y usarlo en `RenderEditor` en lugar de los `~`/líneas cuando la pantalla cabe. Prueba (explicada): con `Start` el texto "FOSFORO" aparece y con `Start` falso no; el logo usa el color `Brand` del tema oscuro y del claro.
+- [x] 1.3 Hacer que `CursorCell` no muestre cursor mientras la pantalla de inicio está dibujada. Prueba (explicada): devuelve `ok=false`.
 
 ## 2. Decisión (paquete `editor`)
 

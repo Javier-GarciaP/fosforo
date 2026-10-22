@@ -2,6 +2,7 @@ package ui_test
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -398,5 +399,61 @@ func TestModeColors(t *testing.T) {
 		if !strings.Contains(status, want) {
 			t.Errorf("%s: la etiqueta debe usar su color (%s): %q", mode, want, status[:60])
 		}
+	}
+}
+
+// Con Start y sitio suficiente, RenderEditor dibuja el logo y la lista y no los «~» del editor vacío.
+func TestRenderEditorStartScreen(t *testing.T) {
+	v := ui.EditorView{Buf: buffer.FromString("", ""), Start: true}
+	out := plain(v, 100, 30)
+	if !strings.Contains(out, "██╗") || !strings.Contains(out, "Space f f") {
+		t.Errorf("falta el logo o la lista:\n%s", out)
+	}
+	if strings.Contains(out, "~") {
+		t.Error("con la pantalla de inicio no debe haber «~»")
+	}
+	v.Start = false
+	if strings.Contains(plain(v, 100, 30), "Space f f") {
+		t.Error("sin Start no debe verse la pantalla de inicio")
+	}
+}
+
+// Si la lista no cabe (terminal muy baja o estrecha) con Start se dibuja el editor vacío normal.
+func TestRenderEditorStartFallsBackWhenSmall(t *testing.T) {
+	v := ui.EditorView{Buf: buffer.FromString("", ""), Start: true}
+	small := plain(v, 100, 9) // 7 filas de texto: menos que las 8 acciones
+	if strings.Contains(small, "Space f f") || !strings.Contains(small, "~") {
+		t.Errorf("con poco alto debe verse el editor vacío normal:\n%s", small)
+	}
+}
+
+// El logo usa el color de la marca (Brand) en el tema oscuro y en el claro.
+func TestRenderEditorStartLogoUsesBrand(t *testing.T) {
+	v := ui.EditorView{Buf: buffer.FromString("", ""), Start: true}
+	for name, th := range map[string]ui.Theme{"oscuro": ui.Dark(), "claro": ui.Light()} {
+		raw := ui.RenderEditor(v, 100, 30, th)
+		r, g, b := hexToRGB(t, th.Brand)
+		if !strings.Contains(raw, fmt.Sprintf("38;2;%d;%d;%d", r, g, b)) {
+			t.Errorf("tema %s: no se usa el color Brand %s", name, th.Brand)
+		}
+	}
+}
+
+func hexToRGB(t *testing.T, h string) (r, g, b int) {
+	t.Helper()
+	if _, err := fmt.Sscanf(h, "#%02x%02x%02x", &r, &g, &b); err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
+// La pantalla de inicio no tiene cursor; si no cabe, el cursor vuelve a su sitio normal.
+func TestCursorCellStartScreen(t *testing.T) {
+	v := ui.EditorView{Buf: buffer.FromString("", ""), Start: true}
+	if _, _, ok := ui.CursorCell(v, 100, 30); ok {
+		t.Error("con la pantalla de inicio no hay cursor")
+	}
+	if _, _, ok := ui.CursorCell(v, 100, 9); !ok {
+		t.Error("si la pantalla de inicio no cabe, el cursor se muestra")
 	}
 }
