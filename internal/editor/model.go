@@ -540,6 +540,14 @@ func (m Model) TooSmall() bool {
 	return m.width < MinWidth || m.height < MinHeight
 }
 
+// showStart indica si toca la pantalla de inicio: buffer sin nombre, vacío y sin modificar, sin vista previa
+// de Markdown y fuera del modo Insert (al pulsar «i» ya se va a escribir, así que se muestra el cursor).
+func (m Model) showStart() bool {
+	b := m.buf
+	return b.Path() == "" && !b.Modified() && b.LineCount() == 1 && b.LineLen(0) == 0 &&
+		m.mdState() == nil && m.mode != ModeInsert
+}
+
 func (m Model) view() ui.EditorView {
 	mode := m.mode.Label()
 	switch {
@@ -552,6 +560,7 @@ func (m Model) view() ui.EditorView {
 		Buf: m.buf, Cursor: m.cur.Pos, Top: m.top, Left: m.left,
 		Mode: mode, PathLabel: m.label, Message: m.msg, IsError: m.msgErr, Pending: m.Pending(),
 		Explorer: m.explorerView(), BufIndex: m.active + 1, BufCount: len(m.bufs),
+		Start: m.showStart(),
 	}
 	if hl := m.bufs[m.active].hl; hl != nil {
 		v.Highlight = hl.lines

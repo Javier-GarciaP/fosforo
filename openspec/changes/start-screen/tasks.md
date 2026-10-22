@@ -8,9 +8,9 @@
 
 ## 2. Decisión (paquete `editor`)
 
-- [ ] 2.1 En `internal/editor/model.go`, calcular `Start` al construir la vista: buffer sin nombre, vacío, sin modificar, sin vista previa Markdown y no en modo Insert. Prueba de modelo (explicada, con teatest): abrir carpeta muestra la pantalla; abrir un archivo la oculta; pulsar `i` la oculta; cerrar el último buffer la vuelve a mostrar.
+- [x] 2.1 En `internal/editor/model.go`, calcular `Start` al construir la vista: buffer sin nombre, vacío, sin modificar, sin vista previa Markdown y no en modo Insert. Prueba de modelo (explicada, con teatest): abrir carpeta muestra la pantalla; abrir un archivo la oculta; pulsar `i` la oculta; cerrar el último buffer la vuelve a mostrar.
 - [ ] 2.2 Prueba (explicada) que recorre `ui.StartEntries` y comprueba que cada atajo está asignado en el mapa de teclas al comando esperado (`file.find`, `file.new`, `file.recent`, `search.project`, `explorer.toggle`, `config.open`, `help.keys`, `app.quit`).
-- [ ] 2.3 Prueba (explicada): los clics y las teclas normales (`:`) se comportan igual con la pantalla visible (no hay zona clicable nueva).
+- [x] 2.3 Prueba (explicada): los clics y las teclas normales (`:`) se comportan igual con la pantalla visible (no hay zona clicable nueva).
 
 ## 3. Documentación y cierre
 
